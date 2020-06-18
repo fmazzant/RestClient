@@ -1,11 +1,10 @@
 # RestClient
-RestClient library provides a simple connector to consume REST services. It is an extention of HttpClient object.
+RestClient library provides a simple connector to consume REST services.
 
-Use Rest() method to create a RestClientBuilder instance from HttpClient object
+Use Rest() method to create a RestClientBuilder from RestClient
 
 ```c#
-HttpClient httpClient = new HttpClient();
-var rest = httpClient.Rest();
+var rest = RestClient.Rest();
 ```
 
 With RestClientBuilder we can create a simply "Get" call:
