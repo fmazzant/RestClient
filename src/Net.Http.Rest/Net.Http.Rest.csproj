@@ -12,6 +12,8 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <Copyright>Copyright (c) 2020 Federico Mazzanti</Copyright>
     <Company />
+    <PackageId>RestClient</PackageId>
+    <Product>RestClient</Product>
   </PropertyGroup>
 
   <ItemGroup>
