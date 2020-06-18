@@ -1,7 +1,18 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <NeutralLanguage>en-150</NeutralLanguage>
+    <Authors>Federico Mazzanti</Authors>
+    <Description>RestClient is a library for .net that can help you to consume REST services</Description>
+    <RepositoryType>GitHub</RepositoryType>
+    <RepositoryUrl>https://github.com/fmazzant/RestClient</RepositoryUrl>
+    <PackageTags>rest-client, c-sharp, dotnet-standard, http-client</PackageTags>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="4.7.2" />
+  </ItemGroup>
 
 </Project>
