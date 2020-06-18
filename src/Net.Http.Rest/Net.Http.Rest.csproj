@@ -12,9 +12,15 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <Copyright>Copyright (c) 2020 Federico Mazzanti</Copyright>
     <Company />
-    <PackageId>RestClient</PackageId>
+    <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
+    <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
+    <Version>1.0.1</Version>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="HttpClientExtensions.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Text.Json" Version="4.7.2" />
