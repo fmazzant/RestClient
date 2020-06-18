@@ -29,21 +29,21 @@
 
 namespace Net.Http.Rest
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-    using System.Net.Http;
-    using System.Net.Http.Headers;
+    using Net.Http.Rest.Generic;
+    using Net.Http.Rest.IO;
     using Net.Http.Rest.Serialization;
     using Net.Http.Rest.Serialization.Json;
     using Net.Http.Rest.Serialization.Xml;
-    using System.Threading.Tasks;
-    using Net.Http.Rest.Generic;
-    using System.Net;
-    using System.Security.Cryptography.X509Certificates;
-    using System.Net.Security;
+    using System;
+    using System.Collections.Generic;
     using System.IO;
-    using Net.Http.Rest.IO;
+    using System.Net;
+    using System.Net.Http;
+    using System.Net.Http.Headers;
+    using System.Net.Security;
+    using System.Security.Cryptography.X509Certificates;
+    using System.Text;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Provides a set of methods for building the requests
