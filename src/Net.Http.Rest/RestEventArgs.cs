@@ -32,36 +32,57 @@ namespace Net.Http.Rest
     using System;
 
     /// <summary>
-    /// Provides a set of static (Shared in Visual Basic) methods for connecting to REST webapi.
+    /// Represents the class that contain start event data, and provides a value to use when the communication is starting.
     /// </summary>
-    [Obsolete("You use HttpClientExtensions", true)]
-    public static class RestClient : object
+    public class StartEventArgs : EventArgs
     {
         /// <summary>
-        /// Creates a RestClientBuilder instance to build the connection command
+        /// if true the request is aborted.
         /// </summary>
-        /// <returns></returns>
-        public static RestClientBuilder Rest()
-            => new RestClientBuilder();
+        public bool Cancel { get; set; } = false;
 
         /// <summary>
-        /// Creates a RestClientBuilder instance to build the connection command
+        /// The payload of request
         /// </summary>
-        /// <param name="restProperties">Rest's properties</param>
-        /// <returns></returns>
-        public static RestClientBuilder Rest(RestProperties restProperties)
-            => new RestClientBuilder { Properties = restProperties };
+        public object Payload { get; set; }
+    }
+
+    /// <summary>    
+    /// Provides data for generic network communication events related to progress changed
+    /// </summary>
+    public class ProgressEventArgs : EventArgs
+    {
+        /// <summary>
+        /// Gets a value indicating the bytes received.
+        /// </summary>
+        public long CurrentBytes { get; internal set; }
 
         /// <summary>
-        /// Creates a RestClientBuilder instance to build the connection command
+        /// Gets a value indicating the total bytes to receive.
         /// </summary>
-        /// <param name="properties">Rest properties action</param>
-        /// <returns></returns>
-        public static RestClientBuilder Rest(Action<RestProperties> properties)
+        public long TotalBytes { get; internal set; }
+
+        /// <summary>
+        /// Get a value indication the progress float number of comminication. The value can be from 0 to 1
+        /// </summary>
+        public float ProgressFloat
         {
-            RestClientBuilder restClient = new RestClientBuilder() { };
-            properties(restClient.Properties);
-            return restClient;
+            get
+            {
+                if (TotalBytes == 0) return 0;
+                return (float)((float)CurrentBytes / (float)TotalBytes);
+            }
+        }
+
+        /// <summary>
+        /// Get a value indication the progress percentage number of comminication. The value can be from 0 to 100
+        /// </summary>
+        public int ProgressPercentage
+        {
+            get
+            {
+                return (int)(ProgressFloat * 100);
+            }
         }
     }
 }

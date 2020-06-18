@@ -30,36 +30,46 @@
 namespace Net.Http.Rest
 {
     using System;
+    using System.Net.Http;
 
     /// <summary>
     /// Provides a set of static (Shared in Visual Basic) methods for connecting to REST webapi.
     /// </summary>
-    [Obsolete("You use HttpClientExtensions", true)]
-    public static class RestClient : object
+    public static class HttpClientExtensions
     {
         /// <summary>
         /// Creates a RestClientBuilder instance to build the connection command
         /// </summary>
         /// <returns></returns>
-        public static RestClientBuilder Rest()
-            => new RestClientBuilder();
+        public static RestClientBuilder Rest(this HttpClient httpClient)
+            => new RestClientBuilder
+            {
+                HttpClient = httpClient
+            };
 
         /// <summary>
         /// Creates a RestClientBuilder instance to build the connection command
         /// </summary>
         /// <param name="restProperties">Rest's properties</param>
         /// <returns></returns>
-        public static RestClientBuilder Rest(RestProperties restProperties)
-            => new RestClientBuilder { Properties = restProperties };
+        public static RestClientBuilder Rest(this HttpClient httpClient, RestProperties restProperties)
+            => new RestClientBuilder
+            {
+                HttpClient = httpClient,
+                Properties = restProperties
+            };
 
         /// <summary>
         /// Creates a RestClientBuilder instance to build the connection command
         /// </summary>
         /// <param name="properties">Rest properties action</param>
         /// <returns></returns>
-        public static RestClientBuilder Rest(Action<RestProperties> properties)
+        public static RestClientBuilder Rest(this HttpClient httpClient, Action<RestProperties> properties)
         {
-            RestClientBuilder restClient = new RestClientBuilder() { };
+            RestClientBuilder restClient = new RestClientBuilder()
+            {
+                HttpClient = httpClient
+            };
             properties(restClient.Properties);
             return restClient;
         }

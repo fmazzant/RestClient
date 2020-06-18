@@ -27,41 +27,34 @@
 /// 
 /// </summary>
 
-namespace Net.Http.Rest
+namespace Net.Serialization
 {
     using System;
 
     /// <summary>
-    /// Provides a set of static (Shared in Visual Basic) methods for connecting to REST webapi.
+    /// Provides custom formatting for generic serialization and deserialization.
     /// </summary>
-    [Obsolete("You use HttpClientExtensions", true)]
-    public static class RestClient : object
+    public interface ISerializerContent
     {
         /// <summary>
-        /// Creates a RestClientBuilder instance to build the connection command
+        /// Gets content-type as string
         /// </summary>
-        /// <returns></returns>
-        public static RestClientBuilder Rest()
-            => new RestClientBuilder();
+        string MediaTypeAsString { get; }
 
         /// <summary>
-        /// Creates a RestClientBuilder instance to build the connection command
+        /// Deserializes the custom string to the specified type.
         /// </summary>
-        /// <param name="restProperties">Rest's properties</param>
-        /// <returns></returns>
-        public static RestClientBuilder Rest(RestProperties restProperties)
-            => new RestClientBuilder { Properties = restProperties };
+        /// <param name="value">The custom string to deserialize.</param>
+        /// <param name="typeOf">The System.Type of object being deserialized.</param>
+        /// <returns>The deserialized object from the custom string.</returns>
+        object DeserializeObject(string value, Type typeOf);
 
         /// <summary>
-        /// Creates a RestClientBuilder instance to build the connection command
+        /// Serializes the specified object to a custom string
         /// </summary>
-        /// <param name="properties">Rest properties action</param>
-        /// <returns></returns>
-        public static RestClientBuilder Rest(Action<RestProperties> properties)
-        {
-            RestClientBuilder restClient = new RestClientBuilder() { };
-            properties(restClient.Properties);
-            return restClient;
-        }
+        /// <param name="value">The object to serialize.</param>
+        /// <param name="typeOf">The type of the value being serialized.</param>
+        /// <returns>A custom string representation of the object.</returns>
+        string SerializeObject(object value, Type typeOf);
     }
 }
