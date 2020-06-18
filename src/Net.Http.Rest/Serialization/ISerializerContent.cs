@@ -27,7 +27,7 @@
 /// 
 /// </summary>
 
-namespace Net.Serialization
+namespace Net.Http.Rest.Serialization
 {
     using System;
 

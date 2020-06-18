@@ -34,9 +34,9 @@ namespace Net.Http.Rest
     using System.Text;
     using System.Net.Http;
     using System.Net.Http.Headers;
-    using Net.Serialization;
-    using Net.Serialization.Json;
-    using Net.Serialization.Xml;
+    using Net.Http.Rest.Serialization;
+    using Net.Http.Rest.Serialization.Json;
+    using Net.Http.Rest.Serialization.Xml;
     using System.Threading.Tasks;
     using Net.Http.Rest.Generic;
     using System.Net;

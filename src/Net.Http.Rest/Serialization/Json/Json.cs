@@ -27,7 +27,7 @@
 /// 
 /// </summary>
 
-namespace Net.Serialization.Json
+namespace Net.Http.Rest.Serialization.Json
 {
     using System;
     using System.IO;
