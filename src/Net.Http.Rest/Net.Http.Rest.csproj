@@ -8,14 +8,14 @@
     <Description>RestClient is a library for .net that can help you to consume REST services</Description>
     <RepositoryType>GitHub</RepositoryType>
     <RepositoryUrl>https://github.com/fmazzant/RestClient</RepositoryUrl>
-    <PackageTags>rest-client, c-sharp, dotnet-standard, http-client</PackageTags>
+    <PackageTags>rest-client, c-sharp, dotnet-standard, http-client, restclient, mafe</PackageTags>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <Copyright>Copyright (c) 2020 Federico Mazzanti</Copyright>
     <Company />
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.0.1</Version>
+    <Version>1.0.0-alpha2</Version>
   </PropertyGroup>
 
   <ItemGroup>
