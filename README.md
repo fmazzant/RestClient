@@ -8,7 +8,7 @@ HttpClient httpClient = new HttpClient();
 var rest = httpClient.Rest();
 ```
 
-With RestClientBuilder we can create a simple Get called, it is displayed in the following code:
+With RestClientBuilder we can create a simply Get call, it is displayed in the following code:
 
 ```c#
 var result = rest
