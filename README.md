@@ -341,20 +341,21 @@ var result = rest
             })
             .Url("[URL]");
     
+    public RestBuilder RootAuthentication() 
+        => Root()
+             .OnAuthentication(() => new AuthenticationHeaderValue("Bearer", "[Token]"))
+             .RefreshToken()
+             .RefreshTokenInvoke(async () => await Refresh(new RefreshRequest { }));
+    
     public RestBuilder UsersRoot() 
         => Root().Command("/Users");
     
     public RestBuilder DimensionsRoot() 
         => Root().Command("/Dimensions");
     
-    public RestBuilder EventsRoot() 
-        => Root().Command("/Events");
+    public RestBuilder EventsRoot()
+        => RootAuthentication().Command("/Events");
     
-    public RestBuilder EventsWithRefreshRoot() 
-        => EventsRoot()
-            .RefreshToken()
-            .RefreshTokenInvoke(async () => await Refresh(new RefreshRequest { }));
-
     //requests
 
     public async Task<RestResult<LoginResponse>> Login(LoginRequest request) 
