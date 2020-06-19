@@ -224,7 +224,7 @@ var result = rest
     .Get(); // [URL]/path?id=10&type=myType
 ```
 
-The url of Get called is: https://myurl.com/path?id=10&type=myType
+The url generated is: https://myurl.com/path?id=10&type=myType
 
 ### Post
 
