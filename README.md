@@ -268,10 +268,21 @@ var result = rest
 
 ### Timeout
 
+The default value is 100,000 milliseconds (100 seconds).
+To set an infinite timeout, set the property value to InfiniteTimeSpan.
+A Domain Name System (DNS) query may take up to 15 seconds to return or time out. If your request contains a host name that requires resolution and you set Timeout to a value less than 15 seconds, it may take 15 seconds or more before an Exception is thrown to indicate a timeout on your request.
+
 ```c#
 var result = rest
     .Url("[URL]")
     .Timeout(3200) //milliseconds
+    .Get<ResponseObject>();
+```
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .Timeout(TimeSpan.FromMinutes(10)) 
     .Get<ResponseObject>();
 ```
 
