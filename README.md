@@ -301,7 +301,7 @@ var result = rest
 var result = rest
     .Url("[URL]")
     .OnPreResult((e) => { 
-        DoSomethings(); 
+        DoSomethings(e); 
     })
     .Payload(new BigObject{})
     .Post<ResponseObject>();
