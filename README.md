@@ -124,6 +124,9 @@ var result = rest
 
 ### Serialization
 
+Two types of serialization that are supported by RestClient: Xml and Json, but it is possible implemetate ISerializerContent to customize the serialization.
+RestClient uses .Json() to serialize an object into json.
+
 ```c#
 var result = rest
     .Url("[URL]")
@@ -131,6 +134,7 @@ var result = rest
     .Get<MyObject>();
 ```
 
+RestClient uses .Xml() to serialize an object into xml.
 
 ```c#
 var result = rest
@@ -140,6 +144,8 @@ var result = rest
 ```
 
 ### Custom Serialization
+
+Consider the code below to demonstrate custom Serialization by implementing the ISerializerContent interface:
 
 ```c#
 public class MyCustomSerializer : ISerializerContent
@@ -157,6 +163,7 @@ public class MyCustomSerializer : ISerializerContent
     }
 }
 ```
+Now, we can use MyCustomSerializer how to explan the code below:
 
 ```c#
 var result = rest
@@ -166,6 +173,8 @@ var result = rest
 ```
 
 ### Get
+
+GET is used to request data from a specified resource and GET is one of the most common HTTP methods.
 
 ```c#
 var result = rest
@@ -177,7 +186,18 @@ var result = await rest
     .GetAsync();
 ```
 
-### Parameters
+Some other notes on GET requests:
+
+* GET requests can be cached
+* GET requests remain in the browser history
+* GET requests can be bookmarked
+* GET requests should never be used when dealing with sensitive data
+* GET requests have length restrictions
+* GET requests are only used to request data (not modify)
+
+Note that the query string (name/value pairs) is sent in the URL of a GET request:
+
+### Parameters as query string 
 
 ```c#
 var result = rest
@@ -191,47 +211,66 @@ var result = rest
 
 ### Post
 
+POST is used to send data to a server to create/update a resource.
+The data sent to the server with POST is stored in the request payload of the HTTP request:
+
 ```c#
 var result = rest
     .Url("[URL]")
     .Payload(new Object{})
-    .Post<object>();
+    .Post<ResponseObject>();
 
 var result = await rest
     .Url("[URL]")
     .Payload(new Object{})
-    .PostAsync<object>();
+    .PostAsync<ResponseObject>();
 ```
+POST is one of the most common HTTP methods.
+
+Some other notes on POST requests:
+
+* POST requests are never cached
+* POST requests do not remain in the browser history
+* POST requests cannot be bookmarked
+* POST requests have no restrictions on data length
 
 ### Put
 
+PUT is used to send data to a server to create/update a resource.
+
+The difference between POST and PUT is that PUT requests are idempotent. That is, calling the same PUT request multiple times will always produce the same result. In contrast, calling a POST request repeatedly have side effects of creating the same resource multiple times.
+
 ```c#
 var result = rest
     .Url("[URL]")
     .Payload(new Object{})
-    .Put<object>();
+    .Put<ResponseObject>();
 
 var result = await rest
     .Url("[URL]")
     .Payload(new Object{})
-    .PutAsync<object>();
+    .PutAsync<ResponseObject>();
 ```
 
 ### Delete
 
+The DELETE method deletes the specified resource.
+
 ```c#
 var result = rest
     .Url("[URL]")
     .Payload(new Object{})
-    .Delete<object>();
+    .Delete<ResponseObject>();
 
 var result = await rest
     .Url("[URL]")
     .Payload(new Object{})
-    .DeleteAsync<object>();
+    .DeleteAsync<ResponseObject>();
 ```
 
 ### Payload
+
+A payload is the carrying capacity of a packet or other transmission data unit. RestClient uses .Playload<T>(obj) to set an object on request. 
 
 ```c#
 var result = rest
@@ -247,7 +286,9 @@ var result = rest
     .Put<ResponseObject>();
 ```
 
-### Progressing
+### OnUploadProgress
+
+OnUploadProgress occurs when the request is running and the data traveling to outside. It is allowing todo somethings, get a percentage of upload for example.
 
 ```c#
 var result = rest
@@ -256,6 +297,17 @@ var result = rest
     {
       DoSomethings(p.ProgressPercentage); 
     }) //occurs during request
+    .Payload(new BigObject{})
+    .Post<ResponseObject>();
+```
+
+### OnDownloadProgress
+
+OnDownloadProgress occurs when the response is running and the data traveling to inside.  It is allowing todo somethings, get a percentage of download for example.
+
+```c#
+var result = rest
+    .Url("[URL]")
     .OnDownloadProgress(p =>
     {
       DoSomethings(p.ProgressPercentage); 
@@ -286,6 +338,9 @@ var result = rest
 
 ### OnStart
 
+OnStart occurs when the request is starting and it is allowing todo somethings. 
+Cancelling request for example.
+
 ```c#
 var result = rest
     .Url("[URL]")
@@ -297,17 +352,22 @@ var result = rest
 ```
 ### OnPreResult
 
+OnPreResult occurs when the request is completing but the request is not completed. 
+When OnPreResult is raises we can todo somethings, for example  get and use the result of request.
+
 ```c#
 var result = rest
     .Url("[URL]")
     .OnPreResult((e) => { 
-        DoSomethings(); 
+        DoSomethings(e); 
     })
     .Payload(new BigObject{})
     .Post<ResponseObject>();
 ```
 
 ### OnCompleted
+
+OnCompleted occurs when the request is completed. 
 
 ```c#
 var result = rest
@@ -321,6 +381,8 @@ var result = rest
 
 ### OnException
 
+OnException occurs when the request raises an exception. 
+
 ```c#
 var result = rest
     .Url("[URL]")
@@ -332,6 +394,8 @@ var result = rest
 ```
 
 ### Complete code example
+
+Consider the code below to demonstrate a complete code example. RestClient allows to create a flexible and robust network layer and it is very easy to use.
 
 ```c#
 
