@@ -27,7 +27,7 @@
 /// 
 /// </summary>
 
-namespace Mafe.Net.Rest.IO
+namespace RestClient.IO
 {
     using System;
     using System.IO;

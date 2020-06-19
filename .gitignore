@@ -12,3 +12,5 @@
 /src/Mafe.RestClient/bin
 /src/Mafe.RestClient/obj
 /src/.vs/Mafe.RestClient/DesignTimeBuild
+/src/RestClient/bin
+/src/RestClient/obj

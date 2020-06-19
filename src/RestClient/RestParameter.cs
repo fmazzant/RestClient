@@ -27,40 +27,21 @@
 /// 
 /// </summary>
 
-namespace Mafe.Net.Rest
+namespace RestClient
 {
-    using System;
-
     /// <summary>
-    /// Provides a set of static (Shared in Visual Basic) methods for connecting to REST webapi.
+    /// Provides a class the represents the querystring parameter
     /// </summary>
-    public static class RestClient : object
+    public struct RestParameter
     {
         /// <summary>
-        /// Creates a RestClientBuilder instance to build the connection command
+        /// Key parameter
         /// </summary>
-        /// <returns></returns>
-        public static RestClientBuilder Rest()
-            => new RestClientBuilder();
+        public string Key { get; set; }
 
         /// <summary>
-        /// Creates a RestClientBuilder instance to build the connection command
+        /// Value parameter
         /// </summary>
-        /// <param name="restProperties">Rest's properties</param>
-        /// <returns></returns>
-        public static RestClientBuilder Rest(RestProperties restProperties)
-            => new RestClientBuilder { Properties = restProperties };
-
-        /// <summary>
-        /// Creates a RestClientBuilder instance to build the connection command
-        /// </summary>
-        /// <param name="properties">Rest properties action</param>
-        /// <returns></returns>
-        public static RestClientBuilder Rest(Action<RestProperties> properties)
-        {
-            RestClientBuilder restClient = new RestClientBuilder() { };
-            properties(restClient.Properties);
-            return restClient;
-        }
+        public object Value { get; set; }
     }
 }

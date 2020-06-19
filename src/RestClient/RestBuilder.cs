@@ -27,13 +27,13 @@
 /// 
 /// </summary>
 
-namespace Mafe.Net.Rest
+namespace RestClient
 {
-    using Mafe.Net.Rest.Generic;
-    using Mafe.Net.Rest.IO;
-    using Mafe.Net.Rest.Serialization;
-    using Mafe.Net.Rest.Serialization.Json;
-    using Mafe.Net.Rest.Serialization.Xml;
+    using RestClient.Generic;
+    using RestClient.IO;
+    using RestClient.Serialization;
+    using RestClient.Serialization.Json;
+    using RestClient.Serialization.Xml;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -48,7 +48,7 @@ namespace Mafe.Net.Rest
     /// <summary>
     /// Provides a set of methods for building the requests
     /// </summary>
-    public sealed class RestClientBuilder
+    public sealed class RestBuilder
     {
         /// <summary>
         /// Provides a base class for sending HTTP requests and receiving HTTP responses from a resource identified by a URI
@@ -89,10 +89,10 @@ namespace Mafe.Net.Rest
         /// <summary>
         /// Initializes a new instance
         /// </summary>
-        internal RestClientBuilder()
+        internal RestBuilder()
         {
-            //ServicePointManager.ServerCertificateValidationCallback = (object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) => true;
-            ServicePointManager.ServerCertificateValidationCallback = (s, cert, chain, sslPolicyErrors) => true;
+            ServicePointManager.ServerCertificateValidationCallback = (object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) 
+                => true;
         }
 
         /// <summary>
@@ -100,9 +100,9 @@ namespace Mafe.Net.Rest
         /// </summary>
         /// <param name="callback"></param>
         /// <returns></returns>
-        public RestClientBuilder CertificateValidation(Func<object, X509Certificate, X509Chain, SslPolicyErrors, bool> callback)
+        public RestBuilder CertificateValidation(Func<object, X509Certificate, X509Chain, SslPolicyErrors, bool> callback)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(callback);
             return result;
         }
@@ -112,9 +112,9 @@ namespace Mafe.Net.Rest
         /// </summary>
         /// <param name="credential"></param>
         /// <returns></returns>
-        public RestClientBuilder NetworkCredential(Func<NetworkCredential> credential)
+        public RestBuilder NetworkCredential(Func<NetworkCredential> credential)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.HttpClient = new HttpClient(new HttpClientHandler()
             {
                 Credentials = credential()
@@ -130,9 +130,9 @@ namespace Mafe.Net.Rest
         /// <param name="username"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public RestClientBuilder NetworkCredential(string username, string password)
+        public RestBuilder NetworkCredential(string username, string password)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.HttpClient = new HttpClient(new HttpClientHandler()
             {
                 Credentials = new NetworkCredential(username, password)
@@ -149,9 +149,9 @@ namespace Mafe.Net.Rest
         /// <param name="password"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public RestClientBuilder NetworkCredential(string username, string password, string domain)
+        public RestBuilder NetworkCredential(string username, string password, string domain)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.HttpClient = new HttpClient(new HttpClientHandler()
             {
                 Credentials = new NetworkCredential(username, password, domain)
@@ -167,9 +167,9 @@ namespace Mafe.Net.Rest
         /// <param name="username"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public RestClientBuilder NetworkCredential(string username, System.Security.SecureString password)
+        public RestBuilder NetworkCredential(string username, System.Security.SecureString password)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.HttpClient = new HttpClient(new HttpClientHandler()
             {
                 Credentials = new NetworkCredential(username, password)
@@ -186,9 +186,9 @@ namespace Mafe.Net.Rest
         /// <param name="password"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public RestClientBuilder NetworkCredential(string username, System.Security.SecureString password, string domain)
+        public RestBuilder NetworkCredential(string username, System.Security.SecureString password, string domain)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.HttpClient = new HttpClient(new HttpClientHandler()
             {
                 Credentials = new NetworkCredential(username, password, domain)
@@ -203,9 +203,9 @@ namespace Mafe.Net.Rest
         /// </summary>
         /// <param name="authentication"></param>
         /// <returns></returns>
-        public RestClientBuilder OnAuthentication(Func<AuthenticationHeaderValue> authentication)
+        public RestBuilder OnAuthentication(Func<AuthenticationHeaderValue> authentication)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.HttpClient.DefaultRequestHeaders.Authorization = authentication();
             return result;
         }
@@ -215,9 +215,9 @@ namespace Mafe.Net.Rest
         /// </summary>
         /// <param name="scheme"></param>
         /// <returns></returns>
-        public RestClientBuilder OnAuthentication(string scheme)
+        public RestBuilder OnAuthentication(string scheme)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(scheme);
             return result;
         }
@@ -228,9 +228,9 @@ namespace Mafe.Net.Rest
         /// <param name="scheme"></param>
         /// <param name="parameter"></param>
         /// <returns></returns>
-        public RestClientBuilder OnAuthentication(string scheme, string parameter)
+        public RestBuilder OnAuthentication(string scheme, string parameter)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(scheme, parameter);
             return result;
         }
@@ -245,9 +245,9 @@ namespace Mafe.Net.Rest
         /// </summary>
         /// <param name="timeOut"></param>
         /// <returns></returns>
-        public RestClientBuilder Timeout(TimeSpan timeOut)
+        public RestBuilder Timeout(TimeSpan timeOut)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.HttpClient.Timeout
                 = result.TimeOut
                 = timeOut;
@@ -259,9 +259,9 @@ namespace Mafe.Net.Rest
         /// </summary>
         /// <param name="defaultRequestHeaders"></param>
         /// <returns></returns>
-        public RestClientBuilder Header(Action<HttpRequestHeaders> defaultRequestHeaders)
+        public RestBuilder Header(Action<HttpRequestHeaders> defaultRequestHeaders)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             defaultRequestHeaders(result.HttpClient.DefaultRequestHeaders);
             return result;
         }
@@ -271,9 +271,9 @@ namespace Mafe.Net.Rest
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
-        public RestClientBuilder Command(string command)
+        public RestBuilder Command(string command)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             string prefix = !command.StartsWith("/") ? "/" : string.Empty;
             result.Commands.Add($"{prefix}{command}");
             return result;
@@ -284,9 +284,9 @@ namespace Mafe.Net.Rest
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
-        public RestClientBuilder Command(int command)
+        public RestBuilder Command(int command)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.Commands.Add($"/{command}");
             return result;
         }
@@ -296,9 +296,9 @@ namespace Mafe.Net.Rest
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
-        public RestClientBuilder Command(Guid command)
+        public RestBuilder Command(Guid command)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.Commands.Add($"/{command}");
             return result;
         }
@@ -323,9 +323,9 @@ namespace Mafe.Net.Rest
         /// </summary>
         /// <param name="refreshToken"></param>
         /// <returns></returns>
-        public RestClientBuilder RefreshToken(bool refreshToken = true)
+        public RestBuilder RefreshToken(bool refreshToken = true)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.RefreshTokenExecution = refreshToken;
             return result;
         }
@@ -335,9 +335,9 @@ namespace Mafe.Net.Rest
         /// </summary>
         /// <param name="refreshTokenApi"></param>
         /// <returns></returns>
-        public RestClientBuilder RefreshTokenInvoke(Func<RestResult> refreshTokenApi)
+        public RestBuilder RefreshTokenInvoke(Func<RestResult> refreshTokenApi)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.RefreshTokenApi = refreshTokenApi;
             return result;
         }
@@ -347,9 +347,9 @@ namespace Mafe.Net.Rest
         /// </summary>
         /// <param name="refreshTokenApi"></param>
         /// <returns></returns>
-        public RestClientBuilder RefreshTokenInvoke(Func<Task<RestResult>> refreshTokenApi)
+        public RestBuilder RefreshTokenInvoke(Func<Task<RestResult>> refreshTokenApi)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.RefreshTokenApiAsync = refreshTokenApi;
             return result;
         }
@@ -358,9 +358,9 @@ namespace Mafe.Net.Rest
         /// Sets xml as serialization
         /// </summary>
         /// <returns></returns>
-        public RestClientBuilder Xml()
+        public RestBuilder Xml()
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.Serializer = new XML();
             return result;
         }
@@ -369,9 +369,9 @@ namespace Mafe.Net.Rest
         /// Sets json as serialization
         /// </summary>
         /// <returns></returns>
-        public RestClientBuilder Json()
+        public RestBuilder Json()
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.Serializer = new JSON();
             return result;
         }
@@ -381,9 +381,9 @@ namespace Mafe.Net.Rest
         /// </summary>
         /// <param name="serializer"></param>
         /// <returns></returns>
-        public RestClientBuilder CustomSerializer(ISerializerContent serializer)
+        public RestBuilder CustomSerializer(ISerializerContent serializer)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.Serializer = serializer;
             return result;
         }
@@ -393,9 +393,9 @@ namespace Mafe.Net.Rest
         /// </summary>
         /// <param name="logger"></param>
         /// <returns></returns>
-        public RestClientBuilder Log(bool logger = true)
+        public RestBuilder Log(bool logger = true)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.Logger = logger;
             return result;
         }
@@ -406,9 +406,9 @@ namespace Mafe.Net.Rest
         /// <param name="key"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public RestClientBuilder Parameter(string key, object value)
+        public RestBuilder Parameter(string key, object value)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             if (Parameters.ContainsKey(key))
                 result.Parameters[key] = value.ToString();
             else
@@ -422,9 +422,9 @@ namespace Mafe.Net.Rest
         /// <param name="parameter"></param>
         /// <param name="others"></param>
         /// <returns></returns>
-        public RestClientBuilder Parameter(RestParameter parameter, params RestParameter[] others)
+        public RestBuilder Parameter(RestParameter parameter, params RestParameter[] others)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.Parameter(parameter.Key, parameter.Value);
             foreach (RestParameter p in others) result.Parameter(p.Key, p.Value);
             return result;
@@ -435,7 +435,7 @@ namespace Mafe.Net.Rest
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public RestClientBuilder Url(string url)
+        public RestBuilder Url(string url)
         {
             return this.Url(new Uri(url));
         }
@@ -445,9 +445,9 @@ namespace Mafe.Net.Rest
         /// </summary>
         /// <param name="uri"></param>
         /// <returns></returns>
-        public RestClientBuilder Url(Uri uri)
+        public RestBuilder Url(Uri uri)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.Properties.EndPoint = uri;
             return result;
         }
@@ -468,9 +468,9 @@ namespace Mafe.Net.Rest
         /// <typeparam name="T"></typeparam>
         /// <param name="payload"></param>
         /// <returns></returns>
-        public RestClientBuilder Payload<T>(T payload)
+        public RestBuilder Payload<T>(T payload)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.PayloadContent = payload;
             result.PayloadContentType = typeof(T);
             return result;
@@ -486,9 +486,9 @@ namespace Mafe.Net.Rest
         /// </summary>
         /// <param name="onStart"></param>
         /// <returns></returns>
-        public RestClientBuilder OnStart(Action<StartEventArgs> onStart)
+        public RestBuilder OnStart(Action<StartEventArgs> onStart)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.OnStartAction = onStart;
             return result;
         }
@@ -503,9 +503,9 @@ namespace Mafe.Net.Rest
         /// </summary>
         /// <param name="onProgress"></param>
         /// <returns></returns>
-        public RestClientBuilder OnUploadProgress(Action<ProgressEventArgs> onProgress)
+        public RestBuilder OnUploadProgress(Action<ProgressEventArgs> onProgress)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.OnUploadProgressAction = onProgress;
             return result;
         }
@@ -520,9 +520,9 @@ namespace Mafe.Net.Rest
         /// </summary>
         /// <param name="onProgress"></param>
         /// <returns></returns>
-        public RestClientBuilder OnDownloadProgress(Action<ProgressEventArgs> onProgress)
+        public RestBuilder OnDownloadProgress(Action<ProgressEventArgs> onProgress)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.OnDownloadProgressAction = onProgress;
             return result;
         }
@@ -537,9 +537,9 @@ namespace Mafe.Net.Rest
         /// </summary>
         /// <param name="onCompleted"></param>
         /// <returns></returns>
-        public RestClientBuilder OnCompleted(Action<EventArgs> onCompleted)
+        public RestBuilder OnCompleted(Action<EventArgs> onCompleted)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.OnCompletedAction = onCompleted;
             return result;
         }
@@ -554,9 +554,9 @@ namespace Mafe.Net.Rest
         /// </summary>
         /// <param name="restResult"></param>
         /// <returns></returns>
-        public RestClientBuilder OnResult(Action<RestResult> restResult)
+        public RestBuilder OnResult(Action<RestResult> restResult)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.OnResultAction = restResult;
             return result;
         }
@@ -571,9 +571,9 @@ namespace Mafe.Net.Rest
         /// </summary>
         /// <param name="exception"></param>
         /// <returns></returns>
-        public RestClientBuilder OnException(Action<Exception> exception)
+        public RestBuilder OnException(Action<Exception> exception)
         {
-            var result = (RestClientBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.OnExceptionAction = exception;
             return result;
         }
