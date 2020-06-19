@@ -482,7 +482,7 @@ namespace RestClient
         Action<StartEventArgs> OnStartAction = null;
 
         /// <summary>
-        /// Sets onStart action and occors when the request is started
+        /// Sets onStart action and occurs when the request is started
         /// </summary>
         /// <param name="onStart"></param>
         /// <returns></returns>
@@ -499,7 +499,7 @@ namespace RestClient
         Action<ProgressEventArgs> OnUploadProgressAction = null;
 
         /// <summary>
-        /// Sets onUploadProgress action, occors when the request is processing 
+        /// Sets onUploadProgress action, occurs when the request is processing 
         /// </summary>
         /// <param name="onProgress"></param>
         /// <returns></returns>
@@ -516,7 +516,7 @@ namespace RestClient
         Action<ProgressEventArgs> OnDownloadProgressAction = null;
 
         /// <summary>
-        /// Sets onDownloadProgress action, occors when the response is processing 
+        /// Sets onDownloadProgress action, occurs when the response is processing 
         /// </summary>
         /// <param name="onProgress"></param>
         /// <returns></returns>
@@ -533,7 +533,7 @@ namespace RestClient
         Action<EventArgs> OnCompletedAction = null;
 
         /// <summary>
-        /// Sets onCompleted action, occors when the call is completed.
+        /// Sets onCompleted action, occurs when the call is completed.
         /// </summary>
         /// <param name="onCompleted"></param>
         /// <returns></returns>
@@ -545,19 +545,19 @@ namespace RestClient
         }
 
         /// <summary>
-        /// On Result Action
+        /// On Pre Result Action
         /// </summary>
-        Action<RestResult> OnResultAction = null;
+        Action<RestResult> OnPreResultAction = null;
 
         /// <summary>
-        /// Sets onREsult, occors when the result of request il builded.
+        /// Sets onPreResult, occurs when the result of request il builded.
         /// </summary>
         /// <param name="restResult"></param>
         /// <returns></returns>
-        public RestBuilder OnResult(Action<RestResult> restResult)
+        public RestBuilder OnPreResult(Action<RestResult> restResult)
         {
             var result = (RestBuilder)this.MemberwiseClone();
-            result.OnResultAction = restResult;
+            result.OnPreResultAction = restResult;
             return result;
         }
 
@@ -567,7 +567,7 @@ namespace RestClient
         Action<Exception> OnExceptionAction = null;
 
         /// <summary>
-        /// Sets onException, occors when there is an exception during the call
+        /// Sets onException, occurs when there is an exception during the call
         /// </summary>
         /// <param name="exception"></param>
         /// <returns></returns>
@@ -881,7 +881,7 @@ namespace RestClient
                     response.Content = result;
                 }
 
-                OnResultAction?.Invoke(response);
+                OnPreResultAction?.Invoke(response);
                 OnCompletedAction?.Invoke(new EventArgs());
             }
             catch (Exception ex)
@@ -962,7 +962,7 @@ namespace RestClient
                     response.Content = await responseMessage.Content.ReadAsStreamAsync();
                 }
 
-                OnResultAction?.Invoke(response);
+                OnPreResultAction?.Invoke(response);
                 OnCompletedAction?.Invoke(new EventArgs());
             }
             catch (Exception ex)
@@ -1043,7 +1043,7 @@ namespace RestClient
                     response.StringContent = BitConverter.ToString(response.Content);
                 }
 
-                OnResultAction?.Invoke(response);
+                OnPreResultAction?.Invoke(response);
                 OnCompletedAction?.Invoke(new EventArgs());
             }
             catch (Exception ex)
@@ -1126,7 +1126,7 @@ namespace RestClient
                     response.Content = (T)Serializer.DeserializeObject(response.StringContent, typeof(T));
                 }
 
-                OnResultAction?.Invoke(response);
+                OnPreResultAction?.Invoke(response);
                 OnCompletedAction?.Invoke(new EventArgs());
             }
             catch (Exception ex)
