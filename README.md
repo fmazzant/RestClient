@@ -11,7 +11,7 @@ With RestBuilder we can create a simply "Get" call:
 
 ```c#
 var result = rest
-  .Url("https://www.federicomazzanti.com")
+  .Url("[URL]")
   .Get(); 
 ```
 
@@ -37,6 +37,6 @@ var result = rest
       return errors == SslPolicyErrors.None 
               && validCerts.Contains(certificate.GetCertHashString()); // Compliant: trust only some certificates
     })
-    .Url("https://www.federicomazzanti.com")
+    .Url("[URL]")
     .Get();
 ```
