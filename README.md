@@ -1,10 +1,10 @@
 # RestClient
 RestClient library provides a simple connector to consume REST services.
 
-Use Rest() method to create a RestClientBuilder from RestClient
+Use Build() method to create a RestBuilder from Rest
 
 ```c#
-var rest = RestClient.Rest();
+var rest = Rest.Build();
 ```
 
 With RestClientBuilder we can create a simply "Get" call:
