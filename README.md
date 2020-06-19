@@ -254,13 +254,11 @@ var result = rest
     .Url("[URL]")
     .OnUploadProgress(p =>
     {
-        Debug.WriteLine(p.ProgressPercentage);
-        Trace.WriteLine(p.ProgressPercentage);
+      DoSomethings(p.ProgressPercentage); 
     }) //occurs during request
     .OnDownloadProgress(p =>
     {
-        Debug.WriteLine(p.ProgressPercentage);
-        Trace.WriteLine(p.ProgressPercentage);
+      DoSomethings(p.ProgressPercentage); 
     }) //occurs during response
     .Payload(new BigObject{})
     .Post<ResponseObject>();
@@ -291,7 +289,9 @@ var result = rest
 ```c#
 var result = rest
     .Url("[URL]")
-    .OnStart((e) => { })
+    .OnStart((e) => { 
+        DoSomethings(e); 
+    })
     .Payload(new BigObject{})
     .Post<ResponseObject>();
 ```
@@ -300,7 +300,9 @@ var result = rest
 ```c#
 var result = rest
     .Url("[URL]")
-    .OnPreResult((e) => { })
+    .OnPreResult((e) => { 
+        DoSomethings(); 
+    })
     .Payload(new BigObject{})
     .Post<ResponseObject>();
 ```
@@ -310,7 +312,9 @@ var result = rest
 ```c#
 var result = rest
     .Url("[URL]")
-    .OnCompleted((e) => { })
+    .OnCompleted((e) => { 
+        DoSomethings(e); 
+    })
     .Payload(new BigObject{})
     .Post<ResponseObject>();
 ```
@@ -320,7 +324,9 @@ var result = rest
 ```c#
 var result = rest
     .Url("[URL]")
-    .OnException((e) => { })
+    .OnException((e) => { 
+      DoSomethings(e); 
+    })
     .Payload(new BigObject{})
     .Post<ResponseObject>();
 ```
@@ -341,20 +347,21 @@ var result = rest
             })
             .Url("[URL]");
     
+    public RestBuilder RootAuthentication() 
+        => Root()
+             .OnAuthentication(() => new AuthenticationHeaderValue("Bearer", "[Token]"))
+             .RefreshToken()
+             .RefreshTokenInvoke(async () => await Refresh(new RefreshRequest { }));
+    
     public RestBuilder UsersRoot() 
         => Root().Command("/Users");
     
     public RestBuilder DimensionsRoot() 
         => Root().Command("/Dimensions");
     
-    public RestBuilder EventsRoot() 
-        => Root().Command("/Events");
+    public RestBuilder EventsRoot()
+        => RootAuthentication().Command("/Events");
     
-    public RestBuilder EventsWithRefreshRoot() 
-        => EventsRoot()
-            .RefreshToken()
-            .RefreshTokenInvoke(async () => await Refresh(new RefreshRequest { }));
-
     //requests
 
     public async Task<RestResult<LoginResponse>> Login(LoginRequest request) 
@@ -376,7 +383,7 @@ var result = rest
             .PostAsync<CountryResponse>();
     
     public async Task<RestResult<EventDetailResponse>> EventDetail(EventDetailRequest request) 
-        => await EventsWithRefreshRoot()
+        => await EventsRoot()
             .Command("/EventDetail")
             .Payload(request)
             .PostAsync<EventDetailResponse>();
