@@ -46,6 +46,11 @@ var result = rest
 
 ### Authentication
 
+As defined by HTTP/1.1 [RFC2617], the application should send the access_token directly in the Authorization request header.
+You can do so by including the bearer token's access_token value in the HTTP request body as 'Authorization: Bearer {access_token_value}'.
+
+If an authenticated user has a bearer token's access_token or refresh_token that is expired, then a '401 - Unauthorized (invalid or expired refresh token)' error is returned.
+
 ```c#
 var result = rest
     .OnAuthentication(() => new AuthenticationHeaderValue("Bearer", "[Token]"))
@@ -53,7 +58,41 @@ var result = rest
     .Get();
 ```
 
+### Refresh Token
+
+A valid bearer token (with active access_token or refresh_token properties) keeps the user's authentication alive without requiring him or her to re-enter their credentials frequently.
+The access_token can be used for as long as it’s active, which is up to one hour after login or renewal. The refresh_token is active for 336 hours (14 days). After the access_token expires, an active refresh_token can be used to get a new access_token / refresh_token pair as shown in the following example. This cycle can continue for up to 90 days after which the user must log in again. If the refresh_token expires, the tokens cannot be renewed and the user must log in again.
+
+To refresh a token, use "RefreshTokenInvoke" automatically.
+
+```c#
+var url = "[URL]";
+var result = rest
+    .OnAuthentication(() => new AuthenticationHeaderValue("Bearer", "[Token]"))
+    .RefreshToken(true)
+    .RefreshTokenInvoke(async () =>
+    {
+        var result = await rest
+            .Url(url)
+            .Command("/refresh")
+            .GetAsync<TokenObjectResponse>();   
+        doSomethings(); //store the token inside your env.
+        return result;
+    })
+    .Command("/detail")
+    .Url(url)
+    .Get();
+```
+
+A refresh_token should be revoked:
+* If a user is no longer permitted to make requests on the API, or
+* If the access_token or refresh_token have been compromised.
+
 ### Network Credential
+
+The NetworkCredential class is a base class that supplies credentials in password-based authentication schemes such as basic, digest, NTLM, and Kerberos. 
+Classes that implement the ICredentials interface, such as the CredentialCache class, return NetworkCredential objects.
+This class does not support public key-based authentication methods such as Secure Sockets Layer (SSL) client authentication.
 
 ```c#
 var result = rest
@@ -70,6 +109,8 @@ var result = rest
 ```
 
 ### Headers
+
+The Headers collection contains the protocol headers associated with the request. The .Header((h)=>{}) method allows to add the list of key.
 
 ```c#
 var result = rest
@@ -122,26 +163,6 @@ var result = rest
     .Url("[URL]")
     .CustomSerializer(new MyCustomSerializer { })
     .Get<MyObject>();
-```
-
-### Jwt Refresh Token
-
-```c#
-var url = "[URL]";
-var result = rest
-    .RefreshToken(true)
-    .RefreshTokenInvoke(async () =>
-    {
-        var result = await rest
-            .Url(url)
-            .Command("/refresh")
-            .GetAsync<TokenObjectResponse>();   
-        doSomethings(); //store the token inside your env.
-        return result;
-    })
-    .Command("/detail")
-    .Url(url)
-    .Get();
 ```
 
 ### Get
@@ -247,10 +268,21 @@ var result = rest
 
 ### Timeout
 
+The default value is 100,000 milliseconds (100 seconds).
+To set an infinite timeout, set the property value to InfiniteTimeSpan.
+A Domain Name System (DNS) query may take up to 15 seconds to return or time out. If your request contains a host name that requires resolution and you set Timeout to a value less than 15 seconds, it may take 15 seconds or more before an Exception is thrown to indicate a timeout on your request.
+
 ```c#
 var result = rest
     .Url("[URL]")
     .Timeout(3200) //milliseconds
+    .Get<ResponseObject>();
+```
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .Timeout(TimeSpan.FromMinutes(10)) 
     .Get<ResponseObject>();
 ```
 
@@ -293,7 +325,7 @@ var result = rest
     .Post<ResponseObject>();
 ```
 
-### Building example context
+### Complete code example
 
 ```c#
 
@@ -323,7 +355,7 @@ var result = rest
             .RefreshToken()
             .RefreshTokenInvoke(async () => await Refresh(new RefreshRequest { }));
 
-    //execution
+    //requests
 
     public async Task<RestResult<LoginResponse>> Login(LoginRequest request) 
         => await UsersRoot()
