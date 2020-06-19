@@ -46,12 +46,58 @@ var result = rest
 
 ### Authentication
 
+```c#
+var result = rest
+    .OnAuthentication(() => new AuthenticationHeaderValue("Bearer", "[Token]"))
+    .Url("[URL]")
+    .Get();
+```
+
+### Network Credential
+
+```c#
+var result = rest
+    .NetworkCredential("myUsername","myPassword")
+    .Url("[URL]")
+    .Get();
+```
+
+```c#
+var result = rest
+    .NetworkCredential(() =>  new System.Net.NetworkCredential("myUsername","myPassword"))
+    .Url("[URL]")
+    .Get();
+```
 
 ### Headers
 
+```c#
+var result = rest
+    .Header((h) => {
+        if(!h.Contains("auth-custom"))
+            h.Add("auth-custom", "value");
+    })
+    .Url("[URL]")
+    .Get();
+```
 
 ### Serailization
+rest.Get<MyObject>()
 
+```c#
+var result = rest
+    .Url("[URL]")
+    .Json()
+    .Get<MyObject>();
+```
+
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .Xml()
+    .Get<MyObject>();
+```
 
 ### Custom Serialization
 
