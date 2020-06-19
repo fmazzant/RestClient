@@ -286,7 +286,9 @@ var result = rest
     .Put<ResponseObject>();
 ```
 
-### Progressing bar
+### OnUploadProgress
+
+OnUploadProgress occurs when the request is running and the data traveling to outside. It is allowing todo somethings, get a percentage of upload for example.
 
 ```c#
 var result = rest
@@ -295,6 +297,17 @@ var result = rest
     {
       DoSomethings(p.ProgressPercentage); 
     }) //occurs during request
+    .Payload(new BigObject{})
+    .Post<ResponseObject>();
+```
+
+### OnDownloadProgress
+
+OnDownloadProgress occurs when the response is running and the data traveling to inside.  It is allowing todo somethings, get a percentage of download for example.
+
+```c#
+var result = rest
+    .Url("[URL]")
     .OnDownloadProgress(p =>
     {
       DoSomethings(p.ProgressPercentage); 
