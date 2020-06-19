@@ -10,7 +10,7 @@ To use behaviors in your project, add the Mafe.RestClient NuGet package to your 
 ### What is RestClient?
 
 The goal of RestClient is to enable developers to easily connect to any server in a really easy way. 
-Just define your Data Transfer Object (Dto) and start playing the client!
+Just define your Data Transfer Object (Dto) and start playing with the client!
 
 That may look something like this and use Build() method to create a RestBuilder from Rest:
 
