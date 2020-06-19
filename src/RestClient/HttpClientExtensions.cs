@@ -27,7 +27,7 @@
 /// 
 /// </summary>
 
-namespace Net.Http.Rest
+namespace RestClient
 {
     using System;
     using System.Net.Http;
@@ -41,8 +41,8 @@ namespace Net.Http.Rest
         /// Creates a RestClientBuilder instance to build the connection command
         /// </summary>
         /// <returns></returns>
-        public static RestClientBuilder Rest(this HttpClient httpClient)
-            => new RestClientBuilder
+        public static RestBuilder Rest(this HttpClient httpClient)
+            => new RestBuilder
             {
                 HttpClient = httpClient
             };
@@ -52,8 +52,8 @@ namespace Net.Http.Rest
         /// </summary>
         /// <param name="restProperties">Rest's properties</param>
         /// <returns></returns>
-        public static RestClientBuilder Rest(this HttpClient httpClient, RestProperties restProperties)
-            => new RestClientBuilder
+        public static RestBuilder Rest(this HttpClient httpClient, RestProperties restProperties)
+            => new RestBuilder
             {
                 HttpClient = httpClient,
                 Properties = restProperties
@@ -64,9 +64,9 @@ namespace Net.Http.Rest
         /// </summary>
         /// <param name="properties">Rest properties action</param>
         /// <returns></returns>
-        public static RestClientBuilder Rest(this HttpClient httpClient, Action<RestProperties> properties)
+        public static RestBuilder Rest(this HttpClient httpClient, Action<RestProperties> properties)
         {
-            RestClientBuilder restClient = new RestClientBuilder()
+            RestBuilder restClient = new RestBuilder()
             {
                 HttpClient = httpClient
             };

@@ -14,3 +14,18 @@ var result = rest
   .Url("https://www.federicomazzanti.com")
   .Get(); 
 ```
+
+### Certificate Validation
+
+
+
+```c#
+var result = rest
+    .CertificateValidation((object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors errors) =>
+    {
+        if(develoment) return true;
+        
+    })
+    .Url("https://www.federicomazzanti.com")
+    .Get();
+```
