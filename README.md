@@ -71,7 +71,7 @@ var result = rest
 ### Delete
 
 
-### Building solution exampple
+### Building example context
 
 ```c#
 
