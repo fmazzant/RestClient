@@ -325,6 +325,9 @@ var result = rest
 
 ### OnStart
 
+OnStart occurs when the request is starting and it is allowing todo somethings. 
+Cancelling request for example.
+
 ```c#
 var result = rest
     .Url("[URL]")
@@ -335,6 +338,9 @@ var result = rest
     .Post<ResponseObject>();
 ```
 ### OnPreResult
+
+OnPreResult occurs when the request is completing but the request is not completed. 
+When OnPreResult is raises we can todo somethings, for example  get and use the result of request.
 
 ```c#
 var result = rest
@@ -348,6 +354,8 @@ var result = rest
 
 ### OnCompleted
 
+OnCompleted occurs when the request is completed. 
+
 ```c#
 var result = rest
     .Url("[URL]")
@@ -360,6 +368,8 @@ var result = rest
 
 ### OnException
 
+OnException occurs when the request raises an exception. 
+
 ```c#
 var result = rest
     .Url("[URL]")
@@ -371,6 +381,8 @@ var result = rest
 ```
 
 ### Complete code example
+
+
 
 ```c#
 
