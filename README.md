@@ -344,7 +344,7 @@ var result = rest
             .RefreshToken()
             .RefreshTokenInvoke(async () => await Refresh(new RefreshRequest { }));
 
-    //execution
+    //requests
 
     public async Task<RestResult<LoginResponse>> Login(LoginRequest request) 
         => await UsersRoot()
