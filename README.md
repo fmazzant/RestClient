@@ -9,7 +9,7 @@ To use behaviors in your project, add the Mafe.RestClient NuGet package to your 
 
 ### What is RestClient?
 
-The goal of RestClient is to enable developers to easily connection any server with a limited spent of time to develop it. 
+The goal of RestClient is to enable developers to easily connect to any server with a limited spent of time to develop it. 
 Is necessary define or have defined Data Transfer Object (Dto) entities to play faster.
 
 That may look something like this and use Build() method to create a RestBuilder from Rest
