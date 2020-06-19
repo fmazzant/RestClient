@@ -124,6 +124,9 @@ var result = rest
 
 ### Serialization
 
+Two types of serialization that are supported by RestClient: Xml and Json, but it is possible implemetate ISerializerContent to customize the serialization.
+RestClient uses .Json() to use the json serialization.
+
 ```c#
 var result = rest
     .Url("[URL]")
@@ -131,6 +134,7 @@ var result = rest
     .Get<MyObject>();
 ```
 
+RestClient uses .Xml() to use the xml serialization.
 
 ```c#
 var result = rest
@@ -140,6 +144,8 @@ var result = rest
 ```
 
 ### Custom Serialization
+
+Consider the code below to demonstrate custom Serialization by implementing the ISerializerContent interface:
 
 ```c#
 public class MyCustomSerializer : ISerializerContent
@@ -157,6 +163,7 @@ public class MyCustomSerializer : ISerializerContent
     }
 }
 ```
+Now, we can use MyCustomSerializer how to explan the code below:
 
 ```c#
 var result = rest
