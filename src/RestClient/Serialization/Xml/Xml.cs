@@ -27,7 +27,7 @@
 /// 
 /// </summary>
 
-namespace Mafe.Net.Rest.Serialization.Xml
+namespace RestClient.Serialization.Xml
 {
     using System;
     using System.IO;
