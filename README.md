@@ -47,6 +47,9 @@ var result = rest
 ### Authentication
 
 
+### Headers
+
+
 ### Serailization
 
 
@@ -115,15 +118,15 @@ var result = rest
             .Payload(request)
             .PostAsync<RefreshResponse>();
     
-    public async Task<RestResult<CountryResponse>> GetCountries(CountryRequest request) 
+    public async Task<RestResult<CountryResponse>> Countries(CountryRequest request) 
         => await DimensionsRoot()
-            .Command("/GetCountries")
+            .Command("/Countries")
             .Payload(request)
             .PostAsync<CountryResponse>();
     
-    public async Task<RestResult<EventDetailResponse>> GetEventDetail(EventDetailRequest request) 
+    public async Task<RestResult<EventDetailResponse>> EventDetail(EventDetailRequest request) 
         => await EventsWithRefreshRoot()
-            .Command("/GetEventDetail")
+            .Command("/EventDetail")
             .Payload(request)
             .PostAsync<EventDetailResponse>();
 ```
