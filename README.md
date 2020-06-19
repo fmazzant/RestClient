@@ -90,6 +90,10 @@ A refresh_token should be revoked:
 
 ### Network Credential
 
+The NetworkCredential class is a base class that supplies credentials in password-based authentication schemes such as basic, digest, NTLM, and Kerberos. 
+Classes that implement the ICredentials interface, such as the CredentialCache class, return NetworkCredential objects.
+This class does not support public key-based authentication methods such as Secure Sockets Layer (SSL) client authentication.
+
 ```c#
 var result = rest
     .NetworkCredential("myUsername","myPassword")
