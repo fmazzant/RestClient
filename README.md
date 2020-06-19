@@ -211,7 +211,7 @@ var result = rest
 
 ### Post
 
-POST is used to send data to a server to create/update a resource.
+POST is used to send data to a server for create/update a resource.
 The data sent to the server with POST is stored in the request payload of the HTTP request:
 
 ```c#
@@ -236,7 +236,7 @@ Some other notes on POST requests:
 
 ### Put
 
-PUT is used to send data to a server to create/update a resource.
+PUT is used to send data to a server for create/update a resource.
 
 The difference between POST and PUT is that PUT requests are idempotent. That is, calling the same PUT request multiple times will always produce the same result. In contrast, calling a POST request repeatedly have side effects of creating the same resource multiple times.
 
@@ -288,7 +288,7 @@ var result = rest
 
 ### OnUploadProgress
 
-OnUploadProgress occurs when the request is running and the data traveling to outside. It is allowing todo somethings, get a percentage of upload for example.
+OnUploadProgress occurs when the request is running and the data is traveling outside. It is allow todo somethings, get a percentage of upload for example.
 
 ```c#
 var result = rest
@@ -303,7 +303,7 @@ var result = rest
 
 ### OnDownloadProgress
 
-OnDownloadProgress occurs when the response is running and the data traveling to inside.  It is allowing todo somethings, get a percentage of download for example.
+OnDownloadProgress occurs when the response is running and the data is traveling inside.  It is allow todo somethings, get a percentage of download for example.
 
 ```c#
 var result = rest
@@ -338,7 +338,7 @@ var result = rest
 
 ### OnStart
 
-OnStart occurs when the request is starting and it is allowing todo somethings. 
+OnStart occurs when the request is starting and it is allow todo somethings. 
 Cancelling request for example.
 
 ```c#
