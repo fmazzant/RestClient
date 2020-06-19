@@ -270,6 +270,8 @@ var result = await rest
 
 ### Payload
 
+A payload is the carrying capacity of a packet or other transmission data unit. RestClient uses .Playload<T>(obj) to set an object on request. 
+
 ```c#
 var result = rest
     .Url("[URL]")
@@ -284,7 +286,7 @@ var result = rest
     .Put<ResponseObject>();
 ```
 
-### Progressing
+### Progressing bar
 
 ```c#
 var result = rest
