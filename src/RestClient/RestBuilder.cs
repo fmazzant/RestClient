@@ -255,6 +255,20 @@ namespace RestClient
         }
 
         /// <summary>
+        /// Sets the timespan to wait before the request times out
+        /// </summary>
+        /// <param name="milliseconds"></param>
+        /// <returns></returns>
+        public RestBuilder Timeout(double milliseconds)
+        {
+            var result = (RestBuilder)this.MemberwiseClone();
+            result.HttpClient.Timeout
+                = result.TimeOut
+                = TimeSpan.FromMilliseconds(milliseconds);
+            return result;
+        }
+
+        /// <summary>
         ///  Sets the headers which should be sent with this o children requests
         /// </summary>
         /// <param name="defaultRequestHeaders"></param>
