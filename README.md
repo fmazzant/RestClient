@@ -221,10 +221,10 @@ var result = rest
     .Command("/path")
     .Parameter("id","10")
     .Parameter("type", "myType")
-    .Get(); // [URL]/path?id=10&type=myType
+    .Get();
 ```
 
-The url generated is: https://myurl.com/path?id=10&type=myType
+The url generated is: [URL]/path?id=10&type=myType
 
 ### Post
 
