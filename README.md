@@ -7,7 +7,7 @@ Use Build() method to create a RestBuilder from Rest
 var rest = Rest.Build();
 ```
 
-With RestClientBuilder we can create a simply "Get" call:
+With RestBuilder we can create a simply "Get" call:
 
 ```c#
 var result = rest
