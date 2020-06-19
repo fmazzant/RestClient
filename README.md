@@ -202,12 +202,12 @@ var result = rest
 var result = rest
     .Url("[URL]")
     .Payload(new Object{})
-    .Post<object>();
+    .Post<ResponseObject>();
 
 var result = await rest
     .Url("[URL]")
     .Payload(new Object{})
-    .PostAsync<object>();
+    .PostAsync<ResponseObject>();
 ```
 
 ### Put
@@ -216,12 +216,12 @@ var result = await rest
 var result = rest
     .Url("[URL]")
     .Payload(new Object{})
-    .Put<object>();
+    .Put<ResponseObject>();
 
 var result = await rest
     .Url("[URL]")
     .Payload(new Object{})
-    .PutAsync<object>();
+    .PutAsync<ResponseObject>();
 ```
 
 ### Delete
@@ -230,12 +230,12 @@ var result = await rest
 var result = rest
     .Url("[URL]")
     .Payload(new Object{})
-    .Delete<object>();
+    .Delete<ResponseObject>();
 
 var result = await rest
     .Url("[URL]")
     .Payload(new Object{})
-    .DeleteAsync<object>();
+    .DeleteAsync<ResponseObject>();
 ```
 
 ### Payload
