@@ -125,7 +125,7 @@ var result = rest
 ### Serialization
 
 Two types of serialization that are supported by RestClient: Xml and Json, but it is possible implemetate ISerializerContent to customize the serialization.
-RestClient uses .Json() to use the json serialization.
+RestClient uses .Json() to serialize an object into json.
 
 ```c#
 var result = rest
@@ -134,7 +134,7 @@ var result = rest
     .Get<MyObject>();
 ```
 
-RestClient uses .Xml() to use the xml serialization.
+RestClient uses .Xml() to serialize an object into xml.
 
 ```c#
 var result = rest
@@ -395,7 +395,7 @@ var result = rest
 
 ### Complete code example
 
-
+Consider the code below to demonstrate a complete code example. RestClient allows to create a flexible and robust network layer and it is very easy to use.
 
 ```c#
 
