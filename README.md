@@ -43,3 +43,32 @@ var result = rest
     .Url("[URL]")
     .Get();
 ```
+
+### Authentication
+
+
+### Serailization
+
+
+### Custom Serialization
+
+
+### Jwt Refresh Token
+
+
+### Progressing
+
+
+### Post
+
+
+### Put
+
+
+### Delete
+
+
+### Building solution exampple
+
+
+
