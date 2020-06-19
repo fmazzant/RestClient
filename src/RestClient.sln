@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Net.Http.Rest", "Net.Http.Rest\Net.Http.Rest.csproj", "{DAB324A6-F981-4D90-A5A1-4072E8AF2B7D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mafe.RestClient", "Net.Http.Rest\Mafe.RestClient.csproj", "{DAB324A6-F981-4D90-A5A1-4072E8AF2B7D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -27,13 +27,13 @@
 /// 
 /// </summary>
 
-namespace Net.Http.Rest
+namespace Mafe.Net.Rest
 {
-    using Net.Http.Rest.Generic;
-    using Net.Http.Rest.IO;
-    using Net.Http.Rest.Serialization;
-    using Net.Http.Rest.Serialization.Json;
-    using Net.Http.Rest.Serialization.Xml;
+    using Mafe.Net.Rest.Generic;
+    using Mafe.Net.Rest.IO;
+    using Mafe.Net.Rest.Serialization;
+    using Mafe.Net.Rest.Serialization.Json;
+    using Mafe.Net.Rest.Serialization.Xml;
     using System;
     using System.Collections.Generic;
     using System.IO;

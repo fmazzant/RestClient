@@ -27,7 +27,7 @@
 /// 
 /// </summary>
 
-namespace Net.Http.Rest
+namespace Mafe.Net.Rest
 {
     using System;
 

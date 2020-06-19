@@ -27,7 +27,7 @@
 /// 
 /// </summary>
 
-namespace Net.Http.Rest
+namespace Mafe.Net.Rest
 {
     /// <summary>
     /// Represents the method that will handle an event when the event request progress changed provides data.
