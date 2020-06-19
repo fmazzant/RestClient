@@ -293,7 +293,7 @@ var result = rest
     .Post<ResponseObject>();
 ```
 
-### Building example context
+### Complete code example
 
 ```c#
 
