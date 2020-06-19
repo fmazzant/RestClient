@@ -53,7 +53,7 @@ namespace RestClient
         /// <summary>
         /// Provides a base class for sending HTTP requests and receiving HTTP responses from a resource identified by a URI
         /// </summary>
-        public HttpClient HttpClient { get; internal set; }
+        internal HttpClient HttpClient { get; private set; }
             = new HttpClient();
 
         /// <summary>
