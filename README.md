@@ -212,7 +212,7 @@ var result = await rest
 
 ### Payload
 
-```c-sharp
+```c#
 var result = rest
     .Url("[URL]")
     .Payload(new RequestObject{})
