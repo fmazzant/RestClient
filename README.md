@@ -81,7 +81,7 @@ var result = rest
     .Get();
 ```
 
-### Serailization
+### Serialization
 
 ```c#
 var result = rest
