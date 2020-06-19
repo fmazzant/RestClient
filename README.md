@@ -46,12 +46,47 @@ var result = rest
 
 ### Authentication
 
+As defined by HTTP/1.1 [RFC2617], the application should send the access_token directly in the Authorization request header.
+You can do so by including the bearer token's access_token value in the HTTP request body as 'Authorization: Bearer {access_token_value}'.
+
+If an authenticated user has a bearer token's access_token or refresh_token that is expired, then a '401 - Unauthorized (invalid or expired refresh token)' error is returned.
+
 ```c#
 var result = rest
     .OnAuthentication(() => new AuthenticationHeaderValue("Bearer", "[Token]"))
     .Url("[URL]")
     .Get();
 ```
+
+### Refresh Token
+
+A valid bearer token (with active access_token or refresh_token properties) keeps the user's authentication alive without requiring him or her to re-enter their credentials frequently.
+The access_token can be used for as long as it’s active, which is up to one hour after login or renewal. The refresh_token is active for 336 hours (14 days). After the access_token expires, an active refresh_token can be used to get a new access_token / refresh_token pair as shown in the following example. This cycle can continue for up to 90 days after which the user must log in again. If the refresh_token expires, the tokens cannot be renewed and the user must log in again.
+
+To refresh a token, use "RefreshTokenInvoke" automatically.
+
+```c#
+var url = "[URL]";
+var result = rest
+    .OnAuthentication(() => new AuthenticationHeaderValue("Bearer", "[Token]"))
+    .RefreshToken(true)
+    .RefreshTokenInvoke(async () =>
+    {
+        var result = await rest
+            .Url(url)
+            .Command("/refresh")
+            .GetAsync<TokenObjectResponse>();   
+        doSomethings(); //store the token inside your env.
+        return result;
+    })
+    .Command("/detail")
+    .Url(url)
+    .Get();
+```
+
+A refresh_token should be revoked:
+* If a user is no longer permitted to make requests on the API, or
+* If the access_token or refresh_token have been compromised.
 
 ### Network Credential
 
@@ -122,26 +157,6 @@ var result = rest
     .Url("[URL]")
     .CustomSerializer(new MyCustomSerializer { })
     .Get<MyObject>();
-```
-
-### Jwt Refresh Token
-
-```c#
-var url = "[URL]";
-var result = rest
-    .RefreshToken(true)
-    .RefreshTokenInvoke(async () =>
-    {
-        var result = await rest
-            .Url(url)
-            .Command("/refresh")
-            .GetAsync<TokenObjectResponse>();   
-        doSomethings(); //store the token inside your env.
-        return result;
-    })
-    .Command("/detail")
-    .Url(url)
-    .Get();
 ```
 
 ### Get
