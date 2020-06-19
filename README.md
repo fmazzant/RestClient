@@ -33,9 +33,12 @@ TLS libraries provide built-in certificate validation functions that should be u
 var result = rest
     .CertificateValidation((sender, certificate, chain, errors) =>
     {
-      if (development) return true; // for development, trust all certificates
+      // for development, trust all certificates
+      if (development) return true; 
+      
+      // Compliant: trust only some certificates
       return errors == SslPolicyErrors.None 
-              && validCerts.Contains(certificate.GetCertHashString()); // Compliant: trust only some certificates
+              && validCerts.Contains(certificate.GetCertHashString()); 
     })
     .Url("[URL]")
     .Get();
