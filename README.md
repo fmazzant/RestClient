@@ -59,6 +59,9 @@ var result = rest
 ### Progressing
 
 
+### Payload
+
+
 ### Post
 
 
@@ -70,5 +73,47 @@ var result = rest
 
 ### Building solution exampple
 
+```c#
+    public RestBuilder Root() => Rest.Build()
+    .CertificateValidation((sender, certificate, chain, errors) =>
+    {
+      // for development, trust all certificates
+      if (development) return true; 
+      
+      // Compliant: trust only some certificates
+      return errors == SslPolicyErrors.None 
+              && validCerts.Contains(certificate.GetCertHashString()); 
+    })
+    .Url("[URL]");
+    
+    public RestBuilder UsersRoot() => Root().Command("/Users");
+    
+    public RestBuilder DimensionsRoot() => Root().Command("/Dimensions");
+    
+    public RestBuilder EventsRoot() => Root().Command("/Events");
+    
+    public RestBuilder EventsWithRefreshRoot() => EventsRoot()
+        .RefreshToken()
+        .RefreshTokenInvoke(async () => await Refresh(new RefreshRequest { }));
 
+    public async Task<RestResult<LoginResponse>> Login(LoginRequest request) => await UsersRoot()
+        .Command("/Login") //[URL]/Users/Login 
+        .Payload(request)
+        .PostAsync<LoginResponse>();
+
+    public async Task<RestResult<RefreshResponse>> Refresh(RefreshRequest request) => await UsersRoot()
+        .Command("/Refresh")
+        .Payload(request)
+        .PostAsync<RefreshResponse>();
+
+    public async Task<RestResult<CountryResponse>> GetCountries(CountryRequest request) => await DimensionsRoot()
+        .Command("/GetCountries")
+        .Payload(request)
+        .PostAsync<CountryResponse>();
+
+    public async Task<RestResult<EventDetailResponse>> GetEventDetail(EventDetailRequest request) => await EventsWithRefreshRoot()
+        .Command("/GetEventDetail")
+        .Payload(request)
+        .PostAsync<EventDetailResponse>();
+```
 
