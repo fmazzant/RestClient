@@ -174,6 +174,9 @@ var result = rest
 
 ### Get
 
+GET is used to request data from a specified resource and GET is one of the most common HTTP methods.
+Note that the query string (name/value pairs) is sent in the URL of a GET request:
+
 ```c#
 var result = rest
     .Url("[URL]")
@@ -198,6 +201,9 @@ var result = rest
 
 ### Post
 
+POST is used to send data to a server to create/update a resource.
+The data sent to the server with POST is stored in the request payload of the HTTP request:
+
 ```c#
 var result = rest
     .Url("[URL]")
@@ -212,6 +218,10 @@ var result = await rest
 
 ### Put
 
+PUT is used to send data to a server to create/update a resource.
+
+The difference between POST and PUT is that PUT requests are idempotent. That is, calling the same PUT request multiple times will always produce the same result. In contrast, calling a POST request repeatedly have side effects of creating the same resource multiple times.
+
 ```c#
 var result = rest
     .Url("[URL]")
@@ -225,6 +235,8 @@ var result = await rest
 ```
 
 ### Delete
+
+The DELETE method deletes the specified resource.
 
 ```c#
 var result = rest
