@@ -82,7 +82,6 @@ var result = rest
 ```
 
 ### Serailization
-rest.Get<MyObject>()
 
 ```c#
 var result = rest
