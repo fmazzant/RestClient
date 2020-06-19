@@ -213,15 +213,18 @@ Note that the query string (name/value pairs) is sent in the URL of a GET reques
 
 ### Parameters as query string 
 
+In some case we need to use arguments as query string. We can use the method Parameter(key, value) to resolve it, look code below:
+
 ```c#
 var result = rest
     .Url("[URL]")
     .Command("/path")
     .Parameter("id","10")
     .Parameter("type", "myType")
-    .Get(); // [URL]/path?id=10&type=myTYpe
-
+    .Get(); // [URL]/path?id=10&type=myType
 ```
+
+The url of Get called is: https://myurl.com/path?id=10&type=myType
 
 ### Post
 
