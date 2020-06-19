@@ -100,6 +100,29 @@ var result = rest
 
 ### Custom Serialization
 
+```c#
+public class MyCustomSerializer : ISerializerContent
+{
+    public string MediaTypeAsString => throw new NotImplementedException();
+
+    public object DeserializeObject(string value, Type typeOf)
+    {
+        throw new NotImplementedException();
+    }
+
+    public string SerializeObject(object value, Type typeOf)
+    {
+        throw new NotImplementedException();
+    }
+}
+```
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .CustomSerializer(new MyCustomSerializer { })
+    .Get<MyObject>();
+```
 
 ### Jwt Refresh Token
 
