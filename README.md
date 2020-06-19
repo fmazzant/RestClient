@@ -383,7 +383,7 @@ var result = rest
             .PostAsync<CountryResponse>();
     
     public async Task<RestResult<EventDetailResponse>> EventDetail(EventDetailRequest request) 
-        => await EventsWithRefreshRoot()
+        => await EventsRoot()
             .Command("/EventDetail")
             .Payload(request)
             .PostAsync<EventDetailResponse>();
