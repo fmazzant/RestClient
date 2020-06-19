@@ -9,8 +9,8 @@ To use behaviors in your project, add the Mafe.RestClient NuGet package to your 
 
 ### What is RestClient?
 
-The goal of RestClient is to enable developers to easily connect to any server with a limited spent of time to develop it. 
-Is necessary define or have defined Data Transfer Object (Dto) entities to play faster.
+The goal of RestClient is to enable developers to easily connect to any server in a really easy way. 
+Just define your Data Transfer Object (Dto) and start playing with the client!
 
 That may look something like this and use Build() method to create a RestBuilder from Rest:
 
@@ -213,15 +213,18 @@ Note that the query string (name/value pairs) is sent in the URL of a GET reques
 
 ### Parameters as query string 
 
+In some case we need to use arguments as query string. We can use the method Parameter(key, value) to resolve it, look code below:
+
 ```c#
 var result = rest
     .Url("[URL]")
     .Command("/path")
     .Parameter("id","10")
     .Parameter("type", "myType")
-    .Get(); // [URL]/path?id=10&type=myTYpe
-
+    .Get();
 ```
+
+The url generated is: [URL]/path?id=10&type=myType
 
 ### Post
 
