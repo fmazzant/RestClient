@@ -1,16 +1,17 @@
 # RestClient
-RestClient library provides a simple connector to consume REST services.
 
-# Nuget
+RestClient library provides a simple connector to consume REST services.
 
 To use behaviors in your project, add the Mafe.RestClient NuGet package to your project.
 
 [![Nuget](https://img.shields.io/nuget/v/Mafe.RestClient?style=flat-square)](https://www.nuget.org/packages/Mafe.RestClient)
 [![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/Mafe.RestClient?style=flat-square)](https://www.nuget.org/packages/Mafe.RestClient)
 
-# Documentation
+### What is RestClient?
 
-Use Build() method to create a RestBuilder from Rest
+The goal of RestClient is to enable developers to easily connection any server for a limited amount of time to develop it.
+
+That may look something like this and use Build() method to create a RestBuilder from Rest
 
 ```c#
 var rest = Rest.Build();
