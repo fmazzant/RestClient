@@ -126,21 +126,172 @@ var result = rest
 
 ### Jwt Refresh Token
 
+```c#
+var url = "[URL]";
+var result = rest
+    .RefreshToken(true)
+    .RefreshTokenInvoke(async () =>
+    {
+        var result = await rest
+            .Url(url)
+            .Command("/refresh")
+            .GetAsync<TokenObjectResponse>();   
+        doSomethings(); //store the token inside your env.
+        return result;
+    })
+    .Command("/detail")
+    .Url(url)
+    .Get();
+```
 
-### Progressing
+### Get
 
+```c#
+var result = rest
+    .Url("[URL]")
+    .Get();
 
-### Payload
+var result = await rest
+    .Url("[URL]")
+    .GetAsync();
+```
 
+### Parameters
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .Command("/path")
+    .Parameter("id","10")
+    .Parameter("type", "myType")
+    .Get(); // [URL]/path?id=10&type=myTYpe
+
+```
 
 ### Post
 
+```c#
+var result = rest
+    .Url("[URL]")
+    .Payload(new Object{})
+    .Post<object>();
+
+var result = await rest
+    .Url("[URL]")
+    .Payload(new Object{})
+    .PostAsync<object>();
+```
 
 ### Put
 
+```c#
+var result = rest
+    .Url("[URL]")
+    .Payload(new Object{})
+    .Put<object>();
+
+var result = await rest
+    .Url("[URL]")
+    .Payload(new Object{})
+    .PutAsync<object>();
+```
 
 ### Delete
 
+```c#
+var result = rest
+    .Url("[URL]")
+    .Payload(new Object{})
+    .Delete<object>();
+
+var result = await rest
+    .Url("[URL]")
+    .Payload(new Object{})
+    .DeleteAsync<object>();
+```
+
+### Payload
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .Payload(new RequestObject{})
+    .Post<ResponseObject>();
+```
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .Payload(new RequestObject{})
+    .Put<ResponseObject>();
+```
+
+### Progressing
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .OnUploadProgress(p =>
+    {
+        Debug.WriteLine(p.ProgressPercentage);
+        Trace.WriteLine(p.ProgressPercentage);
+    }) //occurs during request
+    .OnDownloadProgress(p =>
+    {
+        Debug.WriteLine(p.ProgressPercentage);
+        Trace.WriteLine(p.ProgressPercentage);
+    }) //occurs during response
+    .Payload(new BigObject{})
+    .Post<ResponseObject>();
+```
+
+### Timeout
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .Timeout(3200) //milliseconds
+    .Get<ResponseObject>();
+```
+
+### OnStart
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .OnStart((e) => { })
+    .Payload(new BigObject{})
+    .Post<ResponseObject>();
+```
+### OnPreResult
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .OnPreResult((e) => { })
+    .Payload(new BigObject{})
+    .Post<ResponseObject>();
+```
+
+### OnCompleted
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .OnCompleted((e) => { })
+    .Payload(new BigObject{})
+    .Post<ResponseObject>();
+```
+
+### OnException
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .OnException((e) => { })
+    .Payload(new BigObject{})
+    .Post<ResponseObject>();
+```
 
 ### Building example context
 
