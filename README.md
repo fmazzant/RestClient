@@ -175,7 +175,6 @@ var result = rest
 ### Get
 
 GET is used to request data from a specified resource and GET is one of the most common HTTP methods.
-Note that the query string (name/value pairs) is sent in the URL of a GET request:
 
 ```c#
 var result = rest
@@ -187,7 +186,18 @@ var result = await rest
     .GetAsync();
 ```
 
-### Parameters
+Some other notes on GET requests:
+
+* GET requests can be cached
+* GET requests remain in the browser history
+* GET requests can be bookmarked
+* GET requests should never be used when dealing with sensitive data
+* GET requests have length restrictions
+* GET requests are only used to request data (not modify)
+
+Note that the query string (name/value pairs) is sent in the URL of a GET request:
+
+### Parameters as query string 
 
 ```c#
 var result = rest
@@ -215,6 +225,14 @@ var result = await rest
     .Payload(new Object{})
     .PostAsync<ResponseObject>();
 ```
+POST is one of the most common HTTP methods.
+
+Some other notes on POST requests:
+
+* POST requests are never cached
+* POST requests do not remain in the browser history
+* POST requests cannot be bookmarked
+* POST requests have no restrictions on data length
 
 ### Put
 
