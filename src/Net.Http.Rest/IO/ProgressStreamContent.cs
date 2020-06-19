@@ -27,7 +27,7 @@
 /// 
 /// </summary>
 
-namespace Net.Http.Rest.IO
+namespace Mafe.Net.Rest.IO
 {
     using System;
     using System.IO;

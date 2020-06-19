@@ -27,7 +27,7 @@
 /// 
 /// </summary>
 
-namespace Net.Http.Rest.Serialization.Json
+namespace Mafe.Net.Rest.Serialization.Json
 {
     using System;
     using System.Text.Json;
