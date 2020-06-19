@@ -20,9 +20,12 @@ var rest = Rest.Build();
 With RestBuilder we can create a simply "Get" call:
 
 ```c#
-var result = rest
-  .Url("[URL]")
-  .Get(); 
+var result = rest.Url("[URL]").Get();
+```
+or we can use GetAsync() method :
+
+```c#
+var result = await rest.Url("[URL]").GetAsync();
 ```
 
 ### Certificate Validation
