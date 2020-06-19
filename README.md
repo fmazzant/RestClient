@@ -254,13 +254,11 @@ var result = rest
     .Url("[URL]")
     .OnUploadProgress(p =>
     {
-        Debug.WriteLine(p.ProgressPercentage);
-        Trace.WriteLine(p.ProgressPercentage);
+      DoSomethings(p.ProgressPercentage); 
     }) //occurs during request
     .OnDownloadProgress(p =>
     {
-        Debug.WriteLine(p.ProgressPercentage);
-        Trace.WriteLine(p.ProgressPercentage);
+      DoSomethings(p.ProgressPercentage); 
     }) //occurs during response
     .Payload(new BigObject{})
     .Post<ResponseObject>();
@@ -291,7 +289,9 @@ var result = rest
 ```c#
 var result = rest
     .Url("[URL]")
-    .OnStart((e) => { })
+    .OnStart((e) => { 
+        DoSomethings(e); 
+    })
     .Payload(new BigObject{})
     .Post<ResponseObject>();
 ```
@@ -300,7 +300,9 @@ var result = rest
 ```c#
 var result = rest
     .Url("[URL]")
-    .OnPreResult((e) => { })
+    .OnPreResult((e) => { 
+        DoSomethings(); 
+    })
     .Payload(new BigObject{})
     .Post<ResponseObject>();
 ```
@@ -310,7 +312,9 @@ var result = rest
 ```c#
 var result = rest
     .Url("[URL]")
-    .OnCompleted((e) => { })
+    .OnCompleted((e) => { 
+        DoSomethings(e); 
+    })
     .Payload(new BigObject{})
     .Post<ResponseObject>();
 ```
@@ -320,7 +324,9 @@ var result = rest
 ```c#
 var result = rest
     .Url("[URL]")
-    .OnException((e) => { })
+    .OnException((e) => { 
+      DoSomethings(e); 
+    })
     .Payload(new BigObject{})
     .Post<ResponseObject>();
 ```
