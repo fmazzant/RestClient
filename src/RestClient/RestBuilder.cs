@@ -491,6 +491,53 @@ namespace RestClient
         }
 
         /// <summary>
+        /// Defines is enabled x-form-urlencoded
+        /// </summary>
+        bool IsEnabledFormUrlEncoded { get; set; }
+
+        /// <summary>
+        /// Params for x-www-form-urlencoded
+        /// </summary>
+        Dictionary<string, string> KeyValues { get; set; }
+
+        /// <summary>
+        /// Enable form Url Encoding
+        /// </summary>
+        /// <param name="enableFormUrlEncoded"></param>
+        /// <returns></returns>
+        public RestBuilder EnableFormUrlEncoded(bool enableFormUrlEncoded = true)
+        {
+            var result = (RestBuilder)this.MemberwiseClone();
+            result.IsEnabledFormUrlEncoded = enableFormUrlEncoded;
+            return result;
+        }
+
+        /// <summary>
+        /// x-www-form-urlencoded key values
+        /// </summary>
+        /// <param name="keyValues"></param>
+        /// <returns></returns>
+        public RestBuilder FormUrlEncoded(Dictionary<string, string> keyValues)
+        {
+            var result = (RestBuilder)this.MemberwiseClone();
+            result.KeyValues = keyValues;
+            return result;
+        }
+
+        /// <summary>
+        /// x-www-form-urlencoded key values
+        /// </summary>
+        /// <param name="kesValues"></param>
+        /// <returns></returns>
+        public RestBuilder FormUrlEncoded(Action<Dictionary<string, string>> kesValues)
+        {
+            var result = (RestBuilder)this.MemberwiseClone();
+            result.KeyValues = new Dictionary<string, string>();
+            kesValues(result.KeyValues);
+            return result;
+        }
+
+        /// <summary>
         /// On Start Action
         /// </summary>
         Action<StartEventArgs> OnStartAction = null;
