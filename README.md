@@ -208,11 +208,11 @@ Some other notes on GET requests:
 * GET requests have length restrictions
 * GET requests are only used to request data (not modify)
 
-Note that the query string (name/value pairs) is sent in the URL of a GET request:
+Note that the query string (name/value pairs) is sent in the URL of a GET request.
 
 ### Parameters as query string 
 
-In some case we need to use arguments as query string. We can use the method Parameter(key, value) to resolve it, look code below:
+In some cases we need to use arguments as query string. We can use the method Parameter(key, value) to resolve it, like this:
 
 ```c#
 var result = rest
