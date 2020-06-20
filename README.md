@@ -11,7 +11,7 @@ To use it in your project, add the Mafe.RestClient NuGet package to your project
 The goal of RestClient is to enable developers to easily connect to any server in a really easy way. 
 Just define your Data Transfer Object (Dto) and start playing with the client!
 
-That may look something like this and use Build() method to create a RestBuilder from Rest:
+Use Build() method to create a RestBuilder from Rest:
 
 ```c#
 var rest = Rest.Build();
