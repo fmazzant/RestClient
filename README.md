@@ -187,7 +187,7 @@ var result = rest
 
 ### Get
 
-GET is used to request data from a specified resource and GET is one of the most common HTTP methods.
+GET is one of the most common HTTP methods and GET is used to request data from a specified resource 
 
 ```c#
 var result = rest
