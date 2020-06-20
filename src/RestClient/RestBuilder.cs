@@ -108,6 +108,12 @@ namespace RestClient
         }
 
         /// <summary>
+        /// Current Credentials
+        /// </summary>
+        ICredentials Credentials { get; set; }
+            = null;
+
+        /// <summary>
         /// Authentication information used by this func
         /// </summary>
         /// <param name="credential"></param>
@@ -115,10 +121,8 @@ namespace RestClient
         public RestBuilder NetworkCredential(Func<NetworkCredential> credential)
         {
             var result = (RestBuilder)this.MemberwiseClone();
-            result.HttpClient = new HttpClient(new HttpClientHandler()
-            {
-                Credentials = credential()
-            })
+            result.Credentials = credential();
+            result.HttpClient = new HttpClient(new HttpClientHandler() { Credentials = result.Credentials })
             {
                 Timeout = TimeOut
             };
@@ -134,10 +138,8 @@ namespace RestClient
         public RestBuilder NetworkCredential(string username, string password)
         {
             var result = (RestBuilder)this.MemberwiseClone();
-            result.HttpClient = new HttpClient(new HttpClientHandler()
-            {
-                Credentials = new NetworkCredential(username, password)
-            })
+            result.Credentials = new NetworkCredential(username, password);
+            result.HttpClient = new HttpClient(new HttpClientHandler() { Credentials = result.Credentials })
             {
                 Timeout = TimeOut
             };
@@ -154,10 +156,8 @@ namespace RestClient
         public RestBuilder NetworkCredential(string username, string password, string domain)
         {
             var result = (RestBuilder)this.MemberwiseClone();
-            result.HttpClient = new HttpClient(new HttpClientHandler()
-            {
-                Credentials = new NetworkCredential(username, password, domain)
-            })
+            result.Credentials = new NetworkCredential(username, password, domain);
+            result.HttpClient = new HttpClient(new HttpClientHandler() { Credentials = result.Credentials })
             {
                 Timeout = TimeOut
             };
@@ -173,10 +173,8 @@ namespace RestClient
         public RestBuilder NetworkCredential(string username, System.Security.SecureString password)
         {
             var result = (RestBuilder)this.MemberwiseClone();
-            result.HttpClient = new HttpClient(new HttpClientHandler()
-            {
-                Credentials = new NetworkCredential(username, password)
-            })
+            result.Credentials = new NetworkCredential(username, password);
+            result.HttpClient = new HttpClient(new HttpClientHandler() { Credentials = result.Credentials })
             {
                 Timeout = TimeOut
             };
@@ -193,10 +191,8 @@ namespace RestClient
         public RestBuilder NetworkCredential(string username, System.Security.SecureString password, string domain)
         {
             var result = (RestBuilder)this.MemberwiseClone();
-            result.HttpClient = new HttpClient(new HttpClientHandler()
-            {
-                Credentials = new NetworkCredential(username, password, domain)
-            })
+            result.Credentials = new NetworkCredential(username, password, domain);
+            result.HttpClient = new HttpClient(new HttpClientHandler() { Credentials = result.Credentials })
             {
                 Timeout = TimeOut
             };
@@ -208,24 +204,30 @@ namespace RestClient
         /// </summary>
         /// <param name="authentication"></param>
         /// <returns></returns>
-        public RestBuilder OnAuthentication(Func<AuthenticationHeaderValue> authentication)
+        public RestBuilder Authentication(Func<AuthenticationHeaderValue> authentication)
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.HttpClient.DefaultRequestHeaders.Authorization = authentication();
             return result;
         }
 
+        [Obsolete("OnAuthentication: this method will be removed soon", false)]
+        public RestBuilder OnAuthentication(Func<AuthenticationHeaderValue> authentication) => Authentication(authentication);
+
         /// <summary>
         /// The Authorization header for an HTTP request
         /// </summary>
         /// <param name="scheme"></param>
         /// <returns></returns>
-        public RestBuilder OnAuthentication(string scheme)
+        public RestBuilder Authentication(string scheme)
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(scheme);
             return result;
         }
+        
+        [Obsolete("OnAuthentication: this method will be removed soon", false)]
+        public RestBuilder OnAuthentication(string scheme) => Authentication(scheme);
 
         /// <summary>
         /// The Authorization header for an HTTP request
@@ -233,12 +235,15 @@ namespace RestClient
         /// <param name="scheme"></param>
         /// <param name="parameter"></param>
         /// <returns></returns>
-        public RestBuilder OnAuthentication(string scheme, string parameter)
+        public RestBuilder Authentication(string scheme, string parameter)
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(scheme, parameter);
             return result;
         }
+        
+        [Obsolete("OnAuthentication: this method will be removed soon", false)]
+        public RestBuilder OnAuthentication(string scheme, string parameter) => Authentication(scheme, parameter);
 
         /// <summary>
         /// Timeout
