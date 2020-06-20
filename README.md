@@ -312,7 +312,7 @@ var result = rest
     .EnableFormUrlEncoded(true)
 ```
 
-and then we can pass the parameters ad dictionary:
+and then we can pass the parameters as dictionary:
 
 ```c#
  var params = new Dictionary<string, string>();
