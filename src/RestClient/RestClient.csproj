@@ -15,7 +15,7 @@
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.0.1-rc5</Version>
+    <Version>1.0.1</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
   </PropertyGroup>
 
