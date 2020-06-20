@@ -284,7 +284,7 @@ var result = await rest
 
 ### Payload
 
-A payload is the carrying capacity of a packet or other transmission data unit. RestClient uses .Playload<T>(obj) to set an object on request. 
+RestClient uses Playload<T>(obj) method to set an object on request: 
 
 ```c#
 var result = rest
@@ -302,7 +302,7 @@ var result = rest
 
 ### Form Url Encoded (application/x-www-form-urlencoded)
 
-When necessary we can use the request as form urlencoded. To use we enabled FormUrlEncoded:
+When necessary we can use the request as a form-url-encoded. To use it we need to enabled it, like this:
 
 ```c#
 var result = rest
@@ -310,7 +310,7 @@ var result = rest
     .EnableFormUrlEncoded(true)
 ```
 
-and then we can pass the parameters as dictionary:
+and then we can pass the parameters as a dictionary:
 
 ```c#
  var params = new Dictionary<string, string>();
