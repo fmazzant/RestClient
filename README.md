@@ -66,7 +66,7 @@ If an authenticated user has a bearer token's access_token or refresh_token that
 
 ```c#
 var result = rest
-    .OnAuthentication(() => new AuthenticationHeaderValue("Bearer", "[Token]"))
+    .Authentication(() => new AuthenticationHeaderValue("Bearer", "[Token]"))
     .Url("[URL]")
     .Get();
 ```
@@ -81,7 +81,7 @@ To refresh a token, use "RefreshTokenInvoke" automatically.
 ```c#
 var url = "[URL]";
 var result = rest
-    .OnAuthentication(() => new AuthenticationHeaderValue("Bearer", "[Token]"))
+    .Authentication(() => new AuthenticationHeaderValue("Bearer", "[Token]"))
     .RefreshToken(true)
     .RefreshTokenInvoke(async () =>
     {
