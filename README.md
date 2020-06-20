@@ -302,6 +302,30 @@ var result = rest
     .Put<ResponseObject>();
 ```
 
+### Form Url Encoded (application/x-www-form-urlencoded)
+
+When necessary we can use the request as form urlencoded. To use we enabled FormUrlEncoded:
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .EnableFormUrlEncoded(true)
+```
+
+and then we can pass the parameters ad dictionary:
+
+```c#
+ var params = new Dictionary<string, string>();
+ params.Add("key1", "value1");
+ params.Add("key2", "value2");
+
+var result = rest
+    .Url("[URL]")
+    .EnableFormUrlEncoded(true)
+    .FormUrlEncoded(params)
+    .Post();
+```
+
 ### OnUploadProgress
 
 OnUploadProgress occurs when the request is running and the data is traveling outside. It is allow todo somethings, get a percentage of upload for example.
