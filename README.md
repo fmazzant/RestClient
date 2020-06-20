@@ -176,7 +176,7 @@ public class MyCustomSerializer : ISerializerContent
     }
 }
 ```
-Now, we can use MyCustomSerializer how to explan the code below:
+Now, we can use MyCustomSerializer like this:
 
 ```c#
 var result = rest
