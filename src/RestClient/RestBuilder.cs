@@ -91,7 +91,7 @@ namespace RestClient
         /// </summary>
         internal RestBuilder()
         {
-            ServicePointManager.ServerCertificateValidationCallback = (object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) 
+            ServicePointManager.ServerCertificateValidationCallback = (object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
                 => true;
         }
 
@@ -498,7 +498,7 @@ namespace RestClient
         /// <summary>
         /// Params for x-www-form-urlencoded
         /// </summary>
-        Dictionary<string, string> KeyValues { get; set; }
+        Dictionary<string, string> FormUrlEncodedKeyValues { get; set; }
 
         /// <summary>
         /// Enable form Url Encoding
@@ -520,7 +520,7 @@ namespace RestClient
         public RestBuilder FormUrlEncoded(Dictionary<string, string> keyValues)
         {
             var result = (RestBuilder)this.MemberwiseClone();
-            result.KeyValues = keyValues;
+            result.FormUrlEncodedKeyValues = keyValues;
             return result;
         }
 
@@ -532,8 +532,8 @@ namespace RestClient
         public RestBuilder FormUrlEncoded(Action<Dictionary<string, string>> kesValues)
         {
             var result = (RestBuilder)this.MemberwiseClone();
-            result.KeyValues = new Dictionary<string, string>();
-            kesValues(result.KeyValues);
+            result.FormUrlEncodedKeyValues = new Dictionary<string, string>();
+            kesValues(result.FormUrlEncodedKeyValues);
             return result;
         }
 
@@ -905,20 +905,28 @@ namespace RestClient
                 System.Threading.CancellationToken cancellationToken = new System.Threading.CancellationToken();
                 HttpResponseMessage responseMessage = null;// await HttpClient.SendAsync(request);
 
-                if (payloadContent != null)
+                if (!IsEnabledFormUrlEncoded)
                 {
-                    string json = Serializer.SerializeObject(payloadContent, payloadContentType);
-                    HttpContent hc = new StringContent(json, Encoding.UTF8, Serializer.MediaTypeAsString);
-                    request.Content = hc;
-
-                    using (HttpContentStream streamContent = new HttpContentStream(request.Content))
+                    if (payloadContent != null)
                     {
-                        streamContent.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
-                        responseMessage = await streamContent.WriteStringAsStreamAsync(HttpClient, request, cancellationToken);
+                        string json = Serializer.SerializeObject(payloadContent, payloadContentType);
+                        HttpContent hc = new StringContent(json, Encoding.UTF8, Serializer.MediaTypeAsString);
+                        request.Content = hc;
+
+                        using (HttpContentStream streamContent = new HttpContentStream(request.Content))
+                        {
+                            streamContent.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
+                            responseMessage = await streamContent.WriteStringAsStreamAsync(HttpClient, request, cancellationToken);
+                        }
+                    }
+                    else
+                    {
+                        responseMessage = HttpClient.SendAsync(request).Result;
                     }
                 }
                 else
                 {
+                    request.Content = new FormUrlEncodedContent(FormUrlEncodedKeyValues);
                     responseMessage = HttpClient.SendAsync(request).Result;
                 }
 
@@ -987,20 +995,28 @@ namespace RestClient
                 HttpResponseMessage responseMessage = null;// await HttpClient.SendAsync(request);
                 System.Threading.CancellationToken cancellationToken = new System.Threading.CancellationToken();
 
-                if (payloadContent != null)
+                if (!IsEnabledFormUrlEncoded)
                 {
-                    string json = Serializer.SerializeObject(payloadContent, payloadContentType);
-                    HttpContent hc = new StringContent(json, Encoding.UTF8, Serializer.MediaTypeAsString);
-                    request.Content = hc;
-
-                    using (HttpContentStream streamContent = new HttpContentStream(request.Content))
+                    if (payloadContent != null)
                     {
-                        streamContent.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
-                        responseMessage = await streamContent.WriteStringAsStreamAsync(HttpClient, request, cancellationToken);
+                        string json = Serializer.SerializeObject(payloadContent, payloadContentType);
+                        HttpContent hc = new StringContent(json, Encoding.UTF8, Serializer.MediaTypeAsString);
+                        request.Content = hc;
+
+                        using (HttpContentStream streamContent = new HttpContentStream(request.Content))
+                        {
+                            streamContent.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
+                            responseMessage = await streamContent.WriteStringAsStreamAsync(HttpClient, request, cancellationToken);
+                        }
+                    }
+                    else
+                    {
+                        responseMessage = HttpClient.SendAsync(request).Result;
                     }
                 }
                 else
                 {
+                    request.Content = new FormUrlEncodedContent(FormUrlEncodedKeyValues);
                     responseMessage = HttpClient.SendAsync(request).Result;
                 }
 
@@ -1068,20 +1084,28 @@ namespace RestClient
                 System.Threading.CancellationToken cancellationToken = new System.Threading.CancellationToken();
                 HttpResponseMessage responseMessage = null;// await HttpClient.SendAsync(request);
 
-                if (payloadContent != null)
+                if (!IsEnabledFormUrlEncoded)
                 {
-                    string json = Serializer.SerializeObject(payloadContent, payloadContentType);
-                    HttpContent hc = new StringContent(json, Encoding.UTF8, Serializer.MediaTypeAsString);
-                    request.Content = hc;
-
-                    using (HttpContentStream streamContent = new HttpContentStream(request.Content))
+                    if (payloadContent != null)
                     {
-                        streamContent.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
-                        responseMessage = await streamContent.WriteStringAsStreamAsync(HttpClient, request, cancellationToken);
+                        string json = Serializer.SerializeObject(payloadContent, payloadContentType);
+                        HttpContent hc = new StringContent(json, Encoding.UTF8, Serializer.MediaTypeAsString);
+                        request.Content = hc;
+
+                        using (HttpContentStream streamContent = new HttpContentStream(request.Content))
+                        {
+                            streamContent.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
+                            responseMessage = await streamContent.WriteStringAsStreamAsync(HttpClient, request, cancellationToken);
+                        }
+                    }
+                    else
+                    {
+                        responseMessage = HttpClient.SendAsync(request).Result;
                     }
                 }
                 else
                 {
+                    request.Content = new FormUrlEncodedContent(FormUrlEncodedKeyValues);
                     responseMessage = HttpClient.SendAsync(request).Result;
                 }
 
@@ -1151,20 +1175,28 @@ namespace RestClient
                 HttpResponseMessage responseMessage = null;// await HttpClient.SendAsync(request);
                 System.Threading.CancellationToken cancellationToken = new System.Threading.CancellationToken();
 
-                if (payloadContent != null)
+                if (!IsEnabledFormUrlEncoded)
                 {
-                    string json = Serializer.SerializeObject(payloadContent, payloadContentType);
-                    HttpContent hc = new StringContent(json, Encoding.UTF8, Serializer.MediaTypeAsString);
-                    request.Content = hc;
-
-                    using (HttpContentStream streamContent = new HttpContentStream(request.Content))
+                    if (payloadContent != null)
                     {
-                        streamContent.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
-                        responseMessage = await streamContent.WriteStringAsStreamAsync(HttpClient, request, cancellationToken);
+                        string json = Serializer.SerializeObject(payloadContent, payloadContentType);
+                        HttpContent hc = new StringContent(json, Encoding.UTF8, Serializer.MediaTypeAsString);
+                        request.Content = hc;
+
+                        using (HttpContentStream streamContent = new HttpContentStream(request.Content))
+                        {
+                            streamContent.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
+                            responseMessage = await streamContent.WriteStringAsStreamAsync(HttpClient, request, cancellationToken);
+                        }
+                    }
+                    else
+                    {
+                        responseMessage = HttpClient.SendAsync(request).Result;
                     }
                 }
                 else
                 {
+                    request.Content = new FormUrlEncodedContent(FormUrlEncodedKeyValues);
                     responseMessage = HttpClient.SendAsync(request).Result;
                 }
 
