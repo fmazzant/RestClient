@@ -212,7 +212,7 @@ Note that the query string (name/value pairs) is sent in the URL of a GET reques
 
 ### Parameters as query string 
 
-In some cases we need to use arguments as query string. We can use the method Parameter(key, value) to resolve it, like this:
+In some cases we need to use arguments as query string. We can use the method Parameter(key, value) to resolve it like this:
 
 ```c#
 var result = rest
