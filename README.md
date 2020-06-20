@@ -241,9 +241,7 @@ var result = await rest
     .Payload(new Object{})
     .PostAsync<ResponseObject>();
 ```
-POST is one of the most common HTTP methods.
-
-Some other notes on POST requests:
+Post is another common http method, wich is used to:
 
 * POST requests are never cached
 * POST requests do not remain in the browser history
