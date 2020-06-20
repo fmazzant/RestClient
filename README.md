@@ -388,7 +388,7 @@ var result = rest
 ```
 ### OnPreResult
 
-OnPreResult occurs when the request is completing but the request is not completed. 
+OnPreResult occurs when the request is completing but  still hasn't completed yet. 
 When OnPreResult is raises we can todo somethings, for example  get and use the result of request.
 
 ```c#
@@ -431,7 +431,8 @@ var result = rest
 
 ### Complete code example
 
-Consider the code below to demonstrate a complete code example. RestClient allows to create a flexible and robust network layer and it is very easy to use.
+RestClient allows to create a flexible and robust network layer and it is very easy to use.
+Below you find a complete code demostration a complete code example. 
 
 ```c#
 
