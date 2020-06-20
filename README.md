@@ -450,7 +450,7 @@ Below you find a complete code demostration a complete code example.
     
     public RestBuilder RootAuthentication() 
         => Root()
-             .OnAuthentication(() => new AuthenticationHeaderValue("Bearer", "[Token]"))
+             .Authentication(() => new AuthenticationHeaderValue("Bearer", "[Token]"))
              .RefreshToken()
              .RefreshTokenInvoke(async () => await Refresh(new RefreshRequest { }));
     
