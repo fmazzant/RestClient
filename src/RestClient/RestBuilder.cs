@@ -122,7 +122,10 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = credential();
-            result.HttpClient = new HttpClient(new HttpClientHandler() { Credentials = result.Credentials })
+            result.HttpClient = new HttpClient(new HttpClientHandler()
+            {
+                Credentials = result.Credentials
+            })
             {
                 Timeout = TimeOut
             };
@@ -139,7 +142,10 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password);
-            result.HttpClient = new HttpClient(new HttpClientHandler() { Credentials = result.Credentials })
+            result.HttpClient = new HttpClient(new HttpClientHandler()
+            {
+                Credentials = result.Credentials
+            })
             {
                 Timeout = TimeOut
             };
@@ -157,7 +163,10 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password, domain);
-            result.HttpClient = new HttpClient(new HttpClientHandler() { Credentials = result.Credentials })
+            result.HttpClient = new HttpClient(new HttpClientHandler()
+            {
+                Credentials = result.Credentials
+            })
             {
                 Timeout = TimeOut
             };
@@ -174,7 +183,10 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password);
-            result.HttpClient = new HttpClient(new HttpClientHandler() { Credentials = result.Credentials })
+            result.HttpClient = new HttpClient(new HttpClientHandler()
+            {
+                Credentials = result.Credentials
+            })
             {
                 Timeout = TimeOut
             };
@@ -192,7 +204,10 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password, domain);
-            result.HttpClient = new HttpClient(new HttpClientHandler() { Credentials = result.Credentials })
+            result.HttpClient = new HttpClient(new HttpClientHandler()
+            {
+                Credentials = result.Credentials
+            })
             {
                 Timeout = TimeOut
             };
@@ -225,7 +240,7 @@ namespace RestClient
             result.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(scheme);
             return result;
         }
-        
+
         [Obsolete("OnAuthentication: this method will be removed soon", false)]
         public RestBuilder OnAuthentication(string scheme) => Authentication(scheme);
 
@@ -241,7 +256,7 @@ namespace RestClient
             result.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(scheme, parameter);
             return result;
         }
-        
+
         [Obsolete("OnAuthentication: this method will be removed soon", false)]
         public RestBuilder OnAuthentication(string scheme, string parameter) => Authentication(scheme, parameter);
 
