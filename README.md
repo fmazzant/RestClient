@@ -375,8 +375,7 @@ var result = rest
 
 ### OnStart
 
-OnStart occurs when the request is starting and it is allow todo somethings. 
-Cancelling request for example.
+OnStart is an event that triggers when the request starts.
 
 ```c#
 var result = rest
