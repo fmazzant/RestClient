@@ -44,7 +44,12 @@ namespace RestClient
         /// <summary>
         /// The payload of request
         /// </summary>
-        public object Payload { get; set; }
+        public object Payload { get; internal set; }
+
+        /// <summary>
+        /// The Url request
+        /// </summary>
+        public string Url { get; internal set; }
     }
 
     /// <summary>    
@@ -65,24 +70,12 @@ namespace RestClient
         /// <summary>
         /// Get a value indication the progress float number of comminication. The value can be from 0 to 1
         /// </summary>
-        public float ProgressFloat
-        {
-            get
-            {
-                if (TotalBytes == 0) return 0;
-                return (float)((float)CurrentBytes / (float)TotalBytes);
-            }
-        }
+        public float ProgressFloat => (TotalBytes == 0) ? 0 : (float)((float)CurrentBytes / (float)TotalBytes);
+
 
         /// <summary>
         /// Get a value indication the progress percentage number of comminication. The value can be from 0 to 100
         /// </summary>
-        public int ProgressPercentage
-        {
-            get
-            {
-                return (int)(ProgressFloat * 100);
-            }
-        }
+        public int ProgressPercentage => (int)(ProgressFloat * 100);
     }
 }
