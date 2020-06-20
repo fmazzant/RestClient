@@ -14,3 +14,5 @@
 /src/.vs/Mafe.RestClient/DesignTimeBuild
 /src/RestClient/bin
 /src/RestClient/obj
+src/.vs/RestClient/xs/project-cache/RestClient-Debug.json
+src/.vs/RestClient/xs/UserPrefs.xml
