@@ -123,7 +123,7 @@ var result = rest
 
 ### Headers
 
-The Headers collection contains the protocol headers associated with the request. The .Header((h)=>{}) method allows to add the list of key.
+The Headers collection contains the protocol headers associated with the request. The Header((h)=>{}) method allows you to add the list of keys.
 
 ```c#
 var result = rest
