@@ -17,12 +17,12 @@ Use Build() method to create a RestBuilder from Rest:
 var rest = Rest.Build();
 ```
 
-With RestBuilder we can create a simply "Get" call:
+To create a simple get call, just do like this:
 
 ```c#
 var result = rest.Url("[URL]").Get();
 ```
-or we can use GetAsync() method :
+or we can use GetAsync() method:
 
 ```c#
 var result = await rest.Url("[URL]").GetAsync();
