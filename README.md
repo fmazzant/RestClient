@@ -341,7 +341,7 @@ var result = rest
 
 ### OnDownloadProgress
 
-OnDownloadProgress occurs when the response is running and the data is come in. We can get a percentage of the data being downloading like this:
+OnDownloadProgress occurs when the response is running and the data is coming in. We can get a percentage of the data being downloading like this:
 ```c#
 var result = rest
     .Url("[URL]")
