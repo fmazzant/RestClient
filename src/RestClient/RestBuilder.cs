@@ -118,9 +118,10 @@ namespace RestClient
             result.HttpClient = new HttpClient(new HttpClientHandler()
             {
                 Credentials = credential()
-            });
-            if (TimeOut != TimeSpan.Zero)
-                result.HttpClient.Timeout = TimeOut;
+            })
+            {
+                Timeout = TimeOut
+            };
             return result;
         }
 
@@ -136,9 +137,10 @@ namespace RestClient
             result.HttpClient = new HttpClient(new HttpClientHandler()
             {
                 Credentials = new NetworkCredential(username, password)
-            });
-            if (TimeOut != TimeSpan.Zero)
-                result.HttpClient.Timeout = TimeOut;
+            })
+            {
+                Timeout = TimeOut
+            };
             return result;
         }
 
@@ -155,9 +157,10 @@ namespace RestClient
             result.HttpClient = new HttpClient(new HttpClientHandler()
             {
                 Credentials = new NetworkCredential(username, password, domain)
-            });
-            if (TimeOut != TimeSpan.Zero)
-                result.HttpClient.Timeout = TimeOut;
+            })
+            {
+                Timeout = TimeOut
+            };
             return result;
         }
 
@@ -173,9 +176,10 @@ namespace RestClient
             result.HttpClient = new HttpClient(new HttpClientHandler()
             {
                 Credentials = new NetworkCredential(username, password)
-            });
-            if (TimeOut != TimeSpan.Zero)
-                result.HttpClient.Timeout = TimeOut;
+            })
+            {
+                Timeout = TimeOut
+            };
             return result;
         }
 
@@ -192,9 +196,10 @@ namespace RestClient
             result.HttpClient = new HttpClient(new HttpClientHandler()
             {
                 Credentials = new NetworkCredential(username, password, domain)
-            });
-            if (TimeOut != TimeSpan.Zero)
-                result.HttpClient.Timeout = TimeOut;
+            })
+            {
+                Timeout = TimeOut
+            };
             return result;
         }
 
@@ -404,9 +409,11 @@ namespace RestClient
 
         /// <summary>
         /// Sets log, true is enabled, when false is disabled.
+        /// Currently this function is temporary. 
         /// </summary>
         /// <param name="logger"></param>
         /// <returns></returns>
+        [Obsolete("Currently this function is temporary!", false)]
         public RestBuilder Log(bool logger = true)
         {
             var result = (RestBuilder)this.MemberwiseClone();
@@ -897,7 +904,12 @@ namespace RestClient
 
                 if (Logger) Console.WriteLine(url);
 
-                StartEventArgs startEventArgs = new StartEventArgs();
+                StartEventArgs startEventArgs = new StartEventArgs()
+                {
+                    Cancel = false,
+                    Payload = payloadContent,
+                    Url = url
+                };
                 OnStartAction?.Invoke(startEventArgs);
                 if (startEventArgs.Cancel) return null;
 
