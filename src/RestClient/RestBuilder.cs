@@ -493,7 +493,7 @@ namespace RestClient
         /// <summary>
         /// Defines is enabled x-form-urlencoded
         /// </summary>
-        bool IsEnabledFormUrlEncoded { get; set; }
+        bool IsEnabledFormUrlEncoded { get; set; } = false;
 
         /// <summary>
         /// Params for x-www-form-urlencoded
