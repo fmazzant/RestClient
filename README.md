@@ -326,7 +326,7 @@ var result = rest
 
 ### OnUploadProgress
 
-OnUploadProgress occurs when the request is running and the data is traveling outside. It is allow todo somethings, get a percentage of upload for example.
+OnUploadProgress occurs when the request is running and the data is going out. We can get a percentage of the data being uploaded like this:
 
 ```c#
 var result = rest
@@ -341,8 +341,7 @@ var result = rest
 
 ### OnDownloadProgress
 
-OnDownloadProgress occurs when the response is running and the data is traveling inside.  It is allow todo somethings, get a percentage of download for example.
-
+OnDownloadProgress occurs when the response is running and the data is come in. We can get a percentage of the data being downloading like this:
 ```c#
 var result = rest
     .Url("[URL]")
