@@ -401,20 +401,6 @@ var result = rest
     .Post<ResponseObject>();
 ```
 
-### OnCompleted
-
-OnCompleted occurs when the request is completed. 
-
-```c#
-var result = rest
-    .Url("[URL]")
-    .OnCompleted((e) => { 
-        DoSomethings(e); 
-    })
-    .Payload(new BigObject{})
-    .Post<ResponseObject>();
-```
-
 ### OnException
 
 OnException occurs when the request raises an exception. 
@@ -424,6 +410,20 @@ var result = rest
     .Url("[URL]")
     .OnException((e) => { 
       DoSomethings(e); 
+    })
+    .Payload(new BigObject{})
+    .Post<ResponseObject>();
+```
+
+### OnCompleted
+
+OnCompleted occurs when the request is completed. 
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .OnCompleted((e) => { 
+        DoSomethings(e); 
     })
     .Payload(new BigObject{})
     .Post<ResponseObject>();
