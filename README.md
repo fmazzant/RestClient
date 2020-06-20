@@ -465,25 +465,30 @@ Below you find a complete code demostration a complete code example.
     
     //requests
 
-    public async Task<RestResult<LoginResponse>> Login(LoginRequest request) 
+    public async Task<RestResult<LoginResponse>> PostLogin(LoginRequest request) 
         => await UsersRoot()
             .Command("/Login") //[URL]/Users/Login 
             .Payload(request)
             .PostAsync<LoginResponse>();
     
-    public async Task<RestResult<RefreshResponse>> Refresh(RefreshRequest request) 
+     public async Task<RestResult<RuleResponse>> GetRules() 
+        => await UsersRoot()
+            .Command("/Rules")
+            .GetAsync<RuleResponse>();
+    
+    public async Task<RestResult<RefreshResponse>> PostRefresh(RefreshRequest request) 
         => await UsersRoot()
             .Command("/Refresh")
             .Payload(request)
             .PostAsync<RefreshResponse>();
     
-    public async Task<RestResult<CountryResponse>> Countries(CountryRequest request) 
+    public async Task<RestResult<CountryResponse>> PostCountries(CountryRequest request) 
         => await DimensionsRoot()
             .Command("/Countries")
             .Payload(request)
             .PostAsync<CountryResponse>();
-    
-    public async Task<RestResult<EventDetailResponse>> EventDetail(EventDetailRequest request) 
+
+    public async Task<RestResult<EventDetailResponse>> PostEventDetail(EventDetailRequest request) 
         => await EventsRoot()
             .Command("/EventDetail")
             .Payload(request)
