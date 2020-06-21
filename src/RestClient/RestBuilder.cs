@@ -970,6 +970,61 @@ namespace RestClient
         public RestResult<Stream> DeleteAsStream() => DeleteAsStreamAsync().Result;
         #endregion
 
+        #region [ Patch ]
+        HttpMethod PATCH = new HttpMethod("PATCH");
+
+        /// <summary>
+        /// Send a POST request to the specified Uri as an asynchronous operation
+        /// </summary>
+        /// <returns></returns>
+        public async Task<RestResult<string>> PatchAsync() => await SendAsStringAsync(PATCH, PayloadContent, PayloadContentType);
+
+        /// <summary>
+        /// Send a POST request to the specified Uri as an asynchronous operation
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public async Task<RestResult<T>> PatchAsync<T>() where T : new() => await SendAsync<T>(PATCH, PayloadContent, PayloadContentType);
+
+        /// <summary>
+        /// Send a POST request to the specified Uri as an asynchronous operation
+        /// </summary>
+        /// <returns></returns>
+        public async Task<RestResult<byte[]>> PatchAsByteArrayAsync() => await SendAsByteArrayAsync(PATCH, PayloadContent, PayloadContentType);
+
+        /// <summary>
+        /// Send a POST request to the specified Uri as an asynchronous operation
+        /// </summary>
+        /// <returns></returns>
+        public async Task<RestResult<Stream>> PatchAsStreamAsync() => await SendAsStreamAsync(PATCH, PayloadContent, PayloadContentType);
+
+        /// <summary>
+        /// Send a POST request to the specified Uri as a synchronous operation
+        /// </summary>
+        /// <returns></returns>
+        public RestResult<string> Patch() => PatchAsync().Result;
+
+        /// <summary>
+        /// Send a POST request to the specified Uri as a synchronous operation
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public RestResult<T> Patch<T>() where T : new() => PatchAsync<T>().Result;
+
+        /// <summary>
+        /// Send a POST request to the specified Uri as a synchronous operation
+        /// </summary>
+        /// <returns></returns>
+        public RestResult<byte[]> PatchAsByteArray() => PatchAsByteArrayAsync().Result;
+
+        /// <summary>
+        /// Send a POST request to the specified Uri as a synchronous operation
+        /// </summary>
+        /// <returns></returns>
+        public RestResult<Stream> PatchAsStream() => PatchAsStreamAsync().Result;
+
+        #endregion
+
         #region [ Send ]
 
         /// <summary>
