@@ -111,7 +111,9 @@ namespace RestClient
             result.CertificateCallback = callback;
             result.Credentials = Credentials;
             ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(callback);
+            this.CreateNewHttpClientInstance(result);
 
+            /**
             result.HttpClient = new HttpClient(new HttpClientHandler()
             {
                 Credentials = result.Credentials,
@@ -121,6 +123,7 @@ namespace RestClient
             {
                 Timeout = Properties.Timeout
             };
+            */
             return result;
         }
 
@@ -139,7 +142,8 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = credential();
-
+            this.CreateNewHttpClientInstance(result);
+            /**
             result.HttpClient = new HttpClient(new HttpClientHandler()
             {
                 Credentials = result.Credentials,
@@ -149,6 +153,7 @@ namespace RestClient
             {
                 Timeout = Properties.Timeout
             };
+            */
             return result;
         }
 
@@ -162,7 +167,9 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password);
+            this.CreateNewHttpClientInstance(result);
 
+            /**
             result.HttpClient = new HttpClient(new HttpClientHandler()
             {
                 Credentials = result.Credentials,
@@ -172,6 +179,7 @@ namespace RestClient
             {
                 Timeout = Properties.Timeout
             };
+            */
             return result;
         }
 
@@ -186,7 +194,9 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password, domain);
+            this.CreateNewHttpClientInstance(result);
 
+            /**
             result.HttpClient = new HttpClient(new HttpClientHandler()
             {
                 Credentials = result.Credentials,
@@ -196,6 +206,7 @@ namespace RestClient
             {
                 Timeout = Properties.Timeout
             };
+            **/
             return result;
         }
 
@@ -209,7 +220,9 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password);
+            this.CreateNewHttpClientInstance(result);
 
+            /**
             result.HttpClient = new HttpClient(new HttpClientHandler()
             {
                 Credentials = result.Credentials,
@@ -219,6 +232,7 @@ namespace RestClient
             {
                 Timeout = Properties.Timeout
             };
+            **/
             return result;
         }
 
@@ -233,7 +247,9 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password, domain);
+            this.CreateNewHttpClientInstance(result);
 
+            /**
             result.HttpClient = new HttpClient(new HttpClientHandler()
             {
                 Credentials = result.Credentials,
@@ -243,8 +259,28 @@ namespace RestClient
             {
                 Timeout = Properties.Timeout
             };
+            **/
             return result;
         }
+
+        #region [ Create New HttpClient Instance and set into HttpClient ]
+        /// <summary>
+        /// Create new HttpClient instance and set into result.HttpClient
+        /// </summary>
+        /// <param name="result"></param>
+        private void CreateNewHttpClientInstance(RestBuilder result)
+        {
+            result.HttpClient = new HttpClient(new HttpClientHandler()
+            {
+                Credentials = result.Credentials,
+                ClientCertificateOptions = Properties.CertificateOption,
+                ServerCertificateCustomValidationCallback = result.CertificateCallback
+            })
+            {
+                Timeout = Properties.Timeout
+            };
+        }
+        #endregion
 
         /// <summary>
         /// The Authorization header for an HTTP request
@@ -258,6 +294,11 @@ namespace RestClient
             return result;
         }
 
+        /// <summary>
+        /// The Authorization header for an HTTP request (This method will be removed)
+        /// </summary>
+        /// <param name="authentication"></param>
+        /// <returns></returns>
         [Obsolete("OnAuthentication: this method will be removed soon", false)]
         public RestBuilder OnAuthentication(Func<AuthenticationHeaderValue> authentication) => Authentication(authentication);
 
@@ -273,6 +314,11 @@ namespace RestClient
             return result;
         }
 
+        /// <summary>
+        /// The Authorization header for an HTTP request (This method will be removed)
+        /// </summary>
+        /// <param name="scheme"></param>
+        /// <returns></returns>
         [Obsolete("OnAuthentication: this method will be removed soon", false)]
         public RestBuilder OnAuthentication(string scheme) => Authentication(scheme);
 
@@ -289,6 +335,12 @@ namespace RestClient
             return result;
         }
 
+        /// <summary>
+        /// The Authorization header for an HTTP request (This method will be removed)
+        /// </summary>
+        /// <param name="scheme"></param>
+        /// <param name="parameter"></param>
+        /// <returns></returns>
         [Obsolete("OnAuthentication: this method will be removed soon", false)]
         public RestBuilder OnAuthentication(string scheme, string parameter) => Authentication(scheme, parameter);
 
