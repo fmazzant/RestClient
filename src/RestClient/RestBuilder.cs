@@ -111,16 +111,16 @@ namespace RestClient
             result.CertificateCallback = callback;
             result.Credentials = Credentials;
             ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(callback);
-            result.HttpClient = CreateNewInstanceOfHttpClient();
-            //result.HttpClient = new HttpClient(new HttpClientHandler()
-            //{
-            //    Credentials = result.Credentials,
-            //    ClientCertificateOptions = Properties.CertificateOption,
-            //    ServerCertificateCustomValidationCallback = result.CertificateCallback
-            //})
-            //{
-            //    Timeout = Properties.Timeout
-            //};
+
+            result.HttpClient = new HttpClient(new HttpClientHandler()
+            {
+                Credentials = result.Credentials,
+                ClientCertificateOptions = Properties.CertificateOption,
+                ServerCertificateCustomValidationCallback = result.CertificateCallback
+            })
+            {
+                Timeout = Properties.Timeout
+            };
             return result;
         }
 
@@ -139,16 +139,16 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = credential();
-            result.HttpClient = CreateNewInstanceOfHttpClient();
-            //result.HttpClient = new HttpClient(new HttpClientHandler()
-            //{
-            //    Credentials = result.Credentials,
-            //    ClientCertificateOptions = Properties.CertificateOption,
-            //    ServerCertificateCustomValidationCallback = result.CertificateCallback
-            //})
-            //{
-            //    Timeout = Properties.Timeout
-            //};
+
+            result.HttpClient = new HttpClient(new HttpClientHandler()
+            {
+                Credentials = result.Credentials,
+                ClientCertificateOptions = Properties.CertificateOption,
+                ServerCertificateCustomValidationCallback = result.CertificateCallback
+            })
+            {
+                Timeout = Properties.Timeout
+            };
             return result;
         }
 
@@ -162,16 +162,16 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password);
-            result.HttpClient = CreateNewInstanceOfHttpClient();
-            //result.HttpClient = new HttpClient(new HttpClientHandler()
-            //{
-            //    Credentials = result.Credentials,
-            //    ClientCertificateOptions = Properties.CertificateOption,
-            //    ServerCertificateCustomValidationCallback = result.CertificateCallback
-            //})
-            //{
-            //    Timeout = Properties.Timeout
-            //};
+
+            result.HttpClient = new HttpClient(new HttpClientHandler()
+            {
+                Credentials = result.Credentials,
+                ClientCertificateOptions = Properties.CertificateOption,
+                ServerCertificateCustomValidationCallback = result.CertificateCallback
+            })
+            {
+                Timeout = Properties.Timeout
+            };
             return result;
         }
 
@@ -186,16 +186,16 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password, domain);
-            result.HttpClient = CreateNewInstanceOfHttpClient();
-            //result.HttpClient = new HttpClient(new HttpClientHandler()
-            //{
-            //    Credentials = result.Credentials,
-            //    ClientCertificateOptions = Properties.CertificateOption,
-            //    ServerCertificateCustomValidationCallback = result.CertificateCallback
-            //})
-            //{
-            //    Timeout = Properties.Timeout
-            //};
+
+            result.HttpClient = new HttpClient(new HttpClientHandler()
+            {
+                Credentials = result.Credentials,
+                ClientCertificateOptions = Properties.CertificateOption,
+                ServerCertificateCustomValidationCallback = result.CertificateCallback
+            })
+            {
+                Timeout = Properties.Timeout
+            };
             return result;
         }
 
@@ -209,16 +209,16 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password);
-            result.HttpClient = CreateNewInstanceOfHttpClient();
-            //result.HttpClient = new HttpClient(new HttpClientHandler()
-            //{
-            //    Credentials = result.Credentials,
-            //    ClientCertificateOptions = Properties.CertificateOption,
-            //    ServerCertificateCustomValidationCallback = result.CertificateCallback
-            //})
-            //{
-            //    Timeout = Properties.Timeout
-            //};
+
+            result.HttpClient = new HttpClient(new HttpClientHandler()
+            {
+                Credentials = result.Credentials,
+                ClientCertificateOptions = Properties.CertificateOption,
+                ServerCertificateCustomValidationCallback = result.CertificateCallback
+            })
+            {
+                Timeout = Properties.Timeout
+            };
             return result;
         }
 
@@ -233,16 +233,16 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password, domain);
-  
-            //result.HttpClient = new HttpClient(new HttpClientHandler()
-            //{
-            //    Credentials = result.Credentials,
-            //    ClientCertificateOptions = Properties.CertificateOption,
-            //    ServerCertificateCustomValidationCallback = result.CertificateCallback
-            //})
-            //{
-            //    Timeout = Properties.Timeout
-            //};
+
+            result.HttpClient = new HttpClient(new HttpClientHandler()
+            {
+                Credentials = result.Credentials,
+                ClientCertificateOptions = Properties.CertificateOption,
+                ServerCertificateCustomValidationCallback = result.CertificateCallback
+            })
+            {
+                Timeout = Properties.Timeout
+            };
             return result;
         }
 
@@ -692,24 +692,6 @@ namespace RestClient
             result.OnExceptionAction = exception;
             return result;
         }
-
-        #region [ HttpClient Builder ]
-
-        /// <summary>
-        /// Create new instance of HttpClient
-        /// </summary>
-        /// <returns></returns>
-        private HttpClient CreateNewInstanceOfHttpClient() => new HttpClient(new HttpClientHandler()
-        {
-            Credentials = Credentials,
-            ClientCertificateOptions = Properties.CertificateOption,
-            ServerCertificateCustomValidationCallback = CertificateCallback
-        })
-        {
-            Timeout = Properties.Timeout
-        };
-
-        #endregion
 
         #region [ Get ]
         /// <summary>
