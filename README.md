@@ -148,7 +148,7 @@ RestClient uses .Json() to serialize an object into json.
 var result = rest
     .Url("[URL]")
     .Json()
-    .Get<MyObject>();
+    .Get<ResponseObject>();
 ```
 
 RestClient uses .Xml() to serialize an object into xml.
@@ -157,7 +157,7 @@ RestClient uses .Xml() to serialize an object into xml.
 var result = rest
     .Url("[URL]")
     .Xml()
-    .Get<MyObject>();
+    .Get<ResponseObject>();
 ```
 
 ### Custom Serialization
@@ -186,7 +186,7 @@ Now, we can use MyCustomSerializer like this:
 var result = rest
     .Url("[URL]")
     .CustomSerializer(new MyCustomSerializer { })
-    .Get<MyObject>();
+    .Get<ResponseObject>();
 ```
 
 ### Get
