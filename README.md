@@ -43,6 +43,10 @@ It's not recommended to reinvent the wheel by implementing custom certificate ch
 TLS libraries provide built-in certificate validation functions that should be used.
 
 ```c#
+List<string> validCerts = new List<string>(){
+    "CERT STRING"
+};
+
 var result = rest
     .CertificateValidation((sender, certificate, chain, errors) =>
     {
