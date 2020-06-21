@@ -91,9 +91,14 @@ namespace RestClient
         /// </summary>
         internal RestBuilder()
         {
-            ServicePointManager.ServerCertificateValidationCallback = (object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) 
+            ServicePointManager.ServerCertificateValidationCallback = (object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
                 => true;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        Func<object, X509Certificate, X509Chain, SslPolicyErrors, bool> CertificateCallback;
 
         /// <summary>
         /// The callback to validate a server certificate
@@ -103,9 +108,30 @@ namespace RestClient
         public RestBuilder CertificateValidation(Func<object, X509Certificate, X509Chain, SslPolicyErrors, bool> callback)
         {
             var result = (RestBuilder)this.MemberwiseClone();
+            result.CertificateCallback = callback;
+            result.Credentials = Credentials;
             ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(callback);
+            this.CreateNewHttpClientInstance(result);
+
+            /**
+            result.HttpClient = new HttpClient(new HttpClientHandler()
+            {
+                Credentials = result.Credentials,
+                ClientCertificateOptions = Properties.CertificateOption,
+                ServerCertificateCustomValidationCallback = result.CertificateCallback
+            })
+            {
+                Timeout = Properties.Timeout
+            };
+            */
             return result;
         }
+
+        /// <summary>
+        /// Current Credentials
+        /// </summary>
+        ICredentials Credentials { get; set; }
+            = null;
 
         /// <summary>
         /// Authentication information used by this func
@@ -115,12 +141,19 @@ namespace RestClient
         public RestBuilder NetworkCredential(Func<NetworkCredential> credential)
         {
             var result = (RestBuilder)this.MemberwiseClone();
+            result.Credentials = credential();
+            this.CreateNewHttpClientInstance(result);
+            /**
             result.HttpClient = new HttpClient(new HttpClientHandler()
             {
-                Credentials = credential()
-            });
-            if (TimeOut != TimeSpan.Zero)
-                result.HttpClient.Timeout = TimeOut;
+                Credentials = result.Credentials,
+                ClientCertificateOptions = Properties.CertificateOption,
+                ServerCertificateCustomValidationCallback = result.CertificateCallback
+            })
+            {
+                Timeout = Properties.Timeout
+            };
+            */
             return result;
         }
 
@@ -133,12 +166,20 @@ namespace RestClient
         public RestBuilder NetworkCredential(string username, string password)
         {
             var result = (RestBuilder)this.MemberwiseClone();
+            result.Credentials = new NetworkCredential(username, password);
+            this.CreateNewHttpClientInstance(result);
+
+            /**
             result.HttpClient = new HttpClient(new HttpClientHandler()
             {
-                Credentials = new NetworkCredential(username, password)
-            });
-            if (TimeOut != TimeSpan.Zero)
-                result.HttpClient.Timeout = TimeOut;
+                Credentials = result.Credentials,
+                ClientCertificateOptions = Properties.CertificateOption,
+                ServerCertificateCustomValidationCallback = result.CertificateCallback
+            })
+            {
+                Timeout = Properties.Timeout
+            };
+            */
             return result;
         }
 
@@ -152,12 +193,20 @@ namespace RestClient
         public RestBuilder NetworkCredential(string username, string password, string domain)
         {
             var result = (RestBuilder)this.MemberwiseClone();
+            result.Credentials = new NetworkCredential(username, password, domain);
+            this.CreateNewHttpClientInstance(result);
+
+            /**
             result.HttpClient = new HttpClient(new HttpClientHandler()
             {
-                Credentials = new NetworkCredential(username, password, domain)
-            });
-            if (TimeOut != TimeSpan.Zero)
-                result.HttpClient.Timeout = TimeOut;
+                Credentials = result.Credentials,
+                ClientCertificateOptions = Properties.CertificateOption,
+                ServerCertificateCustomValidationCallback = result.CertificateCallback
+            })
+            {
+                Timeout = Properties.Timeout
+            };
+            **/
             return result;
         }
 
@@ -170,12 +219,20 @@ namespace RestClient
         public RestBuilder NetworkCredential(string username, System.Security.SecureString password)
         {
             var result = (RestBuilder)this.MemberwiseClone();
+            result.Credentials = new NetworkCredential(username, password);
+            this.CreateNewHttpClientInstance(result);
+
+            /**
             result.HttpClient = new HttpClient(new HttpClientHandler()
             {
-                Credentials = new NetworkCredential(username, password)
-            });
-            if (TimeOut != TimeSpan.Zero)
-                result.HttpClient.Timeout = TimeOut;
+                Credentials = result.Credentials,
+                ClientCertificateOptions = Properties.CertificateOption,
+                ServerCertificateCustomValidationCallback = result.CertificateCallback
+            })
+            {
+                Timeout = Properties.Timeout
+            };
+            **/
             return result;
         }
 
@@ -189,21 +246,48 @@ namespace RestClient
         public RestBuilder NetworkCredential(string username, System.Security.SecureString password, string domain)
         {
             var result = (RestBuilder)this.MemberwiseClone();
+            result.Credentials = new NetworkCredential(username, password, domain);
+            this.CreateNewHttpClientInstance(result);
+
+            /**
             result.HttpClient = new HttpClient(new HttpClientHandler()
             {
-                Credentials = new NetworkCredential(username, password, domain)
-            });
-            if (TimeOut != TimeSpan.Zero)
-                result.HttpClient.Timeout = TimeOut;
+                Credentials = result.Credentials,
+                ClientCertificateOptions = Properties.CertificateOption,
+                ServerCertificateCustomValidationCallback = result.CertificateCallback
+            })
+            {
+                Timeout = Properties.Timeout
+            };
+            **/
             return result;
         }
+
+        #region [ Create New HttpClient Instance and set into HttpClient ]
+        /// <summary>
+        /// Create new HttpClient instance and set into result.HttpClient
+        /// </summary>
+        /// <param name="result"></param>
+        private void CreateNewHttpClientInstance(RestBuilder result)
+        {
+            result.HttpClient = new HttpClient(new HttpClientHandler()
+            {
+                Credentials = result.Credentials,
+                ClientCertificateOptions = Properties.CertificateOption,
+                ServerCertificateCustomValidationCallback = result.CertificateCallback
+            })
+            {
+                Timeout = Properties.Timeout
+            };
+        }
+        #endregion
 
         /// <summary>
         /// The Authorization header for an HTTP request
         /// </summary>
         /// <param name="authentication"></param>
         /// <returns></returns>
-        public RestBuilder OnAuthentication(Func<AuthenticationHeaderValue> authentication)
+        public RestBuilder Authentication(Func<AuthenticationHeaderValue> authentication)
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.HttpClient.DefaultRequestHeaders.Authorization = authentication();
@@ -211,11 +295,19 @@ namespace RestClient
         }
 
         /// <summary>
+        /// The Authorization header for an HTTP request (This method will be removed)
+        /// </summary>
+        /// <param name="authentication"></param>
+        /// <returns></returns>
+        [Obsolete("OnAuthentication: this method will be removed soon", false)]
+        public RestBuilder OnAuthentication(Func<AuthenticationHeaderValue> authentication) => Authentication(authentication);
+
+        /// <summary>
         /// The Authorization header for an HTTP request
         /// </summary>
         /// <param name="scheme"></param>
         /// <returns></returns>
-        public RestBuilder OnAuthentication(string scheme)
+        public RestBuilder Authentication(string scheme)
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(scheme);
@@ -223,12 +315,20 @@ namespace RestClient
         }
 
         /// <summary>
+        /// The Authorization header for an HTTP request (This method will be removed)
+        /// </summary>
+        /// <param name="scheme"></param>
+        /// <returns></returns>
+        [Obsolete("OnAuthentication: this method will be removed soon", false)]
+        public RestBuilder OnAuthentication(string scheme) => Authentication(scheme);
+
+        /// <summary>
         /// The Authorization header for an HTTP request
         /// </summary>
         /// <param name="scheme"></param>
         /// <param name="parameter"></param>
         /// <returns></returns>
-        public RestBuilder OnAuthentication(string scheme, string parameter)
+        public RestBuilder Authentication(string scheme, string parameter)
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(scheme, parameter);
@@ -236,9 +336,13 @@ namespace RestClient
         }
 
         /// <summary>
-        /// Timeout
+        /// The Authorization header for an HTTP request (This method will be removed)
         /// </summary>
-        TimeSpan TimeOut = TimeSpan.Zero;
+        /// <param name="scheme"></param>
+        /// <param name="parameter"></param>
+        /// <returns></returns>
+        [Obsolete("OnAuthentication: this method will be removed soon", false)]
+        public RestBuilder OnAuthentication(string scheme, string parameter) => Authentication(scheme, parameter);
 
         /// <summary>
         /// Sets the timespan to wait before the request times out
@@ -249,7 +353,7 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.HttpClient.Timeout
-                = result.TimeOut
+                = result.Properties.Timeout
                 = timeOut;
             return result;
         }
@@ -263,7 +367,7 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.HttpClient.Timeout
-                = result.TimeOut
+                = result.Properties.Timeout
                 = TimeSpan.FromMilliseconds(milliseconds);
             return result;
         }
@@ -404,9 +508,11 @@ namespace RestClient
 
         /// <summary>
         /// Sets log, true is enabled, when false is disabled.
+        /// Currently this function is temporary. 
         /// </summary>
         /// <param name="logger"></param>
         /// <returns></returns>
+        [Obsolete("Currently this function is temporary!", false)]
         public RestBuilder Log(bool logger = true)
         {
             var result = (RestBuilder)this.MemberwiseClone();
@@ -487,6 +593,53 @@ namespace RestClient
             var result = (RestBuilder)this.MemberwiseClone();
             result.PayloadContent = payload;
             result.PayloadContentType = typeof(T);
+            return result;
+        }
+
+        /// <summary>
+        /// Defines is enabled x-form-urlencoded
+        /// </summary>
+        bool IsEnabledFormUrlEncoded { get; set; } = false;
+
+        /// <summary>
+        /// Params for x-www-form-urlencoded
+        /// </summary>
+        Dictionary<string, string> FormUrlEncodedKeyValues { get; set; }
+
+        /// <summary>
+        /// Enable form Url Encoding
+        /// </summary>
+        /// <param name="enableFormUrlEncoded"></param>
+        /// <returns></returns>
+        public RestBuilder EnableFormUrlEncoded(bool enableFormUrlEncoded = true)
+        {
+            var result = (RestBuilder)this.MemberwiseClone();
+            result.IsEnabledFormUrlEncoded = enableFormUrlEncoded;
+            return result;
+        }
+
+        /// <summary>
+        /// x-www-form-urlencoded key values
+        /// </summary>
+        /// <param name="keyValues"></param>
+        /// <returns></returns>
+        public RestBuilder FormUrlEncoded(Dictionary<string, string> keyValues)
+        {
+            var result = (RestBuilder)this.MemberwiseClone();
+            result.FormUrlEncodedKeyValues = keyValues;
+            return result;
+        }
+
+        /// <summary>
+        /// x-www-form-urlencoded key values
+        /// </summary>
+        /// <param name="kesValues"></param>
+        /// <returns></returns>
+        public RestBuilder FormUrlEncoded(Action<Dictionary<string, string>> kesValues)
+        {
+            var result = (RestBuilder)this.MemberwiseClone();
+            result.FormUrlEncodedKeyValues = new Dictionary<string, string>();
+            kesValues(result.FormUrlEncodedKeyValues);
             return result;
         }
 
@@ -850,7 +1003,12 @@ namespace RestClient
 
                 if (Logger) Console.WriteLine(url);
 
-                StartEventArgs startEventArgs = new StartEventArgs();
+                StartEventArgs startEventArgs = new StartEventArgs()
+                {
+                    Cancel = false,
+                    Payload = payloadContent,
+                    Url = url
+                };
                 OnStartAction?.Invoke(startEventArgs);
                 if (startEventArgs.Cancel) return null;
 
@@ -858,20 +1016,28 @@ namespace RestClient
                 System.Threading.CancellationToken cancellationToken = new System.Threading.CancellationToken();
                 HttpResponseMessage responseMessage = null;// await HttpClient.SendAsync(request);
 
-                if (payloadContent != null)
+                if (!IsEnabledFormUrlEncoded)
                 {
-                    string json = Serializer.SerializeObject(payloadContent, payloadContentType);
-                    HttpContent hc = new StringContent(json, Encoding.UTF8, Serializer.MediaTypeAsString);
-                    request.Content = hc;
-
-                    using (HttpContentStream streamContent = new HttpContentStream(request.Content))
+                    if (payloadContent != null)
                     {
-                        streamContent.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
-                        responseMessage = await streamContent.WriteStringAsStreamAsync(HttpClient, request, cancellationToken);
+                        string json = Serializer.SerializeObject(payloadContent, payloadContentType);
+                        HttpContent hc = new StringContent(json, Encoding.UTF8, Serializer.MediaTypeAsString);
+                        request.Content = hc;
+
+                        using (HttpContentStream streamContent = new HttpContentStream(request.Content))
+                        {
+                            streamContent.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
+                            responseMessage = await streamContent.WriteStringAsStreamAsync(HttpClient, request, cancellationToken);
+                        }
+                    }
+                    else
+                    {
+                        responseMessage = HttpClient.SendAsync(request).Result;
                     }
                 }
                 else
                 {
+                    request.Content = new FormUrlEncodedContent(FormUrlEncodedKeyValues);
                     responseMessage = HttpClient.SendAsync(request).Result;
                 }
 
@@ -940,20 +1106,28 @@ namespace RestClient
                 HttpResponseMessage responseMessage = null;// await HttpClient.SendAsync(request);
                 System.Threading.CancellationToken cancellationToken = new System.Threading.CancellationToken();
 
-                if (payloadContent != null)
+                if (!IsEnabledFormUrlEncoded)
                 {
-                    string json = Serializer.SerializeObject(payloadContent, payloadContentType);
-                    HttpContent hc = new StringContent(json, Encoding.UTF8, Serializer.MediaTypeAsString);
-                    request.Content = hc;
-
-                    using (HttpContentStream streamContent = new HttpContentStream(request.Content))
+                    if (payloadContent != null)
                     {
-                        streamContent.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
-                        responseMessage = await streamContent.WriteStringAsStreamAsync(HttpClient, request, cancellationToken);
+                        string json = Serializer.SerializeObject(payloadContent, payloadContentType);
+                        HttpContent hc = new StringContent(json, Encoding.UTF8, Serializer.MediaTypeAsString);
+                        request.Content = hc;
+
+                        using (HttpContentStream streamContent = new HttpContentStream(request.Content))
+                        {
+                            streamContent.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
+                            responseMessage = await streamContent.WriteStringAsStreamAsync(HttpClient, request, cancellationToken);
+                        }
+                    }
+                    else
+                    {
+                        responseMessage = HttpClient.SendAsync(request).Result;
                     }
                 }
                 else
                 {
+                    request.Content = new FormUrlEncodedContent(FormUrlEncodedKeyValues);
                     responseMessage = HttpClient.SendAsync(request).Result;
                 }
 
@@ -1021,20 +1195,28 @@ namespace RestClient
                 System.Threading.CancellationToken cancellationToken = new System.Threading.CancellationToken();
                 HttpResponseMessage responseMessage = null;// await HttpClient.SendAsync(request);
 
-                if (payloadContent != null)
+                if (!IsEnabledFormUrlEncoded)
                 {
-                    string json = Serializer.SerializeObject(payloadContent, payloadContentType);
-                    HttpContent hc = new StringContent(json, Encoding.UTF8, Serializer.MediaTypeAsString);
-                    request.Content = hc;
-
-                    using (HttpContentStream streamContent = new HttpContentStream(request.Content))
+                    if (payloadContent != null)
                     {
-                        streamContent.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
-                        responseMessage = await streamContent.WriteStringAsStreamAsync(HttpClient, request, cancellationToken);
+                        string json = Serializer.SerializeObject(payloadContent, payloadContentType);
+                        HttpContent hc = new StringContent(json, Encoding.UTF8, Serializer.MediaTypeAsString);
+                        request.Content = hc;
+
+                        using (HttpContentStream streamContent = new HttpContentStream(request.Content))
+                        {
+                            streamContent.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
+                            responseMessage = await streamContent.WriteStringAsStreamAsync(HttpClient, request, cancellationToken);
+                        }
+                    }
+                    else
+                    {
+                        responseMessage = HttpClient.SendAsync(request).Result;
                     }
                 }
                 else
                 {
+                    request.Content = new FormUrlEncodedContent(FormUrlEncodedKeyValues);
                     responseMessage = HttpClient.SendAsync(request).Result;
                 }
 
@@ -1104,20 +1286,28 @@ namespace RestClient
                 HttpResponseMessage responseMessage = null;// await HttpClient.SendAsync(request);
                 System.Threading.CancellationToken cancellationToken = new System.Threading.CancellationToken();
 
-                if (payloadContent != null)
+                if (!IsEnabledFormUrlEncoded)
                 {
-                    string json = Serializer.SerializeObject(payloadContent, payloadContentType);
-                    HttpContent hc = new StringContent(json, Encoding.UTF8, Serializer.MediaTypeAsString);
-                    request.Content = hc;
-
-                    using (HttpContentStream streamContent = new HttpContentStream(request.Content))
+                    if (payloadContent != null)
                     {
-                        streamContent.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
-                        responseMessage = await streamContent.WriteStringAsStreamAsync(HttpClient, request, cancellationToken);
+                        string json = Serializer.SerializeObject(payloadContent, payloadContentType);
+                        HttpContent hc = new StringContent(json, Encoding.UTF8, Serializer.MediaTypeAsString);
+                        request.Content = hc;
+
+                        using (HttpContentStream streamContent = new HttpContentStream(request.Content))
+                        {
+                            streamContent.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
+                            responseMessage = await streamContent.WriteStringAsStreamAsync(HttpClient, request, cancellationToken);
+                        }
+                    }
+                    else
+                    {
+                        responseMessage = HttpClient.SendAsync(request).Result;
                     }
                 }
                 else
                 {
+                    request.Content = new FormUrlEncodedContent(FormUrlEncodedKeyValues);
                     responseMessage = HttpClient.SendAsync(request).Result;
                 }
 
