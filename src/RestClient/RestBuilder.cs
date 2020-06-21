@@ -974,54 +974,108 @@ namespace RestClient
         HttpMethod PATCH = new HttpMethod("PATCH");
 
         /// <summary>
-        /// Send a POST request to the specified Uri as an asynchronous operation
+        /// Send a PATCH request to the specified Uri as an asynchronous operation
         /// </summary>
         /// <returns></returns>
         public async Task<RestResult<string>> PatchAsync() => await SendAsStringAsync(PATCH, PayloadContent, PayloadContentType);
 
         /// <summary>
-        /// Send a POST request to the specified Uri as an asynchronous operation
+        /// Send a PATCH request to the specified Uri as an asynchronous operation
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public async Task<RestResult<T>> PatchAsync<T>() where T : new() => await SendAsync<T>(PATCH, PayloadContent, PayloadContentType);
 
         /// <summary>
-        /// Send a POST request to the specified Uri as an asynchronous operation
+        /// Send a PATCH request to the specified Uri as an asynchronous operation
         /// </summary>
         /// <returns></returns>
         public async Task<RestResult<byte[]>> PatchAsByteArrayAsync() => await SendAsByteArrayAsync(PATCH, PayloadContent, PayloadContentType);
 
         /// <summary>
-        /// Send a POST request to the specified Uri as an asynchronous operation
+        /// Send a PATCH request to the specified Uri as an asynchronous operation
         /// </summary>
         /// <returns></returns>
         public async Task<RestResult<Stream>> PatchAsStreamAsync() => await SendAsStreamAsync(PATCH, PayloadContent, PayloadContentType);
 
         /// <summary>
-        /// Send a POST request to the specified Uri as a synchronous operation
+        /// Send a PATCH request to the specified Uri as a synchronous operation
         /// </summary>
         /// <returns></returns>
         public RestResult<string> Patch() => PatchAsync().Result;
 
         /// <summary>
-        /// Send a POST request to the specified Uri as a synchronous operation
+        /// Send a PATCH request to the specified Uri as a synchronous operation
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public RestResult<T> Patch<T>() where T : new() => PatchAsync<T>().Result;
 
         /// <summary>
-        /// Send a POST request to the specified Uri as a synchronous operation
+        /// Send a PATCH request to the specified Uri as a synchronous operation
         /// </summary>
         /// <returns></returns>
         public RestResult<byte[]> PatchAsByteArray() => PatchAsByteArrayAsync().Result;
 
         /// <summary>
-        /// Send a POST request to the specified Uri as a synchronous operation
+        /// Send a PATCH request to the specified Uri as a synchronous operation
         /// </summary>
         /// <returns></returns>
         public RestResult<Stream> PatchAsStream() => PatchAsStreamAsync().Result;
+
+        #endregion
+
+        #region [ CustomCall ]
+
+        /// <summary>
+        /// Send a CUSTOM CALL request to the specified Uri as an asynchronous operation
+        /// </summary>
+        /// <returns></returns>
+        public async Task<RestResult<string>> CustomCallAsync(HttpMethod method) => await SendAsStringAsync(method, PayloadContent, PayloadContentType);
+
+        /// <summary>
+        /// Send a CUSTOM CALL request to the specified Uri as an asynchronous operation
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public async Task<RestResult<T>> CustomCallAsync<T>(HttpMethod method) where T : new() => await SendAsync<T>(method, PayloadContent, PayloadContentType);
+
+        /// <summary>
+        /// Send a CUSTOM CALL request to the specified Uri as an asynchronous operation
+        /// </summary>
+        /// <returns></returns>
+        public async Task<RestResult<byte[]>> CustomCallAsByteArrayAsync(HttpMethod method) => await SendAsByteArrayAsync(method, PayloadContent, PayloadContentType);
+
+        /// <summary>
+        /// Send a CUSTOM CALL request to the specified Uri as an asynchronous operation
+        /// </summary>
+        /// <returns></returns>
+        public async Task<RestResult<Stream>> CustomCallAsStreamAsync(HttpMethod method) => await SendAsStreamAsync(method, PayloadContent, PayloadContentType);
+
+        /// <summary>
+        /// Send a CUSTOM CALL request to the specified Uri as a synchronous operation
+        /// </summary>
+        /// <returns></returns>
+        public RestResult<string> CustomCall(HttpMethod method) => CustomCallAsync(method).Result;
+
+        /// <summary>
+        /// Send a CUSTOM CALL request to the specified Uri as a synchronous operation
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public RestResult<T> CustomCall<T>(HttpMethod method) where T : new() => CustomCallAsync<T>(method).Result;
+
+        /// <summary>
+        /// Send a CUSTOM CALL request to the specified Uri as a synchronous operation
+        /// </summary>
+        /// <returns></returns>
+        public RestResult<byte[]> CustomCallAsByteArray(HttpMethod method) => CustomCallAsByteArrayAsync(method).Result;
+
+        /// <summary>
+        /// Send a CUSTOM CALL request to the specified Uri as a synchronous operation
+        /// </summary>
+        /// <returns></returns>
+        public RestResult<Stream> CustomCallAsStream(HttpMethod method) => CustomCallAsStreamAsync(method).Result;
 
         #endregion
 
