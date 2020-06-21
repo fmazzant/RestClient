@@ -2,7 +2,7 @@
 
 RestClient library provides a simple connector to consume REST services.
 
-To use behaviors in your project, add the Mafe.RestClient NuGet package to your project.
+To use it in your project, add the Mafe.RestClient NuGet package to your project.
 
 [![Nuget](https://img.shields.io/nuget/v/Mafe.RestClient?style=flat-square)](https://www.nuget.org/packages/Mafe.RestClient)
 [![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/Mafe.RestClient?style=flat-square)](https://www.nuget.org/packages/Mafe.RestClient)
@@ -12,18 +12,18 @@ To use behaviors in your project, add the Mafe.RestClient NuGet package to your 
 The goal of RestClient is to enable developers to easily connect to any server in a really easy way. 
 Just define your Data Transfer Object (Dto) and start playing with the client!
 
-That may look something like this and use Build() method to create a RestBuilder from Rest:
+Use Build() method to create a RestBuilder from Rest:
 
 ```c#
 var rest = Rest.Build();
 ```
 
-With RestBuilder we can create a simply "Get" call:
+To create a simple get call, just do like this:
 
 ```c#
 var result = rest.Url("[URL]").Get();
 ```
-or we can use GetAsync() method :
+or we can use GetAsync() method:
 
 ```c#
 var result = await rest.Url("[URL]").GetAsync();
@@ -44,6 +44,10 @@ It's not recommended to reinvent the wheel by implementing custom certificate ch
 TLS libraries provide built-in certificate validation functions that should be used.
 
 ```c#
+List<string> validCerts = new List<string>() {
+    "CERT STRING"
+};
+
 var result = rest
     .CertificateValidation((sender, certificate, chain, errors) =>
     {
@@ -67,7 +71,7 @@ If an authenticated user has a bearer token's access_token or refresh_token that
 
 ```c#
 var result = rest
-    .OnAuthentication(() => new AuthenticationHeaderValue("Bearer", "[Token]"))
+    .Authentication(() => new AuthenticationHeaderValue("Bearer", "[Token]"))
     .Url("[URL]")
     .Get();
 ```
@@ -82,7 +86,7 @@ To refresh a token, use "RefreshTokenInvoke" automatically.
 ```c#
 var url = "[URL]";
 var result = rest
-    .OnAuthentication(() => new AuthenticationHeaderValue("Bearer", "[Token]"))
+    .Authentication(() => new AuthenticationHeaderValue("Bearer", "[Token]"))
     .RefreshToken(true)
     .RefreshTokenInvoke(async () =>
     {
@@ -124,7 +128,7 @@ var result = rest
 
 ### Headers
 
-The Headers collection contains the protocol headers associated with the request. The .Header((h)=>{}) method allows to add the list of key.
+The Headers collection contains the protocol headers associated with the request. The Header((h)=>{}) method allows you to add the list of keys.
 
 ```c#
 var result = rest
@@ -138,14 +142,14 @@ var result = rest
 
 ### Serialization
 
-Two types of serialization that are supported by RestClient: Xml and Json, but it is possible implemetate ISerializerContent to customize the serialization.
+Two types of serialization are supported by RestClient: Xml and Json, but it is possible to implementate ISerializerContent to customize the serialization.
 RestClient uses .Json() to serialize an object into json.
 
 ```c#
 var result = rest
     .Url("[URL]")
     .Json()
-    .Get<MyObject>();
+    .Get<ResponseObject>();
 ```
 
 RestClient uses .Xml() to serialize an object into xml.
@@ -154,12 +158,12 @@ RestClient uses .Xml() to serialize an object into xml.
 var result = rest
     .Url("[URL]")
     .Xml()
-    .Get<MyObject>();
+    .Get<ResponseObject>();
 ```
 
 ### Custom Serialization
 
-Consider the code below to demonstrate custom Serialization by implementing the ISerializerContent interface:
+Below an example on how you can do a custom Serialization by implementing the ISerializerContent interface:
 
 ```c#
 public class MyCustomSerializer : ISerializerContent
@@ -177,18 +181,18 @@ public class MyCustomSerializer : ISerializerContent
     }
 }
 ```
-Now, we can use MyCustomSerializer how to explan the code below:
+Now, we can use MyCustomSerializer like this:
 
 ```c#
 var result = rest
     .Url("[URL]")
     .CustomSerializer(new MyCustomSerializer { })
-    .Get<MyObject>();
+    .Get<ResponseObject>();
 ```
 
 ### Get
 
-GET is used to request data from a specified resource and GET is one of the most common HTTP methods.
+GET is one of the most common HTTP methods and GET is used to request data from a specified resource 
 
 ```c#
 var result = rest
@@ -209,11 +213,11 @@ Some other notes on GET requests:
 * GET requests have length restrictions
 * GET requests are only used to request data (not modify)
 
-Note that the query string (name/value pairs) is sent in the URL of a GET request:
+Note that the query string (name/value pairs) is sent in the URL of a GET request.
 
 ### Parameters as query string 
 
-In some case we need to use arguments as query string. We can use the method Parameter(key, value) to resolve it, look code below:
+In some cases we need to use arguments as query string. We can use the method Parameter(key, value) to resolve it like this:
 
 ```c#
 var result = rest
@@ -242,9 +246,7 @@ var result = await rest
     .Payload(new Object{})
     .PostAsync<ResponseObject>();
 ```
-POST is one of the most common HTTP methods.
-
-Some other notes on POST requests:
+Post is another common http method, wich is used to:
 
 * POST requests are never cached
 * POST requests do not remain in the browser history
@@ -287,7 +289,7 @@ var result = await rest
 
 ### Payload
 
-A payload is the carrying capacity of a packet or other transmission data unit. RestClient uses .Playload<T>(obj) to set an object on request. 
+RestClient uses Playload<T>(obj) method to set an object on request: 
 
 ```c#
 var result = rest
@@ -303,9 +305,33 @@ var result = rest
     .Put<ResponseObject>();
 ```
 
+### Form Url Encoded (application/x-www-form-urlencoded)
+
+When necessary we can use the request as a form-url-encoded. To use it we need to enabled it, like this:
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .EnableFormUrlEncoded(true)
+```
+
+and then we can pass the parameters as a dictionary:
+
+```c#
+ var params = new Dictionary<string, string>();
+ params.Add("key1", "value1");
+ params.Add("key2", "value2");
+
+var result = rest
+    .Url("[URL]")
+    .EnableFormUrlEncoded(true)
+    .FormUrlEncoded(params)
+    .Post();
+```
+
 ### OnUploadProgress
 
-OnUploadProgress occurs when the request is running and the data is traveling outside. It is allow todo somethings, get a percentage of upload for example.
+OnUploadProgress occurs when the request is running and the data is going out. We can get a percentage of the data being uploaded like this:
 
 ```c#
 var result = rest
@@ -320,8 +346,7 @@ var result = rest
 
 ### OnDownloadProgress
 
-OnDownloadProgress occurs when the response is running and the data is traveling inside.  It is allow todo somethings, get a percentage of download for example.
-
+OnDownloadProgress occurs when the response is running and the data is coming in. We can get a percentage of the data being downloading like this:
 ```c#
 var result = rest
     .Url("[URL]")
@@ -355,8 +380,7 @@ var result = rest
 
 ### OnStart
 
-OnStart occurs when the request is starting and it is allow todo somethings. 
-Cancelling request for example.
+OnStart is an event that triggers when the request starts.
 
 ```c#
 var result = rest
@@ -369,27 +393,13 @@ var result = rest
 ```
 ### OnPreResult
 
-OnPreResult occurs when the request is completing but the request is not completed. 
+OnPreResult occurs when the request is completing but  still hasn't completed yet. 
 When OnPreResult is raises we can todo somethings, for example  get and use the result of request.
 
 ```c#
 var result = rest
     .Url("[URL]")
     .OnPreResult((e) => { 
-        DoSomethings(e); 
-    })
-    .Payload(new BigObject{})
-    .Post<ResponseObject>();
-```
-
-### OnCompleted
-
-OnCompleted occurs when the request is completed. 
-
-```c#
-var result = rest
-    .Url("[URL]")
-    .OnCompleted((e) => { 
         DoSomethings(e); 
     })
     .Payload(new BigObject{})
@@ -410,9 +420,24 @@ var result = rest
     .Post<ResponseObject>();
 ```
 
+### OnCompleted
+
+OnCompleted occurs when the request is completed. 
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .OnCompleted((e) => { 
+        DoSomethings(e); 
+    })
+    .Payload(new BigObject{})
+    .Post<ResponseObject>();
+```
+
 ### Complete code example
 
-Consider the code below to demonstrate a complete code example. RestClient allows to create a flexible and robust network layer and it is very easy to use.
+RestClient allows to create a flexible and robust network layer and it is very easy to use.
+Below you find a complete code demostration a complete code example. 
 
 ```c#
 
@@ -430,7 +455,7 @@ Consider the code below to demonstrate a complete code example. RestClient allow
     
     public RestBuilder RootAuthentication() 
         => Root()
-             .OnAuthentication(() => new AuthenticationHeaderValue("Bearer", "[Token]"))
+             .Authentication(() => new AuthenticationHeaderValue("Bearer", "[Token]"))
              .RefreshToken()
              .RefreshTokenInvoke(async () => await Refresh(new RefreshRequest { }));
     
@@ -445,25 +470,30 @@ Consider the code below to demonstrate a complete code example. RestClient allow
     
     //requests
 
-    public async Task<RestResult<LoginResponse>> Login(LoginRequest request) 
+    public async Task<RestResult<LoginResponse>> PostLogin(LoginRequest request) 
         => await UsersRoot()
             .Command("/Login") //[URL]/Users/Login 
             .Payload(request)
             .PostAsync<LoginResponse>();
     
-    public async Task<RestResult<RefreshResponse>> Refresh(RefreshRequest request) 
+     public async Task<RestResult<RuleResponse>> GetRules() 
+        => await UsersRoot()
+            .Command("/Rules")
+            .GetAsync<RuleResponse>();
+    
+    public async Task<RestResult<RefreshResponse>> PostRefresh(RefreshRequest request) 
         => await UsersRoot()
             .Command("/Refresh")
             .Payload(request)
             .PostAsync<RefreshResponse>();
     
-    public async Task<RestResult<CountryResponse>> Countries(CountryRequest request) 
+    public async Task<RestResult<CountryResponse>> PostCountries(CountryRequest request) 
         => await DimensionsRoot()
             .Command("/Countries")
             .Payload(request)
             .PostAsync<CountryResponse>();
-    
-    public async Task<RestResult<EventDetailResponse>> EventDetail(EventDetailRequest request) 
+
+    public async Task<RestResult<EventDetailResponse>> PostEventDetail(EventDetailRequest request) 
         => await EventsRoot()
             .Command("/EventDetail")
             .Payload(request)
