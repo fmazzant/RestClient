@@ -1025,7 +1025,7 @@ namespace RestClient
 
         #endregion
 
-        #region [ CustomCall ]
+        #region [ Custom Call ]
 
         /// <summary>
         /// Send a CUSTOM CALL request to the specified Uri as an asynchronous operation
