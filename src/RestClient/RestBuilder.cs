@@ -93,7 +93,18 @@ namespace RestClient
         {
             ServicePointManager.ServerCertificateValidationCallback = (object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
                 => true;
+
+            var handler = new HttpClientHandler();
+            handler.ClientCertificateOptions = ClientCertificateOption.Manual;
+            handler.ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, cetChain, policyErrors)
+                => true;
+            HttpClient = new HttpClient(handler);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        Func<object, X509Certificate, X509Chain, SslPolicyErrors, bool> CertificateCallback;
 
         /// <summary>
         /// The callback to validate a server certificate
@@ -103,7 +114,21 @@ namespace RestClient
         public RestBuilder CertificateValidation(Func<object, X509Certificate, X509Chain, SslPolicyErrors, bool> callback)
         {
             var result = (RestBuilder)this.MemberwiseClone();
+            result.CertificateCallback = callback;
+            result.Credentials = Credentials;
             ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(callback);
+            result.HttpClient = new HttpClient(new HttpClientHandler()
+            {
+                Credentials = result.Credentials,
+                ClientCertificateOptions = ClientCertificateOption.Manual,
+                ServerCertificateCustomValidationCallback = result.CertificateCallback
+            })
+            {
+                Timeout = TimeOut
+            };
+
+
+
             return result;
         }
 
@@ -124,7 +149,9 @@ namespace RestClient
             result.Credentials = credential();
             result.HttpClient = new HttpClient(new HttpClientHandler()
             {
-                Credentials = result.Credentials
+                Credentials = result.Credentials,
+                ClientCertificateOptions = ClientCertificateOption.Manual,
+                ServerCertificateCustomValidationCallback = result.CertificateCallback
             })
             {
                 Timeout = TimeOut
@@ -144,7 +171,9 @@ namespace RestClient
             result.Credentials = new NetworkCredential(username, password);
             result.HttpClient = new HttpClient(new HttpClientHandler()
             {
-                Credentials = result.Credentials
+                Credentials = result.Credentials,
+                ClientCertificateOptions = ClientCertificateOption.Manual,
+                ServerCertificateCustomValidationCallback = result.CertificateCallback
             })
             {
                 Timeout = TimeOut
@@ -165,7 +194,9 @@ namespace RestClient
             result.Credentials = new NetworkCredential(username, password, domain);
             result.HttpClient = new HttpClient(new HttpClientHandler()
             {
-                Credentials = result.Credentials
+                Credentials = result.Credentials,
+                ClientCertificateOptions = ClientCertificateOption.Manual,
+                ServerCertificateCustomValidationCallback = result.CertificateCallback
             })
             {
                 Timeout = TimeOut
@@ -185,7 +216,9 @@ namespace RestClient
             result.Credentials = new NetworkCredential(username, password);
             result.HttpClient = new HttpClient(new HttpClientHandler()
             {
-                Credentials = result.Credentials
+                Credentials = result.Credentials,
+                ClientCertificateOptions = ClientCertificateOption.Manual,
+                ServerCertificateCustomValidationCallback = result.CertificateCallback
             })
             {
                 Timeout = TimeOut
@@ -206,7 +239,9 @@ namespace RestClient
             result.Credentials = new NetworkCredential(username, password, domain);
             result.HttpClient = new HttpClient(new HttpClientHandler()
             {
-                Credentials = result.Credentials
+                Credentials = result.Credentials,
+                ClientCertificateOptions = ClientCertificateOption.Manual,
+                ServerCertificateCustomValidationCallback = result.CertificateCallback
             })
             {
                 Timeout = TimeOut
