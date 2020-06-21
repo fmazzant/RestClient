@@ -46,10 +46,10 @@ namespace RestClient
         /// Specifies how client certificated are provided. Default is "Manual"
         /// </summary>
         public ClientCertificateOption CertificateOption { get; set; } = ClientCertificateOption.Manual;
-        
+
         /// <summary>
-        /// Specifies timeout
+        /// Specifies timeout. Default 100.000 milliseconds.
         /// </summary>
-        public TimeSpan Timeout { get; internal set; }
+        public TimeSpan Timeout { get; set; } = TimeSpan.FromMilliseconds(100000);
     }
 }
