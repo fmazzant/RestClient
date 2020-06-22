@@ -1207,7 +1207,12 @@ namespace RestClient
 
                 if (Logger) Console.WriteLine(url);
 
-                StartEventArgs startEventArgs = new StartEventArgs();
+                StartEventArgs startEventArgs = new StartEventArgs()
+                {
+                    Cancel = false,
+                    Payload = payloadContent,
+                    Url = url
+                };
                 OnStartAction?.Invoke(startEventArgs);
                 if (startEventArgs.Cancel) return null;
 
@@ -1296,7 +1301,13 @@ namespace RestClient
 
                 if (Logger) Console.WriteLine(url);
 
-                StartEventArgs startEventArgs = new StartEventArgs();
+                StartEventArgs startEventArgs = new StartEventArgs()
+                {
+                    Cancel = false,
+                    Payload = payloadContent,
+                    Url = url
+                };
+
                 OnStartAction?.Invoke(startEventArgs);
                 if (startEventArgs.Cancel) return null;
 
@@ -1387,7 +1398,13 @@ namespace RestClient
 
                 if (Logger) Console.WriteLine(url);
 
-                StartEventArgs startEventArgs = new StartEventArgs();
+                StartEventArgs startEventArgs = new StartEventArgs()
+                {
+                    Cancel = false,
+                    Payload = payloadContent,
+                    Url = url
+                };
+
                 OnStartAction?.Invoke(startEventArgs);
                 if (startEventArgs.Cancel) return null;
 
