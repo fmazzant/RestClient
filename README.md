@@ -5,7 +5,6 @@ RestClient library provides a simple connector to consume REST services.
 To use it in your project, add the Mafe.RestClient NuGet package to your project.
 
 [![Nuget](https://img.shields.io/nuget/v/Mafe.RestClient?style=flat-square)](https://www.nuget.org/packages/Mafe.RestClient)
-[![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/Mafe.RestClient?style=flat-square)](https://www.nuget.org/packages/Mafe.RestClient)
 
 ### What is RestClient?
 
