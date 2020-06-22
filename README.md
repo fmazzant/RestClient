@@ -290,9 +290,9 @@ var result = await rest
 
 The CUSTOM method customizing the specified resource.
 
+```c#
 HttpMethod PATCH = new HttpMethod("PATCH");
 
-```c#
 var result = rest
     .Url("[URL]")
     .Payload(new Object{})
