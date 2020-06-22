@@ -112,18 +112,6 @@ namespace RestClient
             result.Credentials = Credentials;
             ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(callback);
             this.CreateNewHttpClientInstance(result);
-
-            /**
-            result.HttpClient = new HttpClient(new HttpClientHandler()
-            {
-                Credentials = result.Credentials,
-                ClientCertificateOptions = Properties.CertificateOption,
-                ServerCertificateCustomValidationCallback = result.CertificateCallback
-            })
-            {
-                Timeout = Properties.Timeout
-            };
-            */
             return result;
         }
 
@@ -143,17 +131,6 @@ namespace RestClient
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = credential();
             this.CreateNewHttpClientInstance(result);
-            /**
-            result.HttpClient = new HttpClient(new HttpClientHandler()
-            {
-                Credentials = result.Credentials,
-                ClientCertificateOptions = Properties.CertificateOption,
-                ServerCertificateCustomValidationCallback = result.CertificateCallback
-            })
-            {
-                Timeout = Properties.Timeout
-            };
-            */
             return result;
         }
 
@@ -168,18 +145,6 @@ namespace RestClient
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password);
             this.CreateNewHttpClientInstance(result);
-
-            /**
-            result.HttpClient = new HttpClient(new HttpClientHandler()
-            {
-                Credentials = result.Credentials,
-                ClientCertificateOptions = Properties.CertificateOption,
-                ServerCertificateCustomValidationCallback = result.CertificateCallback
-            })
-            {
-                Timeout = Properties.Timeout
-            };
-            */
             return result;
         }
 
@@ -195,18 +160,6 @@ namespace RestClient
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password, domain);
             this.CreateNewHttpClientInstance(result);
-
-            /**
-            result.HttpClient = new HttpClient(new HttpClientHandler()
-            {
-                Credentials = result.Credentials,
-                ClientCertificateOptions = Properties.CertificateOption,
-                ServerCertificateCustomValidationCallback = result.CertificateCallback
-            })
-            {
-                Timeout = Properties.Timeout
-            };
-            **/
             return result;
         }
 
@@ -221,18 +174,6 @@ namespace RestClient
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password);
             this.CreateNewHttpClientInstance(result);
-
-            /**
-            result.HttpClient = new HttpClient(new HttpClientHandler()
-            {
-                Credentials = result.Credentials,
-                ClientCertificateOptions = Properties.CertificateOption,
-                ServerCertificateCustomValidationCallback = result.CertificateCallback
-            })
-            {
-                Timeout = Properties.Timeout
-            };
-            **/
             return result;
         }
 
@@ -248,18 +189,6 @@ namespace RestClient
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password, domain);
             this.CreateNewHttpClientInstance(result);
-
-            /**
-            result.HttpClient = new HttpClient(new HttpClientHandler()
-            {
-                Credentials = result.Credentials,
-                ClientCertificateOptions = Properties.CertificateOption,
-                ServerCertificateCustomValidationCallback = result.CertificateCallback
-            })
-            {
-                Timeout = Properties.Timeout
-            };
-            **/
             return result;
         }
 
