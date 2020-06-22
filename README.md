@@ -287,6 +287,24 @@ var result = await rest
     .DeleteAsync<ResponseObject>();
 ```
 
+### Custom Call
+
+The CUSTOM method customizing the specified resource.
+
+HttpMethod PATCH = new HttpMethod("PATCH");
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .Payload(new Object{})
+    .CustomCall<ResponseObject>(PATCH);
+
+var result = await rest
+    .Url("[URL]")
+    .Payload(new Object{})
+    .CustomCallAsync<ResponseObject>(PATCH);
+```
+
 ### Payload
 
 RestClient uses Playload<T>(obj) method to set an object on request: 
