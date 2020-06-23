@@ -1163,13 +1163,13 @@ namespace RestClient
                     }
                     else
                     {
-                        responseMessage = HttpClient.SendAsync(request, cancellationToken).Result;
+                        responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
                     }
                 }
                 else
                 {
                     request.Content = new FormUrlEncodedContent(FormUrlEncodedKeyValues);
-                    responseMessage = HttpClient.SendAsync(request, cancellationToken).Result;
+                    responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
                 }
 
                 if (!isAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
@@ -1260,13 +1260,13 @@ namespace RestClient
                     }
                     else
                     {
-                        responseMessage = HttpClient.SendAsync(request, cancellationToken).Result;
+                        responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
                     }
                 }
                 else
                 {
                     request.Content = new FormUrlEncodedContent(FormUrlEncodedKeyValues);
-                    responseMessage = HttpClient.SendAsync(request, cancellationToken).Result;
+                    responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
                 }
 
                 if (!isAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
@@ -1357,13 +1357,13 @@ namespace RestClient
                     }
                     else
                     {
-                        responseMessage = HttpClient.SendAsync(request, cancellationToken).Result;
+                        responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
                     }
                 }
                 else
                 {
                     request.Content = new FormUrlEncodedContent(FormUrlEncodedKeyValues);
-                    responseMessage = HttpClient.SendAsync(request, cancellationToken).Result;
+                    responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
                 }
 
                 if (!isAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
@@ -1456,13 +1456,13 @@ namespace RestClient
                     }
                     else
                     {
-                        responseMessage = HttpClient.SendAsync(request, cancellationToken).Result;
+                        responseMessage = HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).Result;
                     }
                 }
                 else
                 {
                     request.Content = new FormUrlEncodedContent(FormUrlEncodedKeyValues);
-                    responseMessage = HttpClient.SendAsync(request, cancellationToken).Result;
+                    responseMessage = HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).Result;
                 }
 
                 if (!isAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
