@@ -33,6 +33,7 @@ namespace RestClient
     using System.Net;
     using System.Net.Http;
     using System.Net.Http.Headers;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Provides custom formatting for generic action result.
@@ -160,6 +161,11 @@ namespace RestClient
                 return _InnerException.StackTrace;
             }
         }
+
+        /// <summary>
+        /// Get true if the request is cancellation requested
+        /// </summary>
+        public bool IsCancellationRequested => _InnerException != null && _InnerException is TaskCanceledException;
 
         /// <summary>
         /// Gets HTTP response's version
