@@ -680,6 +680,29 @@ namespace RestClient
 
         #endregion
 
+        #region [ PreResult ]
+
+        /// <summary>
+        /// On Pre Result Action
+        /// </summary>
+        Action<RestResult> OnPreResultAction = null;
+
+        /// <summary>
+        /// Sets onPreResult, occurs when the result of request il builded and it isn't completed ye
+        /// </summary>
+        /// <param name="restResult"></param>
+        /// <returns></returns>
+        public RestBuilder OnPreResult(Action<RestResult> restResult)
+        {
+            var result = (RestBuilder)this.MemberwiseClone();
+            result.OnPreResultAction = restResult;
+            return result;
+        }
+
+        #endregion
+
+        #region [ Completed ]
+
         /// <summary>
         /// On Completed Action
         /// </summary>
@@ -697,22 +720,7 @@ namespace RestClient
             return result;
         }
 
-        /// <summary>
-        /// On Pre Result Action
-        /// </summary>
-        Action<RestResult> OnPreResultAction = null;
-
-        /// <summary>
-        /// Sets onPreResult, occurs when the result of request il builded.
-        /// </summary>
-        /// <param name="restResult"></param>
-        /// <returns></returns>
-        public RestBuilder OnPreResult(Action<RestResult> restResult)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.OnPreResultAction = restResult;
-            return result;
-        }
+        #endregion
 
         #region [ Exception ]
 
