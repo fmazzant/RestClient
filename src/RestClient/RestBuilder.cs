@@ -43,6 +43,7 @@ namespace RestClient
     using System.Net.Security;
     using System.Security.Cryptography.X509Certificates;
     using System.Text;
+    using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -679,65 +680,75 @@ namespace RestClient
         ///  Send a GET request to the specified Uri as an asynchronous operation
         /// </summary>
         /// <returns></returns>
-        public async Task<RestResult<string>> GetAsync() => await SendAsStringAsync(HttpMethod.Get, PayloadContent, PayloadContentType);
+        public async Task<RestResult<string>> GetAsync(CancellationToken token = new CancellationToken())
+            => await SendAsStringAsync(HttpMethod.Get, PayloadContent, PayloadContentType, token);
 
         /// <summary>
         ///  Send a GET request to the specified Uri as an asynchronous operation
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public async Task<RestResult<T>> GetAsync<T>() where T : new() => await SendAsync<T>(HttpMethod.Get, PayloadContent, PayloadContentType);
+        public async Task<RestResult<T>> GetAsync<T>(CancellationToken token = new CancellationToken()) where T : new()
+            => await SendAsync<T>(HttpMethod.Get, PayloadContent, PayloadContentType, token);
 
         /// <summary>
         ///  Send a GET request to the specified Uri as an asynchronous operation
         /// </summary>
         /// <returns></returns>
-        public async Task<RestResult<byte[]>> GetAsByteArrayAsync() => await SendAsByteArrayAsync(HttpMethod.Get, PayloadContent, PayloadContentType);
+        public async Task<RestResult<byte[]>> GetAsByteArrayAsync(CancellationToken token = new CancellationToken())
+            => await SendAsByteArrayAsync(HttpMethod.Get, PayloadContent, PayloadContentType, token);
 
         /// <summary>
         ///  Send a GET request to the specified Uri as an asynchronous operation
         /// </summary>
         /// <returns></returns>
-        public async Task<RestResult<Stream>> GetAsStreamAsync() => await SendAsStreamAsync(HttpMethod.Get, PayloadContent, PayloadContentType);
+        public async Task<RestResult<Stream>> GetAsStreamAsync(CancellationToken token = new CancellationToken())
+            => await SendAsStreamAsync(HttpMethod.Get, PayloadContent, PayloadContentType, token);
 
         /// <summary>
         /// Send a GET request to the specified Uri as an synchronous operation
         /// </summary>
         /// <returns></returns>
-        public RestResult<string> Get() => GetAsync().Result;
+        public RestResult<string> Get(CancellationToken token = new CancellationToken())
+            => GetAsync(token).Result;
 
         /// <summary>
         /// Send a GET request to the specified Uri as an synchronous operation
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public RestResult<string> Get(string url) => Url(url).Get();
+        public RestResult<string> Get(string url, CancellationToken token = new CancellationToken())
+            => Url(url).Get(token);
 
         /// <summary>
         /// Send a GET request to the specified Uri as an synchronous operation
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public RestResult<string> Get(Uri url) => Url(url).Get();
+        public RestResult<string> Get(Uri url, CancellationToken token = new CancellationToken())
+            => Url(url).Get(token);
 
         /// <summary>
         /// Send a GET request to the specified Uri as an synchronous operation
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public RestResult<T> Get<T>() where T : new() => this.GetAsync<T>().Result;
+        public RestResult<T> Get<T>(CancellationToken token = new CancellationToken()) where T : new()
+            => this.GetAsync<T>(token).Result;
 
         /// <summary>
         /// Send a GET request to the specified Uri as an synchronous operation
         /// </summary>
         /// <returns></returns>
-        public RestResult<byte[]> GetAsByteArray() => GetAsByteArrayAsync().Result;
+        public RestResult<byte[]> GetAsByteArray(CancellationToken token = new CancellationToken())
+            => GetAsByteArrayAsync(token).Result;
 
         /// <summary>
         /// Send a GET request to the specified Uri as an synchronous operation
         /// </summary>
         /// <returns></returns>
-        public RestResult<Stream> GetAsStream() => GetAsStreamAsync().Result;
+        public RestResult<Stream> GetAsStream(CancellationToken token = new CancellationToken())
+            => GetAsStreamAsync(token).Result;
         #endregion
 
         #region [ Post ]
@@ -746,51 +757,59 @@ namespace RestClient
         /// Send a POST request to the specified Uri as an asynchronous operation
         /// </summary>
         /// <returns></returns>
-        public async Task<RestResult<string>> PostAsync() => await SendAsStringAsync(HttpMethod.Post, PayloadContent, PayloadContentType);
+        public async Task<RestResult<string>> PostAsync(CancellationToken token = new CancellationToken())
+            => await SendAsStringAsync(HttpMethod.Post, PayloadContent, PayloadContentType, token);
 
         /// <summary>
         /// Send a POST request to the specified Uri as an asynchronous operation
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public async Task<RestResult<T>> PostAsync<T>() where T : new() => await SendAsync<T>(HttpMethod.Post, PayloadContent, PayloadContentType);
+        public async Task<RestResult<T>> PostAsync<T>(CancellationToken token = new CancellationToken()) where T : new()
+            => await SendAsync<T>(HttpMethod.Post, PayloadContent, PayloadContentType, token);
 
         /// <summary>
         /// Send a POST request to the specified Uri as an asynchronous operation
         /// </summary>
         /// <returns></returns>
-        public async Task<RestResult<byte[]>> PostAsByteArrayAsync() => await SendAsByteArrayAsync(HttpMethod.Post, PayloadContent, PayloadContentType);
+        public async Task<RestResult<byte[]>> PostAsByteArrayAsync(CancellationToken token = new CancellationToken())
+            => await SendAsByteArrayAsync(HttpMethod.Post, PayloadContent, PayloadContentType, token);
 
         /// <summary>
         /// Send a POST request to the specified Uri as an asynchronous operation
         /// </summary>
         /// <returns></returns>
-        public async Task<RestResult<Stream>> PostAsStreamAsync() => await SendAsStreamAsync(HttpMethod.Post, PayloadContent, PayloadContentType);
+        public async Task<RestResult<Stream>> PostAsStreamAsync(CancellationToken token = new CancellationToken())
+            => await SendAsStreamAsync(HttpMethod.Post, PayloadContent, PayloadContentType, token);
 
         /// <summary>
         /// Send a POST request to the specified Uri as a synchronous operation
         /// </summary>
         /// <returns></returns>
-        public RestResult<string> Post() => PostAsync().Result;
+        public RestResult<string> Post(CancellationToken token = new CancellationToken())
+            => PostAsync(token).Result;
 
         /// <summary>
         /// Send a POST request to the specified Uri as a synchronous operation
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public RestResult<T> Post<T>() where T : new() => PostAsync<T>().Result;
+        public RestResult<T> Post<T>(CancellationToken token = new CancellationToken()) where T : new()
+            => PostAsync<T>(token).Result;
 
         /// <summary>
         /// Send a POST request to the specified Uri as a synchronous operation
         /// </summary>
         /// <returns></returns>
-        public RestResult<byte[]> PostAsByteArray() => PostAsByteArrayAsync().Result;
+        public RestResult<byte[]> PostAsByteArray(CancellationToken token = new CancellationToken())
+            => PostAsByteArrayAsync(token).Result;
 
         /// <summary>
         /// Send a POST request to the specified Uri as a synchronous operation
         /// </summary>
         /// <returns></returns>
-        public RestResult<Stream> PostAsStream() => PostAsStreamAsync().Result;
+        public RestResult<Stream> PostAsStream(CancellationToken token = new CancellationToken())
+            => PostAsStreamAsync(token).Result;
         #endregion
 
         #region [ Put ]
@@ -799,51 +818,59 @@ namespace RestClient
         /// Send a PUT request to the specified Uri as an asynchronous operation.
         /// </summary>
         /// <returns></returns>
-        public async Task<RestResult<string>> PutAsync() => await SendAsStringAsync(HttpMethod.Put, PayloadContent, PayloadContentType);
+        public async Task<RestResult<string>> PutAsync(CancellationToken token = new CancellationToken())
+            => await SendAsStringAsync(HttpMethod.Put, PayloadContent, PayloadContentType, token);
 
         /// <summary>
         /// Send a PUT request to the specified Uri as an asynchronous operation.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public async Task<RestResult<T>> PutAsync<T>() where T : new() => await SendAsync<T>(HttpMethod.Put, PayloadContent, PayloadContentType);
+        public async Task<RestResult<T>> PutAsync<T>(CancellationToken token = new CancellationToken()) where T : new()
+            => await SendAsync<T>(HttpMethod.Put, PayloadContent, PayloadContentType, token);
 
         /// <summary>
         /// Send a PUT request to the specified Uri as an asynchronous operation.
         /// </summary>
         /// <returns></returns>
-        public async Task<RestResult<byte[]>> PutAsByteArrayAsync() => await SendAsByteArrayAsync(HttpMethod.Put, PayloadContent, PayloadContentType);
+        public async Task<RestResult<byte[]>> PutAsByteArrayAsync(CancellationToken token = new CancellationToken())
+            => await SendAsByteArrayAsync(HttpMethod.Put, PayloadContent, PayloadContentType, token);
 
         /// <summary>
         /// Send a PUT request to the specified Uri as an asynchronous operation.
         /// </summary>
         /// <returns></returns>
-        public async Task<RestResult<Stream>> PutAsStreamAsync() => await SendAsStreamAsync(HttpMethod.Put, PayloadContent, PayloadContentType);
+        public async Task<RestResult<Stream>> PutAsStreamAsync(CancellationToken token = new CancellationToken())
+            => await SendAsStreamAsync(HttpMethod.Put, PayloadContent, PayloadContentType, token);
 
         /// <summary>
         /// Send a PUT request to the specified Uri as a synchronous operation.
         /// </summary>
         /// <returns></returns>
-        public RestResult<string> Put() => PutAsync().Result;
+        public RestResult<string> Put(CancellationToken token = new CancellationToken())
+            => PutAsync(token).Result;
 
         /// <summary>
         /// Send a PUT request to the specified Uri as a synchronous operation.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public RestResult<T> Put<T>() where T : new() => PutAsync<T>().Result;
+        public RestResult<T> Put<T>(CancellationToken token = new CancellationToken()) where T : new()
+            => PutAsync<T>(token).Result;
 
         /// <summary>
         /// Send a PUT request to the specified Uri as a synchronous operation.
         /// </summary>
         /// <returns></returns>
-        public RestResult<byte[]> PutAsByteArray() => PutAsByteArrayAsync().Result;
+        public RestResult<byte[]> PutAsByteArray(CancellationToken token = new CancellationToken())
+            => PutAsByteArrayAsync(token).Result;
 
         /// <summary>
         /// Send a PUT request to the specified Uri as a synchronous operation.
         /// </summary>
         /// <returns></returns>
-        public RestResult<Stream> PutAsStream() => PutAsStreamAsync().Result;
+        public RestResult<Stream> PutAsStream(CancellationToken token = new CancellationToken())
+            => PutAsStreamAsync(token).Result;
         #endregion
 
         #region [ Delete ]
@@ -852,51 +879,59 @@ namespace RestClient
         ///  Send a DELETE request to the specified Uri as an asynchronous operation.
         /// </summary>
         /// <returns></returns>
-        public async Task<RestResult<string>> DeleteAsync() => await SendAsStringAsync(HttpMethod.Delete, PayloadContent, PayloadContentType);
+        public async Task<RestResult<string>> DeleteAsync(CancellationToken token = new CancellationToken())
+            => await SendAsStringAsync(HttpMethod.Delete, PayloadContent, PayloadContentType, token);
 
         /// <summary>
         ///  Send a DELETE request to the specified Uri as an asynchronous operation.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public async Task<RestResult<T>> DeleteAsync<T>() where T : new() => await SendAsync<T>(HttpMethod.Delete, PayloadContent, PayloadContentType);
+        public async Task<RestResult<T>> DeleteAsync<T>(CancellationToken token = new CancellationToken()) where T : new()
+            => await SendAsync<T>(HttpMethod.Delete, PayloadContent, PayloadContentType, token);
 
         /// <summary>
         ///  Send a DELETE request to the specified Uri as an asynchronous operation.
         /// </summary>
         /// <returns></returns>
-        public async Task<RestResult<byte[]>> DeleteAsByteArrayAsync() => await SendAsByteArrayAsync(HttpMethod.Delete, PayloadContent, PayloadContentType);
+        public async Task<RestResult<byte[]>> DeleteAsByteArrayAsync(CancellationToken token = new CancellationToken())
+            => await SendAsByteArrayAsync(HttpMethod.Delete, PayloadContent, PayloadContentType, token);
 
         /// <summary>
         ///  Send a DELETE request to the specified Uri as an asynchronous operation.
         /// </summary>
         /// <returns></returns>
-        public async Task<RestResult<Stream>> DeleteAsStreamAsync() => await SendAsStreamAsync(HttpMethod.Delete, PayloadContent, PayloadContentType);
+        public async Task<RestResult<Stream>> DeleteAsStreamAsync(CancellationToken token = new CancellationToken())
+            => await SendAsStreamAsync(HttpMethod.Delete, PayloadContent, PayloadContentType, token);
 
         /// <summary>
         /// Send a DELETE request to the specified Uri as a synchronous operation.
         /// </summary>
         /// <returns></returns>
-        public RestResult<string> Delete() => DeleteAsync().Result;
+        public RestResult<string> Delete(CancellationToken token = new CancellationToken())
+            => DeleteAsync(token).Result;
 
         /// <summary>
         /// Send a DELETE request to the specified Uri as a synchronous operation.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public RestResult<T> Delete<T>() where T : new() => DeleteAsync<T>().Result;
+        public RestResult<T> Delete<T>(CancellationToken token = new CancellationToken()) where T : new()
+            => DeleteAsync<T>(token).Result;
 
         /// <summary>
         /// Send a DELETE request to the specified Uri as a synchronous operation.
         /// </summary>
         /// <returns></returns>
-        public RestResult<byte[]> DeleteAsByteArray() => DeleteAsByteArrayAsync().Result;
+        public RestResult<byte[]> DeleteAsByteArray(CancellationToken token = new CancellationToken())
+            => DeleteAsByteArrayAsync(token).Result;
 
         /// <summary>
         /// Send a DELETE request to the specified Uri as a synchronous operation.
         /// </summary>
         /// <returns></returns>
-        public RestResult<Stream> DeleteAsStream() => DeleteAsStreamAsync().Result;
+        public RestResult<Stream> DeleteAsStream(CancellationToken token = new CancellationToken())
+            => DeleteAsStreamAsync(token).Result;
         #endregion
 
         #region [ Patch ]
@@ -906,51 +941,59 @@ namespace RestClient
         /// Send a PATCH request to the specified Uri as an asynchronous operation
         /// </summary>
         /// <returns></returns>
-        public async Task<RestResult<string>> PatchAsync() => await SendAsStringAsync(PATCH, PayloadContent, PayloadContentType);
+        public async Task<RestResult<string>> PatchAsync(CancellationToken token = new CancellationToken())
+            => await SendAsStringAsync(PATCH, PayloadContent, PayloadContentType, token);
 
         /// <summary>
         /// Send a PATCH request to the specified Uri as an asynchronous operation
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public async Task<RestResult<T>> PatchAsync<T>() where T : new() => await SendAsync<T>(PATCH, PayloadContent, PayloadContentType);
+        public async Task<RestResult<T>> PatchAsync<T>(CancellationToken token = new CancellationToken()) where T : new()
+            => await SendAsync<T>(PATCH, PayloadContent, PayloadContentType, token);
 
         /// <summary>
         /// Send a PATCH request to the specified Uri as an asynchronous operation
         /// </summary>
         /// <returns></returns>
-        public async Task<RestResult<byte[]>> PatchAsByteArrayAsync() => await SendAsByteArrayAsync(PATCH, PayloadContent, PayloadContentType);
+        public async Task<RestResult<byte[]>> PatchAsByteArrayAsync(CancellationToken token = new CancellationToken())
+            => await SendAsByteArrayAsync(PATCH, PayloadContent, PayloadContentType, token);
 
         /// <summary>
         /// Send a PATCH request to the specified Uri as an asynchronous operation
         /// </summary>
         /// <returns></returns>
-        public async Task<RestResult<Stream>> PatchAsStreamAsync() => await SendAsStreamAsync(PATCH, PayloadContent, PayloadContentType);
+        public async Task<RestResult<Stream>> PatchAsStreamAsync(CancellationToken token = new CancellationToken())
+            => await SendAsStreamAsync(PATCH, PayloadContent, PayloadContentType, token);
 
         /// <summary>
         /// Send a PATCH request to the specified Uri as a synchronous operation
         /// </summary>
         /// <returns></returns>
-        public RestResult<string> Patch() => PatchAsync().Result;
+        public RestResult<string> Patch(CancellationToken token = new CancellationToken())
+            => PatchAsync(token).Result;
 
         /// <summary>
         /// Send a PATCH request to the specified Uri as a synchronous operation
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public RestResult<T> Patch<T>() where T : new() => PatchAsync<T>().Result;
+        public RestResult<T> Patch<T>(CancellationToken token = new CancellationToken()) where T : new()
+            => PatchAsync<T>(token).Result;
 
         /// <summary>
         /// Send a PATCH request to the specified Uri as a synchronous operation
         /// </summary>
         /// <returns></returns>
-        public RestResult<byte[]> PatchAsByteArray() => PatchAsByteArrayAsync().Result;
+        public RestResult<byte[]> PatchAsByteArray(CancellationToken token = new CancellationToken())
+            => PatchAsByteArrayAsync(token).Result;
 
         /// <summary>
         /// Send a PATCH request to the specified Uri as a synchronous operation
         /// </summary>
         /// <returns></returns>
-        public RestResult<Stream> PatchAsStream() => PatchAsStreamAsync().Result;
+        public RestResult<Stream> PatchAsStream(CancellationToken token = new CancellationToken())
+            => PatchAsStreamAsync(token).Result;
 
         #endregion
 
@@ -960,51 +1003,99 @@ namespace RestClient
         /// Send a CUSTOM CALL request to the specified Uri as an asynchronous operation
         /// </summary>
         /// <returns></returns>
-        public async Task<RestResult<string>> CustomCallAsync(HttpMethod method) => await SendAsStringAsync(method, PayloadContent, PayloadContentType);
+        public async Task<RestResult<string>> CustomCallAsync(HttpMethod method, CancellationToken token = new CancellationToken())
+            => await SendAsStringAsync(method, PayloadContent, PayloadContentType, token);
 
         /// <summary>
         /// Send a CUSTOM CALL request to the specified Uri as an asynchronous operation
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public async Task<RestResult<T>> CustomCallAsync<T>(HttpMethod method) where T : new() => await SendAsync<T>(method, PayloadContent, PayloadContentType);
+        public async Task<RestResult<T>> CustomCallAsync<T>(HttpMethod method, CancellationToken token = new CancellationToken()) where T : new()
+            => await SendAsync<T>(method, PayloadContent, PayloadContentType, token);
 
         /// <summary>
         /// Send a CUSTOM CALL request to the specified Uri as an asynchronous operation
         /// </summary>
         /// <returns></returns>
-        public async Task<RestResult<byte[]>> CustomCallAsByteArrayAsync(HttpMethod method) => await SendAsByteArrayAsync(method, PayloadContent, PayloadContentType);
+        public async Task<RestResult<byte[]>> CustomCallAsByteArrayAsync(HttpMethod method, CancellationToken token = new CancellationToken())
+            => await SendAsByteArrayAsync(method, PayloadContent, PayloadContentType, token);
 
         /// <summary>
         /// Send a CUSTOM CALL request to the specified Uri as an asynchronous operation
         /// </summary>
         /// <returns></returns>
-        public async Task<RestResult<Stream>> CustomCallAsStreamAsync(HttpMethod method) => await SendAsStreamAsync(method, PayloadContent, PayloadContentType);
+        public async Task<RestResult<Stream>> CustomCallAsStreamAsync(HttpMethod method, CancellationToken token = new CancellationToken())
+            => await SendAsStreamAsync(method, PayloadContent, PayloadContentType, token);
 
         /// <summary>
         /// Send a CUSTOM CALL request to the specified Uri as a synchronous operation
         /// </summary>
         /// <returns></returns>
-        public RestResult<string> CustomCall(HttpMethod method) => CustomCallAsync(method).Result;
+        public RestResult<string> CustomCall(HttpMethod method, CancellationToken token = new CancellationToken())
+            => CustomCallAsync(method, token).Result;
 
         /// <summary>
         /// Send a CUSTOM CALL request to the specified Uri as a synchronous operation
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public RestResult<T> CustomCall<T>(HttpMethod method) where T : new() => CustomCallAsync<T>(method).Result;
+        public RestResult<T> CustomCall<T>(HttpMethod method, CancellationToken token = new CancellationToken()) where T : new()
+            => CustomCallAsync<T>(method, token).Result;
 
         /// <summary>
         /// Send a CUSTOM CALL request to the specified Uri as a synchronous operation
         /// </summary>
         /// <returns></returns>
-        public RestResult<byte[]> CustomCallAsByteArray(HttpMethod method) => CustomCallAsByteArrayAsync(method).Result;
+        public RestResult<byte[]> CustomCallAsByteArray(HttpMethod method, CancellationToken token = new CancellationToken())
+            => CustomCallAsByteArrayAsync(method, token).Result;
 
         /// <summary>
         /// Send a CUSTOM CALL request to the specified Uri as a synchronous operation
         /// </summary>
         /// <returns></returns>
-        public RestResult<Stream> CustomCallAsStream(HttpMethod method) => CustomCallAsStreamAsync(method).Result;
+        public RestResult<Stream> CustomCallAsStream(HttpMethod method, CancellationToken token = new CancellationToken())
+            => CustomCallAsStreamAsync(method, token).Result;
+
+        #endregion
+
+        #region [ Download ]
+
+        /// <summary>
+        /// Send a GET request to download file from the specified Uri as an asynchronous operation
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public Task<RestResult<byte[]>> DownloadAsync(string url, CancellationToken token = new CancellationToken())
+            => Url(url).GetAsByteArrayAsync(token);
+
+        /// <summary>
+        /// Send a GET request to download file from the specified Uri as an asynchronous operation
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public Task<RestResult<byte[]>> DownloadAsync(Uri url, CancellationToken token = new CancellationToken())
+            => Url(url).GetAsByteArrayAsync(token);
+
+        /// <summary>
+        /// Send a GET request to download file from the specified Uri as a synchronous operation
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public RestResult<byte[]> Download(string url, CancellationToken token = new CancellationToken())
+            => DownloadAsync(url, token).Result;
+
+        /// <summary>
+        /// Send a GET request to download file from the specified Uri as a synchronous operation
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public RestResult<byte[]> Download(Uri url, CancellationToken token = new CancellationToken())
+            => DownloadAsync(url, token).Result;
 
         #endregion
 
@@ -1022,7 +1113,10 @@ namespace RestClient
         /// <param name="payloadContent"></param>
         /// <param name="payloadContentType"></param>
         /// <returns></returns>
-        private async Task<RestResult<string>> SendAsStringAsync(HttpMethod method, object payloadContent = null, Type payloadContentType = null)
+        private async Task<RestResult<string>> SendAsStringAsync(HttpMethod method,
+            object payloadContent = null,
+            Type payloadContentType = null,
+            CancellationToken cancellationToken = new CancellationToken())
         {
             RestResult<string> response = null;
             try
@@ -1051,8 +1145,7 @@ namespace RestClient
                 if (startEventArgs.Cancel) return null;
 
                 HttpRequestMessage request = new HttpRequestMessage(method, url);
-                System.Threading.CancellationToken cancellationToken = new System.Threading.CancellationToken();
-                HttpResponseMessage responseMessage = null;// await HttpClient.SendAsync(request);
+                HttpResponseMessage responseMessage = null;
 
                 if (!IsEnabledFormUrlEncoded)
                 {
@@ -1070,13 +1163,13 @@ namespace RestClient
                     }
                     else
                     {
-                        responseMessage = HttpClient.SendAsync(request).Result;
+                        responseMessage = HttpClient.SendAsync(request, cancellationToken).Result;
                     }
                 }
                 else
                 {
                     request.Content = new FormUrlEncodedContent(FormUrlEncodedKeyValues);
-                    responseMessage = HttpClient.SendAsync(request).Result;
+                    responseMessage = HttpClient.SendAsync(request, cancellationToken).Result;
                 }
 
                 if (!isAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
@@ -1084,10 +1177,10 @@ namespace RestClient
                     isAfterRefreshTokenCalled = true;
 
                     if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
-                        return await SendAsStringAsync(method, payloadContent, payloadContentType);
+                        return await SendAsStringAsync(method, payloadContent, payloadContentType, cancellationToken);
 
                     if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
-                        return await SendAsStringAsync(method, payloadContent, payloadContentType);
+                        return await SendAsStringAsync(method, payloadContent, payloadContentType, cancellationToken);
                 }
 
                 using (HttpContentStream streamContent = new HttpContentStream(responseMessage.Content))
@@ -1117,7 +1210,10 @@ namespace RestClient
         /// <param name="payloadContent"></param>
         /// <param name="payloadContentType"></param>
         /// <returns></returns>
-        private async Task<RestResult<Stream>> SendAsStreamAsync(HttpMethod method, object payloadContent = null, Type payloadContentType = null)
+        private async Task<RestResult<Stream>> SendAsStreamAsync(HttpMethod method,
+            object payloadContent = null,
+            Type payloadContentType = null,
+            CancellationToken cancellationToken = new CancellationToken())
         {
             RestResult<Stream> response = null;
             try
@@ -1146,8 +1242,7 @@ namespace RestClient
                 if (startEventArgs.Cancel) return null;
 
                 HttpRequestMessage request = new HttpRequestMessage(method, url);
-                HttpResponseMessage responseMessage = null;// await HttpClient.SendAsync(request);
-                System.Threading.CancellationToken cancellationToken = new System.Threading.CancellationToken();
+                HttpResponseMessage responseMessage = null;
 
                 if (!IsEnabledFormUrlEncoded)
                 {
@@ -1165,13 +1260,13 @@ namespace RestClient
                     }
                     else
                     {
-                        responseMessage = HttpClient.SendAsync(request).Result;
+                        responseMessage = HttpClient.SendAsync(request, cancellationToken).Result;
                     }
                 }
                 else
                 {
                     request.Content = new FormUrlEncodedContent(FormUrlEncodedKeyValues);
-                    responseMessage = HttpClient.SendAsync(request).Result;
+                    responseMessage = HttpClient.SendAsync(request, cancellationToken).Result;
                 }
 
                 if (!isAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
@@ -1179,10 +1274,10 @@ namespace RestClient
                     isAfterRefreshTokenCalled = true;
 
                     if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
-                        return await SendAsStreamAsync(method, payloadContent, payloadContentType);
+                        return await SendAsStreamAsync(method, payloadContent, payloadContentType, cancellationToken);
 
                     if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
-                        return await SendAsStreamAsync(method, payloadContent, payloadContentType);
+                        return await SendAsStreamAsync(method, payloadContent, payloadContentType, cancellationToken);
                 }
 
                 using (HttpContentStream streamContent = new HttpContentStream(responseMessage.Content))
@@ -1211,7 +1306,10 @@ namespace RestClient
         /// <param name="payloadContent"></param>
         /// <param name="payloadContentType"></param>
         /// <returns></returns>
-        private async Task<RestResult<byte[]>> SendAsByteArrayAsync(HttpMethod method, object payloadContent = null, Type payloadContentType = null)
+        private async Task<RestResult<byte[]>> SendAsByteArrayAsync(HttpMethod method,
+            object payloadContent = null,
+            Type payloadContentType = null,
+            CancellationToken cancellationToken = new CancellationToken())
         {
             RestResult<byte[]> response = null;
             try
@@ -1241,8 +1339,7 @@ namespace RestClient
                 if (startEventArgs.Cancel) return null;
 
                 HttpRequestMessage request = new HttpRequestMessage(method, url);
-                System.Threading.CancellationToken cancellationToken = new System.Threading.CancellationToken();
-                HttpResponseMessage responseMessage = null;// await HttpClient.SendAsync(request);
+                HttpResponseMessage responseMessage = null;
 
                 if (!IsEnabledFormUrlEncoded)
                 {
@@ -1260,13 +1357,13 @@ namespace RestClient
                     }
                     else
                     {
-                        responseMessage = HttpClient.SendAsync(request).Result;
+                        responseMessage = HttpClient.SendAsync(request, cancellationToken).Result;
                     }
                 }
                 else
                 {
                     request.Content = new FormUrlEncodedContent(FormUrlEncodedKeyValues);
-                    responseMessage = HttpClient.SendAsync(request).Result;
+                    responseMessage = HttpClient.SendAsync(request, cancellationToken).Result;
                 }
 
                 if (!isAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
@@ -1274,17 +1371,17 @@ namespace RestClient
                     isAfterRefreshTokenCalled = true;
 
                     if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
-                        return await SendAsByteArrayAsync(method, payloadContent, payloadContentType);
+                        return await SendAsByteArrayAsync(method, payloadContent, payloadContentType, cancellationToken);
 
                     if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
-                        return await SendAsByteArrayAsync(method, payloadContent, payloadContentType);
+                        return await SendAsByteArrayAsync(method, payloadContent, payloadContentType, cancellationToken);
                 }
 
                 using (HttpContentStream streamContent = new HttpContentStream(responseMessage.Content))
                 {
                     streamContent.ProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
                     response = RestResult<byte[]>.CreateInstanceFrom<byte[]>(responseMessage);
-                    response.Content = await streamContent.ReadBytesAsStreamAsync();
+                    response.Content = await streamContent.ReadBytesAsStreamAsync(cancellationToken);
                     response.StringContent = BitConverter.ToString(response.Content);
                 }
 
@@ -1307,7 +1404,10 @@ namespace RestClient
         /// <param name="payloadContent"></param>
         /// <param name="payloadContentType"></param>
         /// <returns></returns>
-        private async Task<RestResult<T>> SendAsync<T>(HttpMethod method, object payloadContent = null, Type payloadContentType = null)
+        private async Task<RestResult<T>> SendAsync<T>(HttpMethod method,
+            object payloadContent = null,
+            Type payloadContentType = null,
+            CancellationToken cancellationToken = new CancellationToken())
             where T : new()
         {
             RestResult<T> response = null;
@@ -1338,8 +1438,7 @@ namespace RestClient
                 if (startEventArgs.Cancel) return null;
 
                 HttpRequestMessage request = new HttpRequestMessage(method, url);
-                HttpResponseMessage responseMessage = null;// await HttpClient.SendAsync(request);
-                System.Threading.CancellationToken cancellationToken = new System.Threading.CancellationToken();
+                HttpResponseMessage responseMessage = null;
 
                 if (!IsEnabledFormUrlEncoded)
                 {
@@ -1357,13 +1456,13 @@ namespace RestClient
                     }
                     else
                     {
-                        responseMessage = HttpClient.SendAsync(request).Result;
+                        responseMessage = HttpClient.SendAsync(request, cancellationToken).Result;
                     }
                 }
                 else
                 {
                     request.Content = new FormUrlEncodedContent(FormUrlEncodedKeyValues);
-                    responseMessage = HttpClient.SendAsync(request).Result;
+                    responseMessage = HttpClient.SendAsync(request, cancellationToken).Result;
                 }
 
                 if (!isAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
@@ -1371,10 +1470,10 @@ namespace RestClient
                     isAfterRefreshTokenCalled = true;
 
                     if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
-                        return await SendAsync<T>(method, payloadContent, payloadContentType);
+                        return await SendAsync<T>(method, payloadContent, payloadContentType, cancellationToken);
 
                     if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
-                        return await SendAsync<T>(method, payloadContent, payloadContentType);
+                        return await SendAsync<T>(method, payloadContent, payloadContentType, cancellationToken);
                 }
 
                 using (HttpContentStream streamContent = new HttpContentStream(responseMessage.Content))
