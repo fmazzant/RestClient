@@ -160,7 +160,7 @@ namespace RestClient.IO
             {
                 if (this.Content != null)
                 {
-                    var streamContent = new ProgressableStreamContent(
+                    var streamContent = new HttpContentStreamProgressable(
                        request.Content,
                        4096,
                        (sent, total) =>
