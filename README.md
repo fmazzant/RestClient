@@ -285,6 +285,25 @@ var result = await rest
     .Payload(new Object{})
     .DeleteAsync<ResponseObject>();
 ```
+### Download
+
+The DOWNLOAD method download the specified resource.
+
+```c#
+var result = rest
+    .Download("[URL]");
+
+var result = await rest
+    .DownloadAsync("[URL]");
+```
+Is possible display the download status with OnDownloadProgress.
+
+```c#
+var result = await rest
+    .OnDownloadProgress((d) => Console.WriteLine($"{d.CurrentBytes}/{d.TotalBytes}"))
+    .DownloadAsync("[URL]");
+```
+
 
 ### Custom Call
 
