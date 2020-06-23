@@ -170,10 +170,15 @@ namespace RestClient.IO
                                TotalBytes = total,
                                CurrentBytes = sent
                            });
+                           if (cancellationToken.IsCancellationRequested) throw new TaskCanceledException();
                        });
                     request.Content = streamContent;
                 }
                 response = client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).Result;
+            }
+            catch (TaskCanceledException)
+            {
+                throw new TaskCanceledException();
             }
             catch (Exception)
             {
@@ -185,6 +190,10 @@ namespace RestClient.IO
                         TotalBytes = 1,
                         CurrentBytes = 1
                     });
+                }
+                catch (TaskCanceledException)
+                {
+                    throw new TaskCanceledException();
                 }
                 catch (Exception)
                 {
