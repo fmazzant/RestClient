@@ -176,7 +176,7 @@ namespace RestClient.IO
                        });
                     request.Content = streamContent;
                 }
-                response = client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).Result;
+                response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             }
             catch (TaskCanceledException)
             {

@@ -96,8 +96,10 @@ namespace RestClient
                 => true;
         }
 
+        #region [ Certificate Validation ]
+
         /// <summary>
-        /// 
+        /// Certificate Callback
         /// </summary>
         Func<object, X509Certificate, X509Chain, SslPolicyErrors, bool> CertificateCallback;
 
@@ -115,6 +117,10 @@ namespace RestClient
             this.CreateNewHttpClientInstance(result);
             return result;
         }
+
+        #endregion
+
+        #region [ Network Credential ]
 
         /// <summary>
         /// Current Credentials
@@ -193,6 +199,8 @@ namespace RestClient
             return result;
         }
 
+        #endregion
+
         #region [ Create New HttpClient Instance and set into HttpClient ]
         /// <summary>
         /// Create new HttpClient instance and set into result.HttpClient
@@ -211,6 +219,8 @@ namespace RestClient
             };
         }
         #endregion
+
+        #region [ Authentication ]
 
         /// <summary>
         /// The Authorization header for an HTTP request
@@ -274,6 +284,10 @@ namespace RestClient
         [Obsolete("OnAuthentication: this method will be removed soon", false)]
         public RestBuilder OnAuthentication(string scheme, string parameter) => Authentication(scheme, parameter);
 
+        #endregion
+
+        #region [ Timeout ]
+
         /// <summary>
         /// Sets the timespan to wait before the request times out
         /// </summary>
@@ -302,6 +316,10 @@ namespace RestClient
             return result;
         }
 
+        #endregion
+
+        #region [ Header ]
+
         /// <summary>
         ///  Sets the headers which should be sent with this o children requests
         /// </summary>
@@ -313,6 +331,10 @@ namespace RestClient
             defaultRequestHeaders(result.HttpClient.DefaultRequestHeaders);
             return result;
         }
+
+        #endregion
+
+        #region [ Command ]
 
         /// <summary>
         /// Adds the command to request
@@ -350,6 +372,10 @@ namespace RestClient
             result.Commands.Add($"/{command}");
             return result;
         }
+
+        #endregion
+
+        #region [ Refresh Token Invoke ]
 
         /// <summary>
         /// if true the refresh token execution is enabled
@@ -402,6 +428,10 @@ namespace RestClient
             return result;
         }
 
+        #endregion
+
+        #region [ Serialization ]
+
         /// <summary>
         /// Sets xml as serialization
         /// </summary>
@@ -436,6 +466,10 @@ namespace RestClient
             return result;
         }
 
+        #endregion
+
+        #region [ Logger ]
+
         /// <summary>
         /// Sets log, true is enabled, when false is disabled.
         /// Currently this function is temporary. 
@@ -449,6 +483,10 @@ namespace RestClient
             result.Logger = logger;
             return result;
         }
+
+        #endregion
+
+        #region [ Parameter ]
 
         /// <summary>
         /// Adds parameter to querystring
@@ -480,6 +518,10 @@ namespace RestClient
             return result;
         }
 
+        #endregion
+
+        #region [ Url ]
+
         /// <summary>
         /// Sets url
         /// </summary>
@@ -501,6 +543,10 @@ namespace RestClient
             result.Properties.EndPoint = uri;
             return result;
         }
+
+        #endregion
+
+        #region [ Payload & FormUrlEncoded ]
 
         /// <summary>
         /// Payload content
@@ -573,6 +619,10 @@ namespace RestClient
             return result;
         }
 
+        #endregion
+
+        #region [ OnStart ]
+
         /// <summary>
         /// On Start Action
         /// </summary>
@@ -589,6 +639,10 @@ namespace RestClient
             result.OnStartAction = onStart;
             return result;
         }
+
+        #endregion
+
+        #region [ Upload & Download Progress ]
 
         /// <summary>
         /// On Upload Progress Action
@@ -624,6 +678,8 @@ namespace RestClient
             return result;
         }
 
+        #endregion
+
         /// <summary>
         /// On Completed Action
         /// </summary>
@@ -658,6 +714,8 @@ namespace RestClient
             return result;
         }
 
+        #region [ Exception ]
+
         /// <summary>
         /// On Exception Action
         /// </summary>
@@ -674,6 +732,8 @@ namespace RestClient
             result.OnExceptionAction = exception;
             return result;
         }
+
+        #endregion
 
         #region [ Get ]
         /// <summary>
@@ -709,46 +769,46 @@ namespace RestClient
         /// Send a GET request to the specified Uri as an synchronous operation
         /// </summary>
         /// <returns></returns>
-        public RestResult<string> Get(CancellationToken token = new CancellationToken())
-            => GetAsync(token).Result;
+        public RestResult<string> Get()
+            => GetAsync().Result;
 
         /// <summary>
         /// Send a GET request to the specified Uri as an synchronous operation
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public RestResult<string> Get(string url, CancellationToken token = new CancellationToken())
-            => Url(url).Get(token);
+        public RestResult<string> Get(string url)
+            => Url(url).Get();
 
         /// <summary>
         /// Send a GET request to the specified Uri as an synchronous operation
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public RestResult<string> Get(Uri url, CancellationToken token = new CancellationToken())
-            => Url(url).Get(token);
+        public RestResult<string> Get(Uri url)
+            => Url(url).Get();
 
         /// <summary>
         /// Send a GET request to the specified Uri as an synchronous operation
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public RestResult<T> Get<T>(CancellationToken token = new CancellationToken()) where T : new()
-            => this.GetAsync<T>(token).Result;
+        public RestResult<T> Get<T>() where T : new()
+            => this.GetAsync<T>().Result;
 
         /// <summary>
         /// Send a GET request to the specified Uri as an synchronous operation
         /// </summary>
         /// <returns></returns>
-        public RestResult<byte[]> GetAsByteArray(CancellationToken token = new CancellationToken())
-            => GetAsByteArrayAsync(token).Result;
+        public RestResult<byte[]> GetAsByteArray()
+            => GetAsByteArrayAsync().Result;
 
         /// <summary>
         /// Send a GET request to the specified Uri as an synchronous operation
         /// </summary>
         /// <returns></returns>
-        public RestResult<Stream> GetAsStream(CancellationToken token = new CancellationToken())
-            => GetAsStreamAsync(token).Result;
+        public RestResult<Stream> GetAsStream()
+            => GetAsStreamAsync().Result;
         #endregion
 
         #region [ Post ]
@@ -786,30 +846,30 @@ namespace RestClient
         /// Send a POST request to the specified Uri as a synchronous operation
         /// </summary>
         /// <returns></returns>
-        public RestResult<string> Post(CancellationToken token = new CancellationToken())
-            => PostAsync(token).Result;
+        public RestResult<string> Post()
+            => PostAsync().Result;
 
         /// <summary>
         /// Send a POST request to the specified Uri as a synchronous operation
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public RestResult<T> Post<T>(CancellationToken token = new CancellationToken()) where T : new()
-            => PostAsync<T>(token).Result;
+        public RestResult<T> Post<T>() where T : new()
+            => PostAsync<T>().Result;
 
         /// <summary>
         /// Send a POST request to the specified Uri as a synchronous operation
         /// </summary>
         /// <returns></returns>
-        public RestResult<byte[]> PostAsByteArray(CancellationToken token = new CancellationToken())
-            => PostAsByteArrayAsync(token).Result;
+        public RestResult<byte[]> PostAsByteArray()
+            => PostAsByteArrayAsync().Result;
 
         /// <summary>
         /// Send a POST request to the specified Uri as a synchronous operation
         /// </summary>
         /// <returns></returns>
-        public RestResult<Stream> PostAsStream(CancellationToken token = new CancellationToken())
-            => PostAsStreamAsync(token).Result;
+        public RestResult<Stream> PostAsStream()
+            => PostAsStreamAsync().Result;
         #endregion
 
         #region [ Put ]
@@ -847,30 +907,30 @@ namespace RestClient
         /// Send a PUT request to the specified Uri as a synchronous operation.
         /// </summary>
         /// <returns></returns>
-        public RestResult<string> Put(CancellationToken token = new CancellationToken())
-            => PutAsync(token).Result;
+        public RestResult<string> Put()
+            => PutAsync().Result;
 
         /// <summary>
         /// Send a PUT request to the specified Uri as a synchronous operation.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public RestResult<T> Put<T>(CancellationToken token = new CancellationToken()) where T : new()
-            => PutAsync<T>(token).Result;
+        public RestResult<T> Put<T>() where T : new()
+            => PutAsync<T>().Result;
 
         /// <summary>
         /// Send a PUT request to the specified Uri as a synchronous operation.
         /// </summary>
         /// <returns></returns>
-        public RestResult<byte[]> PutAsByteArray(CancellationToken token = new CancellationToken())
-            => PutAsByteArrayAsync(token).Result;
+        public RestResult<byte[]> PutAsByteArray()
+            => PutAsByteArrayAsync().Result;
 
         /// <summary>
         /// Send a PUT request to the specified Uri as a synchronous operation.
         /// </summary>
         /// <returns></returns>
-        public RestResult<Stream> PutAsStream(CancellationToken token = new CancellationToken())
-            => PutAsStreamAsync(token).Result;
+        public RestResult<Stream> PutAsStream()
+            => PutAsStreamAsync().Result;
         #endregion
 
         #region [ Delete ]
@@ -908,30 +968,30 @@ namespace RestClient
         /// Send a DELETE request to the specified Uri as a synchronous operation.
         /// </summary>
         /// <returns></returns>
-        public RestResult<string> Delete(CancellationToken token = new CancellationToken())
-            => DeleteAsync(token).Result;
+        public RestResult<string> Delete()
+            => DeleteAsync().Result;
 
         /// <summary>
         /// Send a DELETE request to the specified Uri as a synchronous operation.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public RestResult<T> Delete<T>(CancellationToken token = new CancellationToken()) where T : new()
-            => DeleteAsync<T>(token).Result;
+        public RestResult<T> Delete<T>() where T : new()
+            => DeleteAsync<T>().Result;
 
         /// <summary>
         /// Send a DELETE request to the specified Uri as a synchronous operation.
         /// </summary>
         /// <returns></returns>
-        public RestResult<byte[]> DeleteAsByteArray(CancellationToken token = new CancellationToken())
-            => DeleteAsByteArrayAsync(token).Result;
+        public RestResult<byte[]> DeleteAsByteArray()
+            => DeleteAsByteArrayAsync().Result;
 
         /// <summary>
         /// Send a DELETE request to the specified Uri as a synchronous operation.
         /// </summary>
         /// <returns></returns>
-        public RestResult<Stream> DeleteAsStream(CancellationToken token = new CancellationToken())
-            => DeleteAsStreamAsync(token).Result;
+        public RestResult<Stream> DeleteAsStream()
+            => DeleteAsStreamAsync().Result;
         #endregion
 
         #region [ Patch ]
@@ -970,30 +1030,30 @@ namespace RestClient
         /// Send a PATCH request to the specified Uri as a synchronous operation
         /// </summary>
         /// <returns></returns>
-        public RestResult<string> Patch(CancellationToken token = new CancellationToken())
-            => PatchAsync(token).Result;
+        public RestResult<string> Patch()
+            => PatchAsync().Result;
 
         /// <summary>
         /// Send a PATCH request to the specified Uri as a synchronous operation
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public RestResult<T> Patch<T>(CancellationToken token = new CancellationToken()) where T : new()
-            => PatchAsync<T>(token).Result;
+        public RestResult<T> Patch<T>() where T : new()
+            => PatchAsync<T>().Result;
 
         /// <summary>
         /// Send a PATCH request to the specified Uri as a synchronous operation
         /// </summary>
         /// <returns></returns>
-        public RestResult<byte[]> PatchAsByteArray(CancellationToken token = new CancellationToken())
-            => PatchAsByteArrayAsync(token).Result;
+        public RestResult<byte[]> PatchAsByteArray()
+            => PatchAsByteArrayAsync().Result;
 
         /// <summary>
         /// Send a PATCH request to the specified Uri as a synchronous operation
         /// </summary>
         /// <returns></returns>
-        public RestResult<Stream> PatchAsStream(CancellationToken token = new CancellationToken())
-            => PatchAsStreamAsync(token).Result;
+        public RestResult<Stream> PatchAsStream()
+            => PatchAsStreamAsync().Result;
 
         #endregion
 
@@ -1032,30 +1092,30 @@ namespace RestClient
         /// Send a CUSTOM CALL request to the specified Uri as a synchronous operation
         /// </summary>
         /// <returns></returns>
-        public RestResult<string> CustomCall(HttpMethod method, CancellationToken token = new CancellationToken())
-            => CustomCallAsync(method, token).Result;
+        public RestResult<string> CustomCall(HttpMethod method)
+            => CustomCallAsync(method).Result;
 
         /// <summary>
         /// Send a CUSTOM CALL request to the specified Uri as a synchronous operation
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public RestResult<T> CustomCall<T>(HttpMethod method, CancellationToken token = new CancellationToken()) where T : new()
-            => CustomCallAsync<T>(method, token).Result;
+        public RestResult<T> CustomCall<T>(HttpMethod method) where T : new()
+            => CustomCallAsync<T>(method).Result;
 
         /// <summary>
         /// Send a CUSTOM CALL request to the specified Uri as a synchronous operation
         /// </summary>
         /// <returns></returns>
-        public RestResult<byte[]> CustomCallAsByteArray(HttpMethod method, CancellationToken token = new CancellationToken())
-            => CustomCallAsByteArrayAsync(method, token).Result;
+        public RestResult<byte[]> CustomCallAsByteArray(HttpMethod method)
+            => CustomCallAsByteArrayAsync(method).Result;
 
         /// <summary>
         /// Send a CUSTOM CALL request to the specified Uri as a synchronous operation
         /// </summary>
         /// <returns></returns>
-        public RestResult<Stream> CustomCallAsStream(HttpMethod method, CancellationToken token = new CancellationToken())
-            => CustomCallAsStreamAsync(method, token).Result;
+        public RestResult<Stream> CustomCallAsStream(HttpMethod method)
+            => CustomCallAsStreamAsync(method).Result;
 
         #endregion
 
@@ -1085,8 +1145,8 @@ namespace RestClient
         /// <param name="url"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public RestResult<byte[]> Download(string url, CancellationToken token = new CancellationToken())
-            => DownloadAsync(url, token).Result;
+        public RestResult<byte[]> Download(string url)
+            => DownloadAsync(url).Result;
 
         /// <summary>
         /// Send a GET request to download file from the specified Uri as a synchronous operation
@@ -1094,8 +1154,8 @@ namespace RestClient
         /// <param name="url"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public RestResult<byte[]> Download(Uri url, CancellationToken token = new CancellationToken())
-            => DownloadAsync(url, token).Result;
+        public RestResult<byte[]> Download(Uri url)
+            => DownloadAsync(url).Result;
 
         #endregion
 
@@ -1456,13 +1516,13 @@ namespace RestClient
                     }
                     else
                     {
-                        responseMessage = HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).Result;
+                        responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
                     }
                 }
                 else
                 {
                     request.Content = new FormUrlEncodedContent(FormUrlEncodedKeyValues);
-                    responseMessage = HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).Result;
+                    responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
                 }
 
                 if (!isAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
