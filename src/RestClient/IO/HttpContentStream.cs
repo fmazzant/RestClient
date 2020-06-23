@@ -97,6 +97,7 @@ namespace RestClient.IO
                             TotalBytes = totalBytesToReceive,
                             CurrentBytes = bytesReceived
                         });
+                        if (cancellationToken.IsCancellationRequested) throw new TaskCanceledException();
                     }
                     result = Encoding.UTF8.GetString(ms.ToArray(), 0, (int)ms.Length);
                 }
@@ -132,6 +133,7 @@ namespace RestClient.IO
                             TotalBytes = totalBytesToReceive,
                             CurrentBytes = bytesReceived
                         });
+                        if (cancellationToken.IsCancellationRequested) throw new TaskCanceledException();
                     }
                     result = ms.ToArray();
                 }
@@ -184,7 +186,7 @@ namespace RestClient.IO
             {
                 try
                 {
-                    response = client.SendAsync(request, cancellationToken).Result;
+                    response = client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).Result;
                     ProgressChanged?.Invoke(this, new ProgressEventArgs
                     {
                         TotalBytes = 1,
