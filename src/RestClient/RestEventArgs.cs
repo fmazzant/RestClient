@@ -78,4 +78,36 @@ namespace RestClient
         /// </summary>
         public int ProgressPercentage => (int)(ProgressFloat * 100);
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class PreCompletedEventArgs
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public RestResult Result { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool IsCompleted { get; set; }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class CompletedEventArgs
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public RestResult Result { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public TimeSpan ExecutionTime { get; set; } = TimeSpan.Zero;
+    }
 }

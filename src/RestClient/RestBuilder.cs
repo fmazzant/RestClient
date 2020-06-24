@@ -688,14 +688,32 @@ namespace RestClient
         Action<RestResult> OnPreResultAction = null;
 
         /// <summary>
-        /// Sets onPreResult, occurs when the result of request il builded and it isn't completed ye
+        /// Sets onPreResult, occurs when the result of request il builded and it isn't completed yet
         /// </summary>
         /// <param name="restResult"></param>
         /// <returns></returns>
+        [Obsolete("OnPreResult method will be removed soon, use: .OnPreCompleted((e)=> { var result = e.Result; })", false)]
         public RestBuilder OnPreResult(Action<RestResult> restResult)
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnPreResultAction = restResult;
+            return result;
+        }
+
+        /// <summary>
+        /// On Pre-Completed Action
+        /// </summary>
+        Action<PreCompletedEventArgs> OnPreCompletedAction = null;
+
+        /// <summary>
+        /// Sets OnPreCompleted, occurs when the result of request il builded and it isn't completed yet
+        /// </summary>
+        /// <param name="restResult"></param>
+        /// <returns></returns>
+        public RestBuilder OnPreCompleted(Action<PreCompletedEventArgs> onPreCompleted)
+        {
+            var result = (RestBuilder)this.MemberwiseClone();
+            result.OnPreCompletedAction = onPreCompleted;
             return result;
         }
 
@@ -706,14 +724,32 @@ namespace RestClient
         /// <summary>
         /// On Completed Action
         /// </summary>
-        Action<EventArgs> OnCompletedAction = null;
+        Action<EventArgs> OnCompletedActionEA = null;
 
         /// <summary>
         /// Sets onCompleted action, occurs when the call is completed.
         /// </summary>
         /// <param name="onCompleted"></param>
         /// <returns></returns>
-        public RestBuilder OnCompleted(Action<EventArgs> onCompleted)
+        //[Obsolete("OnCompleted(Action<EventArgs> onCompleted) method will be removed soon, use: .OnPreCompleted((e)=> { var result = e.Result; })", false)]
+        //public RestBuilder OnCompleted(Action<EventArgs> onCompleted)
+        //{
+        //    var result = (RestBuilder)this.MemberwiseClone();
+        //    result.OnCompletedActionEA = onCompleted;
+        //    return result;
+        //}
+
+        /// <summary>
+        /// On Completed Action
+        /// </summary>
+        Action<CompletedEventArgs> OnCompletedAction = null;
+
+        /// <summary>
+        /// Sets onCompleted action, occurs when the call is completed.
+        /// </summary>
+        /// <param name="onCompleted"></param>
+        /// <returns></returns>
+        public RestBuilder OnCompleted(Action<CompletedEventArgs> onCompleted)
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnCompletedAction = onCompleted;
@@ -742,6 +778,8 @@ namespace RestClient
         }
 
         #endregion
+
+        #region [ Http Methods ]
 
         #region [ Get ]
         /// <summary>
@@ -1167,6 +1205,8 @@ namespace RestClient
 
         #endregion
 
+        #endregion
+
         #region [ Send ]
 
         /// <summary>
@@ -1189,17 +1229,7 @@ namespace RestClient
             RestResult<string> response = null;
             try
             {
-                string url = Properties.EndPoint.OriginalString;
-
-                Commands.ForEach(c => url = url + c);
-
-                if (Parameters.Count > 0)
-                {
-                    url = $"{url}?";
-                    foreach (string key in Parameters.Keys)
-                        url += $"{key}={Parameters[key]}&";
-                    url = url.Substring(0, url.Length - 1);
-                }
+                string url = BuildFinalUrl();
 
                 if (Logger) Console.WriteLine(url);
 
@@ -1210,10 +1240,13 @@ namespace RestClient
                     Url = url
                 };
                 OnStartAction?.Invoke(startEventArgs);
-                if (startEventArgs.Cancel) return null;
+
+                if (startEventArgs.Cancel) throw new OperationCanceledException();
 
                 HttpRequestMessage request = new HttpRequestMessage(method, url);
                 HttpResponseMessage responseMessage = null;
+
+                #region [ Sending ]
 
                 if (!IsEnabledFormUrlEncoded)
                 {
@@ -1260,13 +1293,21 @@ namespace RestClient
                     response.Content = result;
                 }
 
+                #endregion
+
                 OnPreResultAction?.Invoke(response);
-                OnCompletedAction?.Invoke(new EventArgs());
+                OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
+
+                OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response });
+                OnCompletedActionEA?.Invoke(new EventArgs());
             }
             catch (Exception ex)
             {
                 OnExceptionAction?.Invoke(ex);
                 response = RestResult<string>.CreateFromException(ex);
+
+                OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response });
+                OnCompletedActionEA?.Invoke(new EventArgs());
             }
             return response;
         }
@@ -1286,17 +1327,7 @@ namespace RestClient
             RestResult<Stream> response = null;
             try
             {
-                string url = Properties.EndPoint.OriginalString;
-
-                Commands.ForEach(c => url = url + c);
-
-                if (Parameters.Count > 0)
-                {
-                    url = $"{url}?";
-                    foreach (string key in Parameters.Keys)
-                        url += $"{key}={Parameters[key]}&";
-                    url = url.Substring(0, url.Length - 1);
-                }
+                string url = BuildFinalUrl();
 
                 if (Logger) Console.WriteLine(url);
 
@@ -1311,6 +1342,8 @@ namespace RestClient
 
                 HttpRequestMessage request = new HttpRequestMessage(method, url);
                 HttpResponseMessage responseMessage = null;
+
+                #region [ Sending ]
 
                 if (!IsEnabledFormUrlEncoded)
                 {
@@ -1356,13 +1389,21 @@ namespace RestClient
                     response.Content = await responseMessage.Content.ReadAsStreamAsync();
                 }
 
+                #endregion
+
                 OnPreResultAction?.Invoke(response);
-                OnCompletedAction?.Invoke(new EventArgs());
+                OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
+
+                OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response });
+                OnCompletedActionEA?.Invoke(new EventArgs());
             }
             catch (Exception ex)
             {
                 OnExceptionAction?.Invoke(ex);
                 response = RestResult<Stream>.CreateFromException(ex);
+
+                OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response });
+                OnCompletedActionEA?.Invoke(new EventArgs());
             }
             return response;
         }
@@ -1382,17 +1423,7 @@ namespace RestClient
             RestResult<byte[]> response = null;
             try
             {
-                string url = Properties.EndPoint.OriginalString;
-
-                Commands.ForEach(c => url = url + c);
-
-                if (Parameters.Count > 0)
-                {
-                    url = $"{url}?";
-                    foreach (string key in Parameters.Keys)
-                        url += $"{key}={Parameters[key]}&";
-                    url = url.Substring(0, url.Length - 1);
-                }
+                string url = BuildFinalUrl();
 
                 if (Logger) Console.WriteLine(url);
 
@@ -1408,6 +1439,8 @@ namespace RestClient
 
                 HttpRequestMessage request = new HttpRequestMessage(method, url);
                 HttpResponseMessage responseMessage = null;
+
+                #region [ Sending ]
 
                 if (!IsEnabledFormUrlEncoded)
                 {
@@ -1453,13 +1486,21 @@ namespace RestClient
                     response.StringContent = BitConverter.ToString(response.Content);
                 }
 
+                #endregion
+
                 OnPreResultAction?.Invoke(response);
-                OnCompletedAction?.Invoke(new EventArgs());
+                OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
+
+                OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response });
+                OnCompletedActionEA?.Invoke(new EventArgs());
             }
             catch (Exception ex)
             {
                 OnExceptionAction?.Invoke(ex);
                 response = RestResult<byte[]>.CreateFromException(ex);
+
+                OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response });
+                OnCompletedActionEA?.Invoke(new EventArgs());
             }
             return response;
         }
@@ -1481,17 +1522,7 @@ namespace RestClient
             RestResult<T> response = null;
             try
             {
-                string url = Properties.EndPoint.OriginalString;
-
-                Commands.ForEach(c => url = url + c);
-
-                if (Parameters.Count > 0)
-                {
-                    url = $"{url}?";
-                    foreach (string key in Parameters.Keys)
-                        url += $"{key}={Parameters[key]}&";
-                    url = url.Substring(0, url.Length - 1);
-                }
+                string url = BuildFinalUrl();
 
                 if (Logger) Console.WriteLine(url);
 
@@ -1507,6 +1538,8 @@ namespace RestClient
 
                 HttpRequestMessage request = new HttpRequestMessage(method, url);
                 HttpResponseMessage responseMessage = null;
+
+                #region [ Sending ]
 
                 if (!IsEnabledFormUrlEncoded)
                 {
@@ -1552,16 +1585,47 @@ namespace RestClient
                     response.Content = (T)Serializer.DeserializeObject(response.StringContent, typeof(T));
                 }
 
+                #endregion
+
                 OnPreResultAction?.Invoke(response);
-                OnCompletedAction?.Invoke(new EventArgs());
+                OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
+
+                OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response });
+                OnCompletedActionEA?.Invoke(new EventArgs());
             }
             catch (Exception ex)
             {
                 OnExceptionAction?.Invoke(ex);
                 response = RestResult<T>.CreateFromException(ex);
+
+                OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response });
+                OnCompletedActionEA?.Invoke(new EventArgs());
             }
             return response;
         }
+
+        /// <summary>
+        /// Builder final url
+        /// </summary>
+        /// <returns></returns>
+        private string BuildFinalUrl()
+        {
+            StringBuilder urlBuilder = new StringBuilder();
+
+            urlBuilder.Append(Properties.EndPoint.OriginalString);
+            Commands.ForEach(c => urlBuilder.Append(c));
+
+            if (Parameters.Count > 0)
+            {
+                urlBuilder.Append($"?");
+                foreach (string key in Parameters.Keys)
+                    urlBuilder.Append($"{key}={Parameters[key]}&");
+                urlBuilder.Remove(urlBuilder.Length - 1, 1);
+            }
+
+            return urlBuilder.ToString();
+        }
+
         #endregion
     }
 }
