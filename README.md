@@ -312,7 +312,7 @@ A CancellationToken enables cooperative cancellation between threads, thread poo
 You create a cancellation token by instantiating a CancellationTokenSource object, 
 which manages cancellation tokens retrieved from its CancellationTokenSource.
 
-The following example uses cancellation token to stopped execution:
+The following example uses cancellation token to stop execution:
 
 ```c#
 // Define the cancellation token.
