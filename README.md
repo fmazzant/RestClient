@@ -455,7 +455,7 @@ var result = rest
     .Payload(new BigObject{})
     .Post<ResponseObject>();
 ```
-### OnPreResult
+### OnPreResult -> OnPreCompleted (renaming)
 
 OnPreResult occurs when the request is completing but  still hasn't completed yet. 
 When OnPreResult is raises we can todo somethings, for example  get and use the result of request.
@@ -463,8 +463,8 @@ When OnPreResult is raises we can todo somethings, for example  get and use the 
 ```c#
 var result = rest
     .Url("[URL]")
-    .OnPreResult((r) => { 
-        DoSomethings(r); 
+    .OnPreCompleted((r) => { 
+        DoSomethings(r.Result); 
     })
     .Payload(new BigObject{})
     .Post<ResponseObject>();
@@ -484,7 +484,7 @@ var result = rest
     .Post<ResponseObject>();
 ```
 
-### OnCompleted
+### OnCompleted (changed type of parameter, from EventArgs to OnCompletedEventArgs)
 
 OnCompleted occurs when the request is completed. 
 
