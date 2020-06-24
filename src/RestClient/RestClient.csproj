@@ -15,10 +15,9 @@
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.3.0</Version>
+    <Version>1.4.0-rc1</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
-    <PackageReleaseNotes>- Cancellation Token
-- Download.</PackageReleaseNotes>
+    <PackageReleaseNotes>- Handlers refactoring</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
