@@ -286,6 +286,53 @@ var result = await rest
     .Payload(new Object{})
     .DeleteAsync<ResponseObject>();
 ```
+### Download
+
+The DOWNLOAD method download the specified resource.
+
+```c#
+var result = rest
+    .Download("[URL]");
+
+var result = await rest
+    .DownloadAsync("[URL]");
+```
+Is possible display the download status with OnDownloadProgress.
+
+```c#
+var result = await rest
+    .OnDownloadProgress((d) => Console.WriteLine($"{d.CurrentBytes}/{d.TotalBytes}"))
+    .DownloadAsync("[URL]");
+```
+
+### CancellationToken
+
+Propagates notification that operations should be canceled.
+
+A CancellationToken enables cooperative cancellation between threads, thread pool work items, or Task objects. 
+You create a cancellation token by instantiating a CancellationTokenSource object, 
+which manages cancellation tokens retrieved from its CancellationTokenSource.
+
+The following example uses cancellation token to stopped execution:
+
+```c#
+// Define the cancellation token.
+CancellationTokenSource source = new CancellationTokenSource();
+CancellationToken token = source.Token;
+
+// Schedules a cancel operation on this System.Threading.CancellationTokenSource
+// after the specified number of milliseconds
+token.CancelAfter(3000);
+
+var file1 = Rest.Build().DownloadAsync("[URL FILE1]", token.Token);
+var file2 = Rest.Build().DownloadAsync("[URL FILE2]", token.Token);
+var get1 = Rest.Build().Url("[URL GET1]").GetAsync<MyObject>(token.Token);
+
+Task.WaitAll(file1, file2, get1);
+```
+
+After cancellation requested it throws a TaskCancellatedException. 
+The exception will be encapsulated into RestResult object.
 
 ### Custom Call
 
@@ -417,8 +464,8 @@ When OnPreResult is raises we can todo somethings, for example  get and use the 
 ```c#
 var result = rest
     .Url("[URL]")
-    .OnPreResult((e) => { 
-        DoSomethings(e); 
+    .OnPreResult((r) => { 
+        DoSomethings(r); 
     })
     .Payload(new BigObject{})
     .Post<ResponseObject>();

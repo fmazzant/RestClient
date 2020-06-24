@@ -97,6 +97,7 @@ namespace RestClient.IO
                             TotalBytes = totalBytesToReceive,
                             CurrentBytes = bytesReceived
                         });
+                        if (cancellationToken.IsCancellationRequested) throw new TaskCanceledException();
                     }
                     result = Encoding.UTF8.GetString(ms.ToArray(), 0, (int)ms.Length);
                 }
@@ -132,6 +133,7 @@ namespace RestClient.IO
                             TotalBytes = totalBytesToReceive,
                             CurrentBytes = bytesReceived
                         });
+                        if (cancellationToken.IsCancellationRequested) throw new TaskCanceledException();
                     }
                     result = ms.ToArray();
                 }
@@ -170,21 +172,30 @@ namespace RestClient.IO
                                TotalBytes = total,
                                CurrentBytes = sent
                            });
+                           if (cancellationToken.IsCancellationRequested) throw new TaskCanceledException();
                        });
                     request.Content = streamContent;
                 }
-                response = client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).Result;
+                response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            }
+            catch (TaskCanceledException)
+            {
+                throw new TaskCanceledException();
             }
             catch (Exception)
             {
                 try
                 {
-                    response = client.SendAsync(request, cancellationToken).Result;
+                    response = client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).Result;
                     ProgressChanged?.Invoke(this, new ProgressEventArgs
                     {
                         TotalBytes = 1,
                         CurrentBytes = 1
                     });
+                }
+                catch (TaskCanceledException)
+                {
+                    throw new TaskCanceledException();
                 }
                 catch (Exception)
                 {
