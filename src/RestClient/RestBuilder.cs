@@ -36,6 +36,7 @@ namespace RestClient
     using RestClient.Serialization.Xml;
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Net;
     using System.Net.Http;
@@ -1264,9 +1265,13 @@ namespace RestClient
             Type payloadContentType = null,
             CancellationToken cancellationToken = new CancellationToken())
         {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             RestResult<string> response = null;
             try
             {
+
                 string url = BuildFinalUrl();
 
                 if (Logger) Console.WriteLine(url);
@@ -1335,19 +1340,19 @@ namespace RestClient
                 #endregion
 
                 OnPreResultAction?.Invoke(response);
-                OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
-
-                OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response });
-                OnCompletedActionEA?.Invoke(new EventArgs());
+                OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });  
             }
             catch (Exception ex)
             {
                 OnExceptionAction?.Invoke(ex);
                 response = RestResult<string>.CreateFromException(ex);
-
-                OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response });
-                OnCompletedActionEA?.Invoke(new EventArgs());
             }
+
+            stopwatch.Stop();
+
+            OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
+            OnCompletedActionEA?.Invoke(new EventArgs());
+
             return response;
         }
 
@@ -1363,6 +1368,9 @@ namespace RestClient
             Type payloadContentType = null,
             CancellationToken cancellationToken = new CancellationToken())
         {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             RestResult<Stream> response = null;
             try
             {
@@ -1432,18 +1440,18 @@ namespace RestClient
 
                 OnPreResultAction?.Invoke(response);
                 OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
-
-                OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response });
-                OnCompletedActionEA?.Invoke(new EventArgs());
             }
             catch (Exception ex)
             {
                 OnExceptionAction?.Invoke(ex);
                 response = RestResult<Stream>.CreateFromException(ex);
-
-                OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response });
-                OnCompletedActionEA?.Invoke(new EventArgs());
             }
+
+            stopwatch.Stop();
+
+            OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
+            OnCompletedActionEA?.Invoke(new EventArgs());
+
             return response;
         }
 
@@ -1459,6 +1467,9 @@ namespace RestClient
             Type payloadContentType = null,
             CancellationToken cancellationToken = new CancellationToken())
         {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             RestResult<byte[]> response = null;
             try
             {
@@ -1530,18 +1541,18 @@ namespace RestClient
 
                 OnPreResultAction?.Invoke(response);
                 OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
-
-                OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response });
-                OnCompletedActionEA?.Invoke(new EventArgs());
             }
             catch (Exception ex)
             {
                 OnExceptionAction?.Invoke(ex);
                 response = RestResult<byte[]>.CreateFromException(ex);
-
-                OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response });
-                OnCompletedActionEA?.Invoke(new EventArgs());
             }
+
+            stopwatch.Stop();
+
+            OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
+            OnCompletedActionEA?.Invoke(new EventArgs());
+
             return response;
         }
 
@@ -1559,6 +1570,9 @@ namespace RestClient
             CancellationToken cancellationToken = new CancellationToken())
             where T : new()
         {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             RestResult<T> response = null;
             try
             {
@@ -1629,18 +1643,18 @@ namespace RestClient
 
                 OnPreResultAction?.Invoke(response);
                 OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
-
-                OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response });
-                OnCompletedActionEA?.Invoke(new EventArgs());
             }
             catch (Exception ex)
             {
                 OnExceptionAction?.Invoke(ex);
                 response = RestResult<T>.CreateFromException(ex);
-
-                OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response });
-                OnCompletedActionEA?.Invoke(new EventArgs());
             }
+
+            stopwatch.Stop();
+
+            OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
+            OnCompletedActionEA?.Invoke(new EventArgs());
+
             return response;
         }
 
