@@ -719,6 +719,27 @@ namespace RestClient
 
         #endregion
 
+        #region [ OnPreviewContentAsString ]
+
+        /// <summary>
+        /// On Preview Content As String Action
+        /// </summary>
+        Action<PreviewContentAsStringEventArgs> OnPreviewContentAsStringAction = null;
+
+        /// <summary>
+        ///  Sets OnPreviewContentAsString, displays the response as string
+        /// </summary>
+        /// <param name="onPreviewContent"></param>
+        /// <returns></returns>
+        public RestBuilder OnPreviewContentAsString(Action<PreviewContentAsStringEventArgs> onPreviewContent)
+        {
+            var result = (RestBuilder)this.MemberwiseClone();
+            result.OnPreviewContentAsStringAction = onPreviewContent;
+            return result;
+        }
+
+        #endregion
+
         #region [ Completed ]
 
         /// <summary>
@@ -1289,7 +1310,8 @@ namespace RestClient
                     streamContent.ProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
                     response = RestResult<string>.CreateInstanceFrom<string>(responseMessage);
                     var result = await streamContent.ReadStringAsStreamAsync(cancellationToken);
-                    response.StringContent = result;
+                    OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = result });
+                    //response.StringContent = result;
                     response.Content = result;
                 }
 
@@ -1385,7 +1407,7 @@ namespace RestClient
                 {
                     streamContent.ProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
                     response = RestResult<Stream>.CreateInstanceFrom<Stream>(responseMessage);
-                    response.StringContent = null;
+                    OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = string.Empty });
                     response.Content = await responseMessage.Content.ReadAsStreamAsync();
                 }
 
@@ -1483,7 +1505,8 @@ namespace RestClient
                     streamContent.ProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
                     response = RestResult<byte[]>.CreateInstanceFrom<byte[]>(responseMessage);
                     response.Content = await streamContent.ReadBytesAsStreamAsync(cancellationToken);
-                    response.StringContent = BitConverter.ToString(response.Content);
+                    //response.StringContent = BitConverter.ToString(response.Content);
+                    OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = BitConverter.ToString(response.Content) });
                 }
 
                 #endregion
@@ -1581,8 +1604,8 @@ namespace RestClient
                 {
                     streamContent.ProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
                     response = Generic.RestResult<T>.CreateInstanceFrom<T>(responseMessage);
-                    response.StringContent = await streamContent.ReadStringAsStreamAsync(cancellationToken);
-                    response.Content = (T)Serializer.DeserializeObject(response.StringContent, typeof(T));
+                    response.Content = (T)Serializer.DeserializeObject(await streamContent.ReadStringAsStreamAsync(cancellationToken), typeof(T));
+                    OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = await streamContent.ReadStringAsStreamAsync(cancellationToken) });
                 }
 
                 #endregion

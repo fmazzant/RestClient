@@ -263,6 +263,8 @@ namespace RestClient
             /// <summary>
             /// Gets response's string content
             /// </summary>
+            
+            [Obsolete("Use: OnPreviewContentAsString((e)=> { }) to check the response as string", true)]
             public string StringContent { get; internal set; }
 
             /// <summary>
