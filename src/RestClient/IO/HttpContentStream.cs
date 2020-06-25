@@ -49,6 +49,21 @@ namespace RestClient.IO
         public event ProgressBytesChangedEventHandler ProgressChanged;
         #endregion
 
+        #region [ Private ]
+
+        /// <summary>
+        /// Lets keep buffer of 20kb
+        /// </summary>
+        private const int DefaultBufferSize = 5 * 4096 * 5; //100kb
+        //private const int defaultBufferSize = 5 * 4096; //20kb
+
+        /// <summary>
+        /// Buffer size
+        /// </summary>
+        private int BufferSize { get; set; }
+
+        #endregion
+
         #region [ Public Properties ]
         /// <summary>
         /// Gets HTTP content
@@ -62,9 +77,21 @@ namespace RestClient.IO
         /// </summary>
         /// <param name="httpContent">HTTP content</param>
         public HttpContentStream(HttpContent httpContent)
+            : this(httpContent, DefaultBufferSize)
+        {
+
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the VarGroup.Mobile.Core.IO.HttpContentStream class.
+        /// </summary>
+        /// <param name="httpContent"></param>
+        /// <param name="bufferSize"></param>
+        public HttpContentStream(HttpContent httpContent, int bufferSize)
             : base()
         {
             this.Content = httpContent;
+            this.BufferSize = bufferSize;
         }
         #endregion
 
@@ -83,7 +110,7 @@ namespace RestClient.IO
             string result = string.Empty;
             using (Stream stream = await this.Content.ReadAsStreamAsync())
             {
-                byte[] data = new byte[1024];
+                byte[] data = new byte[BufferSize];
                 using (MemoryStream ms = new MemoryStream())
                 {
                     int numBytesRead;
@@ -119,7 +146,7 @@ namespace RestClient.IO
             byte[] result = new byte[0];
             using (Stream stream = await this.Content.ReadAsStreamAsync())
             {
-                byte[] data = new byte[1024];
+                byte[] data = new byte[BufferSize];
                 using (MemoryStream ms = new MemoryStream())
                 {
                     int numBytesRead;
@@ -164,7 +191,7 @@ namespace RestClient.IO
                 {
                     var streamContent = new HttpContentStreamProgressable(
                        request.Content,
-                       4096,
+                       BufferSize,
                        (sent, total) =>
                        {
                            ProgressChanged?.Invoke(this, new ProgressEventArgs
