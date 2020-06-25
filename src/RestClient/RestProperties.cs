@@ -60,6 +60,6 @@ namespace RestClient
         /// <summary>
         /// Specifies Buffer Size. Default 20kb.
         /// </summary>
-        public int BufferSize { get; internal set; } = DefaultBufferSize;
+        public int BufferSize { get; set; } = DefaultBufferSize;
     }
 }
