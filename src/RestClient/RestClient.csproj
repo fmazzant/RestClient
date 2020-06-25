@@ -15,11 +15,11 @@
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.4.0-rc3</Version>
+    <Version>1.4.0-rc4</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
     <PackageReleaseNotes>- Added OnPreCompleted, OnCompleted and OnPreviewContentAsString
 - Refactoring some methods.
-- Added BufferSize
+- Added BufferSize and check on buffer size value
 </PackageReleaseNotes>
   </PropertyGroup>
 

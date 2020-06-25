@@ -321,12 +321,13 @@ namespace RestClient
         #region [ Buffer Size ]
 
         /// <summary>
-        /// Sets the buffer size 
+        /// Sets the buffer size. 
         /// </summary>
         /// <param name="bufferSize"></param>
         /// <returns></returns>
         public RestBuilder BufferSize(int bufferSize)
         {
+            if (bufferSize <= 0) throw new ArgumentOutOfRangeException(nameof(bufferSize));
             var result = (RestBuilder)this.MemberwiseClone();
             result.Properties.BufferSize = bufferSize;
             return result;
@@ -1391,7 +1392,7 @@ namespace RestClient
                         HttpContent hc = new StringContent(json, Encoding.UTF8, Serializer.MediaTypeAsString);
                         request.Content = hc;
 
-                        using (HttpContentStream streamContent = new HttpContentStream(request.Content,Properties.BufferSize))
+                        using (HttpContentStream streamContent = new HttpContentStream(request.Content, Properties.BufferSize))
                         {
                             streamContent.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
                             responseMessage = await streamContent.WriteStringAsStreamAsync(HttpClient, request, cancellationToken);
