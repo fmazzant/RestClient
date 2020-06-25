@@ -28,6 +28,28 @@ or we can use GetAsync() method:
 var result = await rest.Url("[URL]").GetAsync();
 ```
 
+### RestProperties
+
+To use RestProperties to configure yuor rest root point. To create a simple configuration, just like this:
+
+```c#
+RestProperties properties = new RestProperties
+{
+    EndPoint = new Uri("[URL]"),
+    BufferSize = 4096,
+    CertificateOption = ClientCertificateOption.Manual,
+    Timeout = TimeSpan.FromMinutes(2)
+};
+```
+
+Use Build() method with properties to create a RestBuilder from Rest:
+
+```c#
+var rest = Rest.Build(properties);
+```
+
+
+
 ### Certificate Validation
 
 Validation of X.509 certificates is essential to create secure SSL/TLS sessions not vulnerable to man-in-the-middle attacks.
