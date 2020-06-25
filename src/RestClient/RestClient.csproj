@@ -5,7 +5,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <NeutralLanguage>en</NeutralLanguage>
     <Authors>Federico Mazzanti</Authors>
-    <Description>RestClient is a library for .net that can help you to consume REST services</Description>
+    <Description>RestClient is a library for .net that can help you to consume REST services.</Description>
     <RepositoryType>GitHub</RepositoryType>
     <RepositoryUrl>https://github.com/fmazzant/RestClient</RepositoryUrl>
     <PackageTags>rest-client, c-sharp, dotnet-standard, http-client, restclient, mafe, xml, json,</PackageTags>
@@ -17,7 +17,7 @@
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
     <Version>1.4.0-rc2</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
-    <PackageReleaseNotes>- Added OnPreCompleted and OnCompleted.
+    <PackageReleaseNotes>- Added OnPreCompleted, OnCompleted and OnPreviewContentAsString
 - Refactoring some methods.
 </PackageReleaseNotes>
   </PropertyGroup>
