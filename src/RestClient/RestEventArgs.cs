@@ -72,7 +72,6 @@ namespace RestClient
         /// </summary>
         public float ProgressFloat => (TotalBytes == 0) ? 0 : (float)((float)CurrentBytes / (float)TotalBytes);
 
-
         /// <summary>
         /// Get a value indication the progress percentage number of comminication. The value can be from 0 to 100
         /// </summary>
@@ -80,33 +79,41 @@ namespace RestClient
     }
 
     /// <summary>
-    /// 
+    ///  Represents the class that contains the content as string of response.
+    /// </summary>
+    public class PreviewContentAsStringEventArgs
+    {
+        public string ContentAsString { get; set; }
+    }
+
+    /// <summary>
+    /// Represents the class that contain pre completed event data, and provides a value to use when the communication is not completed yet.
     /// </summary>
     public class PreCompletedEventArgs
     {
         /// <summary>
-        /// 
+        /// The result of
         /// </summary>
         public RestResult Result { get; set; }
 
         /// <summary>
-        /// 
+        /// true is completed
         /// </summary>
         public bool IsCompleted { get; set; }
     }
 
     /// <summary>
-    /// 
+    /// Represents the class that contain completed event data, and provides a value to use when the communication is completed.
     /// </summary>
     public class CompletedEventArgs
     {
         /// <summary>
-        /// 
+        /// The result of
         /// </summary>
         public RestResult Result { get; set; }
 
         /// <summary>
-        /// 
+        /// Time of execution
         /// </summary>
         public TimeSpan ExecutionTime { get; set; } = TimeSpan.Zero;
     }
