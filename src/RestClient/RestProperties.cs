@@ -51,5 +51,15 @@ namespace RestClient
         /// Specifies timeout. Default 100.000 milliseconds.
         /// </summary>
         public TimeSpan Timeout { get; set; } = TimeSpan.FromMilliseconds(100000);
+
+        /// <summary>
+        /// Default buffer size 20k
+        /// </summary>
+        private const int DefaultBufferSize = 5 * 4096; //20kb
+
+        /// <summary>
+        /// Specifies Buffer Size. Default 20kb.
+        /// </summary>
+        public int BufferSize { get; internal set; } = DefaultBufferSize;
     }
 }

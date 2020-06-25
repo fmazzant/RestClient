@@ -54,8 +54,7 @@ namespace RestClient.IO
         /// <summary>
         /// Lets keep buffer of 20kb
         /// </summary>
-        private const int DefaultBufferSize = 5 * 4096 * 5; //100kb
-        //private const int defaultBufferSize = 5 * 4096; //20kb
+        private const int DefaultBufferSize = 5 * 4096; //20kb
 
         /// <summary>
         /// Buffer size

@@ -19,6 +19,7 @@
     <AssemblyName>Mafe.RestClient</AssemblyName>
     <PackageReleaseNotes>- Added OnPreCompleted, OnCompleted and OnPreviewContentAsString
 - Refactoring some methods.
+- Added BufferSize
 </PackageReleaseNotes>
   </PropertyGroup>
 
