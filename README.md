@@ -499,7 +499,7 @@ var result = rest
     .Post<ResponseObject>();
 ```
 
-### OnCompleted (changed type of parameter, from EventArgs to OnCompletedEventArgs)
+### OnCompleted (changed type of parameter, from EventArgs to CompletedEventArgs)
 
 OnCompleted occurs when the request is completed. 
 
