@@ -1360,7 +1360,7 @@ namespace RestClient
                     Url = url
                 };
                 OnStartAction?.Invoke(startEventArgs);
-                if (startEventArgs.Cancel) return null;
+                if (startEventArgs.Cancel) throw new OperationCanceledException();
 
                 HttpRequestMessage request = new HttpRequestMessage(method, url);
                 HttpResponseMessage responseMessage = null;
@@ -1457,7 +1457,7 @@ namespace RestClient
                 };
 
                 OnStartAction?.Invoke(startEventArgs);
-                if (startEventArgs.Cancel) return null;
+                if (startEventArgs.Cancel) throw new OperationCanceledException();
 
                 HttpRequestMessage request = new HttpRequestMessage(method, url);
                 HttpResponseMessage responseMessage = null;
@@ -1557,7 +1557,7 @@ namespace RestClient
                 };
 
                 OnStartAction?.Invoke(startEventArgs);
-                if (startEventArgs.Cancel) return null;
+                if (startEventArgs.Cancel) throw new OperationCanceledException();
 
                 HttpRequestMessage request = new HttpRequestMessage(method, url);
                 HttpResponseMessage responseMessage = null;
