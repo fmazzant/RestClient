@@ -318,6 +318,22 @@ namespace RestClient
 
         #endregion
 
+        #region [ Buffer Size ]
+
+        /// <summary>
+        /// Sets the buffer size 
+        /// </summary>
+        /// <param name="bufferSize"></param>
+        /// <returns></returns>
+        public RestBuilder BufferSize(int bufferSize)
+        {
+            var result = (RestBuilder)this.MemberwiseClone();
+            result.Properties.BufferSize = bufferSize;
+            return result;
+        }
+
+        #endregion
+
         #region [ Header ]
 
         /// <summary>
@@ -1277,7 +1293,7 @@ namespace RestClient
                         HttpContent hc = new StringContent(json, Encoding.UTF8, Serializer.MediaTypeAsString);
                         request.Content = hc;
 
-                        using (HttpContentStream streamContent = new HttpContentStream(request.Content))
+                        using (HttpContentStream streamContent = new HttpContentStream(request.Content, Properties.BufferSize))
                         {
                             streamContent.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
                             responseMessage = await streamContent.WriteStringAsStreamAsync(HttpClient, request, cancellationToken);
@@ -1305,7 +1321,7 @@ namespace RestClient
                         return await SendAsStringAsync(method, payloadContent, payloadContentType, cancellationToken);
                 }
 
-                using (HttpContentStream streamContent = new HttpContentStream(responseMessage.Content))
+                using (HttpContentStream streamContent = new HttpContentStream(responseMessage.Content, Properties.BufferSize))
                 {
                     streamContent.ProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
                     response = RestResult<string>.CreateInstanceFrom<string>(responseMessage);
@@ -1375,7 +1391,7 @@ namespace RestClient
                         HttpContent hc = new StringContent(json, Encoding.UTF8, Serializer.MediaTypeAsString);
                         request.Content = hc;
 
-                        using (HttpContentStream streamContent = new HttpContentStream(request.Content))
+                        using (HttpContentStream streamContent = new HttpContentStream(request.Content,Properties.BufferSize))
                         {
                             streamContent.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
                             responseMessage = await streamContent.WriteStringAsStreamAsync(HttpClient, request, cancellationToken);
@@ -1403,7 +1419,7 @@ namespace RestClient
                         return await SendAsStreamAsync(method, payloadContent, payloadContentType, cancellationToken);
                 }
 
-                using (HttpContentStream streamContent = new HttpContentStream(responseMessage.Content))
+                using (HttpContentStream streamContent = new HttpContentStream(responseMessage.Content, Properties.BufferSize))
                 {
                     streamContent.ProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
                     response = RestResult<Stream>.CreateInstanceFrom<Stream>(responseMessage);
@@ -1472,7 +1488,7 @@ namespace RestClient
                         HttpContent hc = new StringContent(json, Encoding.UTF8, Serializer.MediaTypeAsString);
                         request.Content = hc;
 
-                        using (HttpContentStream streamContent = new HttpContentStream(request.Content))
+                        using (HttpContentStream streamContent = new HttpContentStream(request.Content, Properties.BufferSize))
                         {
                             streamContent.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
                             responseMessage = await streamContent.WriteStringAsStreamAsync(HttpClient, request, cancellationToken);
@@ -1500,7 +1516,7 @@ namespace RestClient
                         return await SendAsByteArrayAsync(method, payloadContent, payloadContentType, cancellationToken);
                 }
 
-                using (HttpContentStream streamContent = new HttpContentStream(responseMessage.Content))
+                using (HttpContentStream streamContent = new HttpContentStream(responseMessage.Content, Properties.BufferSize))
                 {
                     streamContent.ProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
                     response = RestResult<byte[]>.CreateInstanceFrom<byte[]>(responseMessage);
@@ -1572,7 +1588,7 @@ namespace RestClient
                         HttpContent hc = new StringContent(json, Encoding.UTF8, Serializer.MediaTypeAsString);
                         request.Content = hc;
 
-                        using (HttpContentStream streamContent = new HttpContentStream(request.Content))
+                        using (HttpContentStream streamContent = new HttpContentStream(request.Content, Properties.BufferSize))
                         {
                             streamContent.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
                             responseMessage = await streamContent.WriteStringAsStreamAsync(HttpClient, request, cancellationToken);
@@ -1600,7 +1616,7 @@ namespace RestClient
                         return await SendAsync<T>(method, payloadContent, payloadContentType, cancellationToken);
                 }
 
-                using (HttpContentStream streamContent = new HttpContentStream(responseMessage.Content))
+                using (HttpContentStream streamContent = new HttpContentStream(responseMessage.Content, Properties.BufferSize))
                 {
                     streamContent.ProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
                     response = Generic.RestResult<T>.CreateInstanceFrom<T>(responseMessage);

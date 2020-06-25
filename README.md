@@ -189,6 +189,18 @@ var result = rest
     .Get<ResponseObject>();
 ```
 
+### BufferSize
+
+BufferSize can be use to set the buffer size during upload and download stream. Default value is 20Kb
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .BufferSize(4096 * 5 * 5) //100Kb
+    .Get();
+```
+
+
 ### Get
 
 GET is one of the most common HTTP methods and GET is used to request data from a specified resource 
