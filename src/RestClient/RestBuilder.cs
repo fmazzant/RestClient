@@ -1271,7 +1271,6 @@ namespace RestClient
             RestResult<string> response = null;
             try
             {
-
                 string url = BuildFinalUrl();
 
                 if (Logger) Console.WriteLine(url);
