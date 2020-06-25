@@ -455,6 +455,21 @@ var result = rest
     .Payload(new BigObject{})
     .Post<ResponseObject>();
 ```
+
+### OnPreviewContentAsString
+
+OnPreviewContentAsString is an event that triggers when the response is received and it isn't no deserialized yet.
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .OnPreviewContentAsString((e) => { 
+        DoSomethings(e); 
+    })
+    .Payload(new BigObject{})
+    .Post<ResponseObject>();
+```
+
 ### OnPreResult -> OnPreCompleted (renaming)
 
 OnPreResult occurs when the request is completing but  still hasn't completed yet. 
