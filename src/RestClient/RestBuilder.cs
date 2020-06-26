@@ -1247,7 +1247,7 @@ namespace RestClient
 
         #endregion
 
-        #region [ Send ]
+        #region [ Fetch ]
 
         /// <summary>
         /// isAfterRefreshTokenCalled
