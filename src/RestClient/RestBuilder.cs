@@ -38,6 +38,7 @@ namespace RestClient
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
+    using System.Linq;
     using System.Net;
     using System.Net.Http;
     using System.Net.Http.Headers;
@@ -1339,7 +1340,7 @@ namespace RestClient
                 #endregion
 
                 OnPreResultAction?.Invoke(response);
-                OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });  
+                OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
             }
             catch (Exception ex)
             {
@@ -1666,14 +1667,13 @@ namespace RestClient
             StringBuilder urlBuilder = new StringBuilder();
 
             urlBuilder.Append(Properties.EndPoint.OriginalString);
-            Commands.ForEach(c => urlBuilder.Append(c));
+
+            urlBuilder.Append(string.Join("", Commands.Select(c => $"{c}")));
 
             if (Parameters.Count > 0)
             {
                 urlBuilder.Append($"?");
-                foreach (string key in Parameters.Keys)
-                    urlBuilder.Append($"{key}={Parameters[key]}&");
-                urlBuilder.Remove(urlBuilder.Length - 1, 1);
+                urlBuilder.Append(string.Join("&", Parameters.Select(q => $"{q.Key}={q.Value}")));
             }
 
             return urlBuilder.ToString();
