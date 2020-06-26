@@ -35,7 +35,7 @@ To use RestProperties to configure yuor rest root point. To create a simple conf
 ```c#
 RestProperties properties = new RestProperties
 {
-    EndPoint = new Uri("[URL]"),
+    EndPoint = new Uri("[URL]"), //if you use .Url("[URL]") you override it
     BufferSize = 4096,
     CertificateOption = ClientCertificateOption.Manual,
     Timeout = TimeSpan.FromMinutes(2)
@@ -47,8 +47,6 @@ Use Build() method with properties to create a RestBuilder from Rest:
 ```c#
 var rest = Rest.Build(properties);
 ```
-
-
 
 ### Certificate Validation
 
