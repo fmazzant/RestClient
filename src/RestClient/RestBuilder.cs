@@ -90,6 +90,102 @@ namespace RestClient
             = new JSON();
 
         /// <summary>
+        /// Certificate Callback
+        /// </summary>
+        Func<object, X509Certificate, X509Chain, SslPolicyErrors, bool> CertificateCallback;
+
+        /// <summary>
+        /// Current Credentials
+        /// </summary>
+        ICredentials Credentials { get; set; }
+            = null;
+
+        /// <summary>
+        /// if true the refresh token execution is enabled
+        /// </summary>
+        bool RefreshTokenExecution = true;
+
+        /// <summary>
+        /// Func refresh token
+        /// </summary>
+        Func<RestResult> RefreshTokenApi = null;
+
+        /// <summary>
+        /// Func refresh token async
+        /// </summary>
+        Func<Task<RestResult>> RefreshTokenApiAsync = null;
+
+        /// <summary>
+        /// Payload content
+        /// </summary>
+        object PayloadContent { get; set; }
+
+        /// <summary>
+        /// Payload content's type
+        /// </summary>
+        Type PayloadContentType { get; set; }
+
+        /// <summary>
+        /// Defines is enabled x-form-urlencoded
+        /// </summary>
+        bool IsEnabledFormUrlEncoded { get; set; } = false;
+
+        /// <summary>
+        /// Params for x-www-form-urlencoded
+        /// </summary>
+        Dictionary<string, string> FormUrlEncodedKeyValues { get; set; }
+
+        /// <summary>
+        /// On Start Action
+        /// </summary>
+        Action<StartEventArgs> OnStartAction = null;
+
+        /// <summary>
+        /// On Upload Progress Action
+        /// </summary>
+        Action<ProgressEventArgs> OnUploadProgressAction = null;
+
+        /// <summary>
+        /// On Download Progress
+        /// </summary>
+        Action<ProgressEventArgs> OnDownloadProgressAction = null;
+
+        /// <summary>
+        /// On Pre Result Action
+        /// </summary>
+        Action<RestResult> OnPreResultAction = null;
+
+        /// <summary>
+        /// On Pre-Completed Action
+        /// </summary>
+        Action<PreCompletedEventArgs> OnPreCompletedAction = null;
+
+        /// <summary>
+        /// On Preview Content As String Action
+        /// </summary>
+        Action<PreviewContentAsStringEventArgs> OnPreviewContentAsStringAction = null;
+
+        /// <summary>
+        /// On Completed Action
+        /// </summary>
+        Action<EventArgs> OnCompletedActionEA = null;
+
+        /// <summary>
+        /// On Completed Action
+        /// </summary>
+        Action<CompletedEventArgs> OnCompletedAction = null;
+
+        /// <summary>
+        /// On Exception Action
+        /// </summary>
+        Action<Exception> OnExceptionAction = null;
+
+        /// <summary>
+        /// isAfterRefreshTokenCalled
+        /// </summary>
+        bool isAfterRefreshTokenCalled = false;
+
+        /// <summary>
         /// Initializes a new instance
         /// </summary>
         internal RestBuilder()
@@ -99,11 +195,6 @@ namespace RestClient
         }
 
         #region [ Certificate Validation ]
-
-        /// <summary>
-        /// Certificate Callback
-        /// </summary>
-        Func<object, X509Certificate, X509Chain, SslPolicyErrors, bool> CertificateCallback;
 
         /// <summary>
         /// The callback to validate a server certificate
@@ -123,12 +214,6 @@ namespace RestClient
         #endregion
 
         #region [ Network Credential ]
-
-        /// <summary>
-        /// Current Credentials
-        /// </summary>
-        ICredentials Credentials { get; set; }
-            = null;
 
         /// <summary>
         /// Authentication information used by this func
@@ -201,25 +286,6 @@ namespace RestClient
             return result;
         }
 
-        #endregion
-
-        #region [ Create New HttpClient Instance and set into HttpClient ]
-        /// <summary>
-        /// Create new HttpClient instance and set into result.HttpClient
-        /// </summary>
-        /// <param name="result"></param>
-        private void CreateNewHttpClientInstance(RestBuilder result)
-        {
-            result.HttpClient = new HttpClient(new HttpClientHandler()
-            {
-                Credentials = result.Credentials,
-                ClientCertificateOptions = Properties.CertificateOption,
-                ServerCertificateCustomValidationCallback = result.CertificateCallback
-            })
-            {
-                Timeout = Properties.Timeout
-            };
-        }
         #endregion
 
         #region [ Authentication ]
@@ -397,21 +463,6 @@ namespace RestClient
         #region [ Refresh Token Invoke ]
 
         /// <summary>
-        /// if true the refresh token execution is enabled
-        /// </summary>
-        bool RefreshTokenExecution = true;
-
-        /// <summary>
-        /// Func refresh token
-        /// </summary>
-        Func<RestResult> RefreshTokenApi = null;
-
-        /// <summary>
-        /// Func refresh token async
-        /// </summary>
-        Func<Task<RestResult>> RefreshTokenApiAsync = null;
-
-        /// <summary>
         /// Enables refresh token: true if enabled, false when disabled
         /// </summary>
         /// <param name="refreshToken"></param>
@@ -568,16 +619,6 @@ namespace RestClient
         #region [ Payload & FormUrlEncoded ]
 
         /// <summary>
-        /// Payload content
-        /// </summary>
-        object PayloadContent { get; set; }
-
-        /// <summary>
-        /// Payload content's type
-        /// </summary>
-        Type PayloadContentType { get; set; }
-
-        /// <summary>
         /// Sets payload as generic type
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -590,16 +631,6 @@ namespace RestClient
             result.PayloadContentType = typeof(T);
             return result;
         }
-
-        /// <summary>
-        /// Defines is enabled x-form-urlencoded
-        /// </summary>
-        bool IsEnabledFormUrlEncoded { get; set; } = false;
-
-        /// <summary>
-        /// Params for x-www-form-urlencoded
-        /// </summary>
-        Dictionary<string, string> FormUrlEncodedKeyValues { get; set; }
 
         /// <summary>
         /// Enable form Url Encoding
@@ -643,11 +674,6 @@ namespace RestClient
         #region [ OnStart ]
 
         /// <summary>
-        /// On Start Action
-        /// </summary>
-        Action<StartEventArgs> OnStartAction = null;
-
-        /// <summary>
         /// Sets onStart action and occurs when the request is started
         /// </summary>
         /// <param name="onStart"></param>
@@ -664,11 +690,6 @@ namespace RestClient
         #region [ Upload & Download Progress ]
 
         /// <summary>
-        /// On Upload Progress Action
-        /// </summary>
-        Action<ProgressEventArgs> OnUploadProgressAction = null;
-
-        /// <summary>
         /// Sets onUploadProgress action, occurs when the request is processing 
         /// </summary>
         /// <param name="onProgress"></param>
@@ -679,11 +700,6 @@ namespace RestClient
             result.OnUploadProgressAction = onProgress;
             return result;
         }
-
-        /// <summary>
-        /// On Download Progress
-        /// </summary>
-        Action<ProgressEventArgs> OnDownloadProgressAction = null;
 
         /// <summary>
         /// Sets onDownloadProgress action, occurs when the response is processing 
@@ -702,11 +718,6 @@ namespace RestClient
         #region [ PreResult ]
 
         /// <summary>
-        /// On Pre Result Action
-        /// </summary>
-        Action<RestResult> OnPreResultAction = null;
-
-        /// <summary>
         /// Sets onPreResult, occurs when the result of request il builded and it isn't completed yet
         /// </summary>
         /// <param name="restResult"></param>
@@ -718,11 +729,6 @@ namespace RestClient
             result.OnPreResultAction = restResult;
             return result;
         }
-
-        /// <summary>
-        /// On Pre-Completed Action
-        /// </summary>
-        Action<PreCompletedEventArgs> OnPreCompletedAction = null;
 
         /// <summary>
         /// Sets OnPreCompleted, occurs when the result of request il builded and it isn't completed yet
@@ -741,11 +747,6 @@ namespace RestClient
         #region [ OnPreviewContentAsString ]
 
         /// <summary>
-        /// On Preview Content As String Action
-        /// </summary>
-        Action<PreviewContentAsStringEventArgs> OnPreviewContentAsStringAction = null;
-
-        /// <summary>
         ///  Sets OnPreviewContentAsString, displays the response as string
         /// </summary>
         /// <param name="onPreviewContent"></param>
@@ -762,29 +763,6 @@ namespace RestClient
         #region [ Completed ]
 
         /// <summary>
-        /// On Completed Action
-        /// </summary>
-        Action<EventArgs> OnCompletedActionEA = null;
-
-        /// <summary>
-        /// Sets onCompleted action, occurs when the call is completed.
-        /// </summary>
-        /// <param name="onCompleted"></param>
-        /// <returns></returns>
-        //[Obsolete("OnCompleted(Action<EventArgs> onCompleted) method will be removed soon, use: .OnPreCompleted((e)=> { var result = e.Result; })", false)]
-        //public RestBuilder OnCompleted(Action<EventArgs> onCompleted)
-        //{
-        //    var result = (RestBuilder)this.MemberwiseClone();
-        //    result.OnCompletedActionEA = onCompleted;
-        //    return result;
-        //}
-
-        /// <summary>
-        /// On Completed Action
-        /// </summary>
-        Action<CompletedEventArgs> OnCompletedAction = null;
-
-        /// <summary>
         /// Sets onCompleted action, occurs when the call is completed.
         /// </summary>
         /// <param name="onCompleted"></param>
@@ -799,11 +777,6 @@ namespace RestClient
         #endregion
 
         #region [ Exception ]
-
-        /// <summary>
-        /// On Exception Action
-        /// </summary>
-        Action<Exception> OnExceptionAction = null;
 
         /// <summary>
         /// Sets onException, occurs when there is an exception during the call
@@ -1250,11 +1223,6 @@ namespace RestClient
         #region [ Fetch ]
 
         /// <summary>
-        /// isAfterRefreshTokenCalled
-        /// </summary>
-        bool isAfterRefreshTokenCalled = false;
-
-        /// <summary>
         ///  Send an HTTP request as an asynchronous operation.
         /// </summary>
         /// <param name="method"></param>
@@ -1679,6 +1647,25 @@ namespace RestClient
             return urlBuilder.ToString();
         }
 
+        #endregion
+
+        #region [ Create New HttpClient Instance and set into HttpClient ]
+        /// <summary>
+        /// Create new HttpClient instance and set into result.HttpClient
+        /// </summary>
+        /// <param name="result"></param>
+        private void CreateNewHttpClientInstance(RestBuilder result)
+        {
+            result.HttpClient = new HttpClient(new HttpClientHandler()
+            {
+                Credentials = result.Credentials,
+                ClientCertificateOptions = Properties.CertificateOption,
+                ServerCertificateCustomValidationCallback = result.CertificateCallback
+            })
+            {
+                Timeout = Properties.Timeout
+            };
+        }
         #endregion
     }
 }
