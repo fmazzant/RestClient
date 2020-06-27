@@ -183,7 +183,7 @@ namespace RestClient
         /// <summary>
         /// isAfterRefreshTokenCalled
         /// </summary>
-        bool isAfterRefreshTokenCalled = false;
+        bool IsAfterRefreshTokenCalled = false;
 
         /// <summary>
         /// Initializes a new instance
@@ -1284,9 +1284,9 @@ namespace RestClient
                     responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
                 }
 
-                if (!isAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
+                if (!IsAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
                 {
-                    isAfterRefreshTokenCalled = true;
+                    IsAfterRefreshTokenCalled = true;
 
                     if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
                         return await SendAsStringAsync(method, payloadContent, payloadContentType, cancellationToken);
@@ -1385,9 +1385,9 @@ namespace RestClient
                     responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
                 }
 
-                if (!isAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
+                if (!IsAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
                 {
-                    isAfterRefreshTokenCalled = true;
+                    IsAfterRefreshTokenCalled = true;
 
                     if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
                         return await SendAsStreamAsync(method, payloadContent, payloadContentType, cancellationToken);
@@ -1485,9 +1485,9 @@ namespace RestClient
                     responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
                 }
 
-                if (!isAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
+                if (!IsAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
                 {
-                    isAfterRefreshTokenCalled = true;
+                    IsAfterRefreshTokenCalled = true;
 
                     if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
                         return await SendAsByteArrayAsync(method, payloadContent, payloadContentType, cancellationToken);
@@ -1588,9 +1588,9 @@ namespace RestClient
                     responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
                 }
 
-                if (!isAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
+                if (!IsAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
                 {
-                    isAfterRefreshTokenCalled = true;
+                    IsAfterRefreshTokenCalled = true;
 
                     if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
                         return await SendAsync<T>(method, payloadContent, payloadContentType, cancellationToken);
