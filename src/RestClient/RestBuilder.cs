@@ -1650,6 +1650,7 @@ namespace RestClient
         #endregion
 
         #region [ Create New HttpClient Instance and set into HttpClient ]
+
         /// <summary>
         /// Create new HttpClient instance and set into result.HttpClient
         /// </summary>
@@ -1666,6 +1667,7 @@ namespace RestClient
                 Timeout = Properties.Timeout
             };
         }
+
         #endregion
     }
 }
