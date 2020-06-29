@@ -239,23 +239,27 @@ namespace RestClient.Builder
                         string json = Serializer.SerializeObject(payloadContent, payloadContentType);
                         HttpContent hc = new StringContent(json, Encoding.UTF8, Serializer.MediaTypeAsString);
                         request.Content = hc;
-
-                        using (HttpContentStream streamContent = new HttpContentStream(request.Content, Properties.BufferSize))
-                        {
-                            streamContent.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
-                            responseMessage = await streamContent.WriteStringAsStreamAsync(HttpClient, request, cancellationToken);
-                        }
                     }
                     else
                     {
-                        responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+                        //responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
                     }
                 }
                 else
                 {
                     request.Content = new FormUrlEncodedContent(FormUrlEncodedKeyValues);
-                    responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+                    //responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
                 }
+
+                await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+
+                using (HttpContentStream streamContent = new HttpContentStream(request.Content, Properties.BufferSize))
+                {
+                    streamContent.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
+                    responseMessage = await streamContent.WriteStringAsStreamAsync(HttpClient, request, cancellationToken);
+                }
+
+                responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
                 if (!IsAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
                 {

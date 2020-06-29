@@ -132,6 +132,15 @@ namespace RestClient.IO
         }
 
         /// <summary>
+        /// Serialize the HTTP content to a memory stream as an asynchronous operation.
+        /// </summary>
+        /// <returns></returns>
+        protected override Task<Stream> CreateContentReadStreamAsync()
+        {
+            return base.CreateContentReadStreamAsync();
+        }
+
+        /// <summary>
         ///  Determines whether the HTTP content has a valid length in bytes.
         /// </summary>
         /// <param name="length">The length in bytes of the HHTP content.</param>

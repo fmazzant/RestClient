@@ -202,7 +202,7 @@ namespace RestClient.IO
                        });
                     request.Content = streamContent;
                 }
-                response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+                //response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             }
             catch (TaskCanceledException)
             {
@@ -210,23 +210,59 @@ namespace RestClient.IO
             }
             catch (Exception)
             {
-                try
+                //response = client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).Result;
+                ProgressChanged?.Invoke(this, new ProgressEventArgs
                 {
-                    response = client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).Result;
-                    ProgressChanged?.Invoke(this, new ProgressEventArgs
-                    {
-                        TotalBytes = 1,
-                        CurrentBytes = 1
-                    });
-                }
-                catch (TaskCanceledException)
+                    TotalBytes = 1,
+                    CurrentBytes = 1
+                });
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// Write content
+        /// </summary>
+        /// <param name="request">Represents a HTTP request message.</param>
+        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
+        /// <returns></returns>
+        public async Task<HttpResponseMessage> WriteStringAsStreamAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            HttpResponseMessage response = null;
+            long totalBytesToSend = this.Content != null ? this.Content.Headers.ContentLength.Value : 1;
+
+            string payload = this.Content != null ? await this.Content.ReadAsStringAsync() : "";
+
+            try
+            {
+                if (this.Content != null)
                 {
-                    throw new TaskCanceledException();
+                    var streamContent = new HttpContentStreamProgressable(
+                       request.Content,
+                       BufferSize,
+                       (sent, total) =>
+                       {
+                           ProgressChanged?.Invoke(this, new ProgressEventArgs
+                           {
+                               TotalBytes = total,
+                               CurrentBytes = sent
+                           });
+                           if (cancellationToken.IsCancellationRequested) throw new TaskCanceledException();
+                       });
+                    request.Content = streamContent;
                 }
-                catch (Exception)
+            }
+            catch (TaskCanceledException)
+            {
+                throw new TaskCanceledException();
+            }
+            catch (Exception)
+            {
+                ProgressChanged?.Invoke(this, new ProgressEventArgs
                 {
-                    response = null;
-                }
+                    TotalBytes = 1,
+                    CurrentBytes = 1
+                });
             }
             return response;
         }
