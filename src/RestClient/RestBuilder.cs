@@ -1257,8 +1257,6 @@ namespace RestClient
                 HttpRequestMessage request = new HttpRequestMessage(method, url);
                 HttpResponseMessage responseMessage = null;
 
-                #region [ Sending ]
-
                 request.Content = MakeHttpContent();
 
                 using (HttpContentStream streamContent = new HttpContentStream(request.Content, Properties.BufferSize))
@@ -1288,8 +1286,6 @@ namespace RestClient
                     //response.StringContent = result;
                     response.Content = result;
                 }
-
-                #endregion
 
                 OnPreResultAction?.Invoke(response);
                 OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
@@ -1342,8 +1338,6 @@ namespace RestClient
                 HttpRequestMessage request = new HttpRequestMessage(method, url);
                 HttpResponseMessage responseMessage = null;
 
-                #region [ Sending ]
-
                 request.Content = MakeHttpContent();
 
                 using (HttpContentStream streamContent = new HttpContentStream(request.Content, Properties.BufferSize))
@@ -1371,8 +1365,6 @@ namespace RestClient
                     OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = string.Empty });
                     response.Content = await responseMessage.Content.ReadAsStreamAsync();
                 }
-
-                #endregion
 
                 OnPreResultAction?.Invoke(response);
                 OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
@@ -1426,8 +1418,6 @@ namespace RestClient
                 HttpRequestMessage request = new HttpRequestMessage(method, url);
                 HttpResponseMessage responseMessage = null;
 
-                #region [ Sending ]
-
                 request.Content = MakeHttpContent();
 
                 using (HttpContentStream streamContent = new HttpContentStream(request.Content, Properties.BufferSize))
@@ -1452,12 +1442,10 @@ namespace RestClient
                 {
                     streamContent.ProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
                     response = RestResult<byte[]>.CreateInstanceFrom<byte[]>(responseMessage);
-                    
-                    response.Content = await streamContent.ReadBytesAsStreamAsync(cancellationToken);                   
+
+                    response.Content = await streamContent.ReadBytesAsStreamAsync(cancellationToken);
                     OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = BitConverter.ToString(response.Content) });
                 }
-
-                #endregion
 
                 OnPreResultAction?.Invoke(response);
                 OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
@@ -1513,8 +1501,6 @@ namespace RestClient
                 HttpRequestMessage request = new HttpRequestMessage(method, url);
                 HttpResponseMessage responseMessage = null;
 
-                #region [ Sending ]
-
                 request.Content = MakeHttpContent();
 
                 using (HttpContentStream streamContent = new HttpContentStream(request.Content, Properties.BufferSize))
@@ -1539,13 +1525,11 @@ namespace RestClient
                 {
                     streamContent.ProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
                     response = Generic.RestResult<T>.CreateInstanceFrom<T>(responseMessage);
-                  
+
                     string serializedObject = await streamContent.ReadStringAsStreamAsync(cancellationToken);
                     OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = serializedObject });
                     response.Content = (T)Serializer.DeserializeObject(serializedObject, typeof(T));
                 }
-
-                #endregion
 
                 OnPreResultAction?.Invoke(response);
                 OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
