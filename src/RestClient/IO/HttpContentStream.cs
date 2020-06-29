@@ -177,6 +177,7 @@ namespace RestClient.IO
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <param name="progress">Proveder for progress update</param>
         /// <returns>HttpResponseMessage</returns>
+        [Obsolete("Use: WriteStringAsStreamAsync(HttpRequestMessage request, CancellationToken cancellationToken)", true)]
         public async Task<HttpResponseMessage> WriteStringAsStreamAsync(HttpClient client, HttpRequestMessage request, CancellationToken cancellationToken)
         {
             HttpResponseMessage response = null;
@@ -202,7 +203,6 @@ namespace RestClient.IO
                        });
                     request.Content = streamContent;
                 }
-                //response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             }
             catch (TaskCanceledException)
             {
@@ -210,7 +210,6 @@ namespace RestClient.IO
             }
             catch (Exception)
             {
-                //response = client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).Result;
                 ProgressChanged?.Invoke(this, new ProgressEventArgs
                 {
                     TotalBytes = 1,
@@ -233,37 +232,23 @@ namespace RestClient.IO
 
             string payload = this.Content != null ? await this.Content.ReadAsStringAsync() : "";
 
-            try
+            if (this.Content != null)
             {
-                if (this.Content != null)
-                {
-                    var streamContent = new HttpContentStreamProgressable(
-                       request.Content,
-                       BufferSize,
-                       (sent, total) =>
+                var streamContent = new HttpContentStreamProgressable(
+                   Content,
+                   BufferSize,
+                   (sent, total) =>
+                   {
+                       ProgressChanged?.Invoke(this, new ProgressEventArgs
                        {
-                           ProgressChanged?.Invoke(this, new ProgressEventArgs
-                           {
-                               TotalBytes = total,
-                               CurrentBytes = sent
-                           });
-                           if (cancellationToken.IsCancellationRequested) throw new TaskCanceledException();
+                           TotalBytes = total,
+                           CurrentBytes = sent
                        });
-                    request.Content = streamContent;
-                }
+                       if (cancellationToken.IsCancellationRequested) throw new TaskCanceledException();
+                   });
+                request.Content = streamContent;
             }
-            catch (TaskCanceledException)
-            {
-                throw new TaskCanceledException();
-            }
-            catch (Exception)
-            {
-                ProgressChanged?.Invoke(this, new ProgressEventArgs
-                {
-                    TotalBytes = 1,
-                    CurrentBytes = 1
-                });
-            }
+
             return response;
         }
 

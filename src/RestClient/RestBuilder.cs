@@ -1586,11 +1586,26 @@ namespace RestClient
         /// Make Http Contenxt
         /// </summary>
         /// <returns></returns>
-        public HttpContent MakeHttpContent()
+        public HttpContent MakeHttpContent(CancellationToken cancellationToken = new CancellationToken())
         {
             if (!IsEnabledFormUrlEncoded && PayloadContent != null)
             {
                 return new StringContent(Serializer.SerializeObject(PayloadContent, PayloadContentType), Encoding.UTF8, Serializer.MediaTypeAsString);
+
+                //var content = new StringContent(Serializer.SerializeObject(PayloadContent, PayloadContentType), Encoding.UTF8, Serializer.MediaTypeAsString);
+                //return new HttpContentStreamProgressable(
+                //   content,
+                //   Properties.BufferSize,
+                //   (sent, total) =>
+                //   {
+                //       Console.WriteLine(sent);
+                //       OnUploadProgressAction?.Invoke(new ProgressEventArgs
+                //       {
+                //           TotalBytes = total,
+                //           CurrentBytes = sent
+                //       });
+                //       if (cancellationToken.IsCancellationRequested) throw new TaskCanceledException();
+                //   });
             }
             else if (IsEnabledFormUrlEncoded)
             {
