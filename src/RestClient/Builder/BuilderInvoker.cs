@@ -196,38 +196,17 @@ namespace RestClient.Builder
         #region [ Fetch ]
 
         /// <summary>
-        ///  Send an HTTP request as an asynchronous operation.
+        /// Send an HTTP request as an asynchronous operation.
         /// </summary>
-        /// <param name="method"></param>
-        /// <param name="payloadContent"></param>
-        /// <param name="payloadContentType"></param>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        private async Task<RestResult<string>> SendAsStringAsync(HttpMethod method, CancellationToken cancellationToken = new CancellationToken())
+        protected async Task<RestResult<string>> SendAsStringAsync(HttpRequestMessage request, CancellationToken cancellationToken = new CancellationToken())
         {
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
-
             RestResult<string> response = null;
             try
             {
-                string url = BuildFinalUrl();
-
-                if (Logger) Console.WriteLine(url);
-
-                StartEventArgs startEventArgs = new StartEventArgs()
-                {
-                    Cancel = false,
-                    Payload = PayloadContent,
-                    Url = url
-                };
-                OnStartAction?.Invoke(startEventArgs);
-
-                if (startEventArgs.Cancel) throw new OperationCanceledException();
-
-                HttpRequestMessage request = new HttpRequestMessage(method, url);
                 HttpResponseMessage responseMessage = null;
-
-                request.Content = MakeHttpContent();
 
                 using (HttpContentStream streamContent = new HttpContentStream(request.Content, Properties.BufferSize))
                 {
@@ -241,10 +220,10 @@ namespace RestClient.Builder
                     IsAfterRefreshTokenCalled = true;
 
                     if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
-                        return await SendAsStringAsync(method, cancellationToken);
+                        return await SendAsStringAsync(request, cancellationToken);
 
                     if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
-                        return await SendAsStringAsync(method, cancellationToken);
+                        return await SendAsStringAsync(request, cancellationToken);
                 }
 
                 using (HttpContentStream streamContent = new HttpContentStream(responseMessage.Content, Properties.BufferSize))
@@ -253,56 +232,28 @@ namespace RestClient.Builder
                     response = RestResult<string>.CreateInstanceFrom<string>(responseMessage);
                     var result = await streamContent.ReadStringAsStreamAsync(cancellationToken);
                     OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = result });
-                    //response.StringContent = result;
                     response.Content = result;
                 }
-
-                OnPreResultAction?.Invoke(response);
-                OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
             }
             catch (Exception ex)
             {
                 OnExceptionAction?.Invoke(ex);
                 response = RestResult<string>.CreateFromException(ex);
             }
-
-            stopwatch.Stop();
-
-            OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
-            OnCompletedActionEA?.Invoke(new EventArgs());
-
             return response;
         }
 
         /// <summary>
-        ///  Send an HTTP request as an asynchronous operation.
+        /// Send an HTTP request as an asynchronous operation.
         /// </summary>
-        /// <param name="method"></param>
-        /// <param name="payloadContent"></param>
-        /// <param name="payloadContentType"></param>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        private async Task<RestResult<Stream>> SendAsStreamAsync(HttpMethod method, CancellationToken cancellationToken = new CancellationToken())
+        protected async Task<RestResult<Stream>> SendAsStreamAsync(HttpRequestMessage request, CancellationToken cancellationToken = new CancellationToken())
         {
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
-
             RestResult<Stream> response = null;
             try
             {
-                string url = BuildFinalUrl();
-
-                if (Logger) Console.WriteLine(url);
-
-                StartEventArgs startEventArgs = new StartEventArgs()
-                {
-                    Cancel = false,
-                    Payload = PayloadContent,
-                    Url = url
-                };
-                OnStartAction?.Invoke(startEventArgs);
-                if (startEventArgs.Cancel) throw new OperationCanceledException();
-
-                HttpRequestMessage request = new HttpRequestMessage(method, url);
                 HttpResponseMessage responseMessage = null;
 
                 request.Content = MakeHttpContent();
@@ -319,10 +270,10 @@ namespace RestClient.Builder
                     IsAfterRefreshTokenCalled = true;
 
                     if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
-                        return await SendAsStreamAsync(method, cancellationToken);
+                        return await SendAsStreamAsync(request, cancellationToken);
 
                     if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
-                        return await SendAsStreamAsync(method, cancellationToken);
+                        return await SendAsStreamAsync(request, cancellationToken);
                 }
 
                 using (HttpContentStream streamContent = new HttpContentStream(responseMessage.Content, Properties.BufferSize))
@@ -333,8 +284,6 @@ namespace RestClient.Builder
                     response.Content = await responseMessage.Content.ReadAsStreamAsync();
                 }
 
-                OnPreResultAction?.Invoke(response);
-                OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
             }
             catch (Exception ex)
             {
@@ -342,44 +291,20 @@ namespace RestClient.Builder
                 response = RestResult<Stream>.CreateFromException(ex);
             }
 
-            stopwatch.Stop();
-
-            OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
-            OnCompletedActionEA?.Invoke(new EventArgs());
-
             return response;
         }
 
         /// <summary>
-        ///  Send an HTTP request as an asynchronous operation.
+        /// Send an HTTP request as an asynchronous operation.
         /// </summary>
-        /// <param name="method"></param>
-        /// <param name="payloadContent"></param>
-        /// <param name="payloadContentType"></param>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        private async Task<RestResult<byte[]>> SendAsByteArrayAsync(HttpMethod method, CancellationToken cancellationToken = new CancellationToken())
+        protected async Task<RestResult<byte[]>> SendAsByteArrayAsync(HttpRequestMessage request, CancellationToken cancellationToken = new CancellationToken())
         {
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
-
             RestResult<byte[]> response = null;
             try
             {
-                string url = BuildFinalUrl();
-
-                if (Logger) Console.WriteLine(url);
-
-                StartEventArgs startEventArgs = new StartEventArgs()
-                {
-                    Cancel = false,
-                    Payload = PayloadContent,
-                    Url = url
-                };
-
-                OnStartAction?.Invoke(startEventArgs);
-                if (startEventArgs.Cancel) throw new OperationCanceledException();
-
-                HttpRequestMessage request = new HttpRequestMessage(method, url);
                 HttpResponseMessage responseMessage = null;
 
                 request.Content = MakeHttpContent();
@@ -396,10 +321,10 @@ namespace RestClient.Builder
                     IsAfterRefreshTokenCalled = true;
 
                     if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
-                        return await SendAsByteArrayAsync(method, cancellationToken);
+                        return await SendAsByteArrayAsync(request, cancellationToken);
 
                     if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
-                        return await SendAsByteArrayAsync(method, cancellationToken);
+                        return await SendAsByteArrayAsync(request, cancellationToken);
                 }
 
                 using (HttpContentStream streamContent = new HttpContentStream(responseMessage.Content, Properties.BufferSize))
@@ -410,9 +335,6 @@ namespace RestClient.Builder
                     response.Content = await streamContent.ReadBytesAsStreamAsync(cancellationToken);
                     OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = BitConverter.ToString(response.Content) });
                 }
-
-                OnPreResultAction?.Invoke(response);
-                OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
             }
             catch (Exception ex)
             {
@@ -420,46 +342,22 @@ namespace RestClient.Builder
                 response = RestResult<byte[]>.CreateFromException(ex);
             }
 
-            stopwatch.Stop();
-
-            OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
-            OnCompletedActionEA?.Invoke(new EventArgs());
-
             return response;
         }
 
         /// <summary>
-        ///  Send an HTTP request as an asynchronous operation.
+        /// Send an HTTP request as an asynchronous operation.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="method"></param>
-        /// <param name="payloadContent"></param>
-        /// <param name="payloadContentType"></param>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        private async Task<RestResult<T>> SendAsync<T>(HttpMethod method, CancellationToken cancellationToken = new CancellationToken())
+        protected async Task<RestResult<T>> SendAsync<T>(HttpRequestMessage request, CancellationToken cancellationToken = new CancellationToken())
             where T : new()
         {
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
-
             RestResult<T> response = null;
             try
             {
-                string url = BuildFinalUrl();
-
-                if (Logger) Console.WriteLine(url);
-
-                StartEventArgs startEventArgs = new StartEventArgs()
-                {
-                    Cancel = false,
-                    Payload = PayloadContent,
-                    Url = url
-                };
-
-                OnStartAction?.Invoke(startEventArgs);
-                if (startEventArgs.Cancel) throw new OperationCanceledException();
-
-                HttpRequestMessage request = new HttpRequestMessage(method, url);
                 HttpResponseMessage responseMessage = null;
 
                 request.Content = MakeHttpContent();
@@ -476,10 +374,10 @@ namespace RestClient.Builder
                     IsAfterRefreshTokenCalled = true;
 
                     if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
-                        return await SendAsync<T>(method, cancellationToken);
+                        return await SendAsync<T>(request, cancellationToken);
 
                     if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
-                        return await SendAsync<T>(method, cancellationToken);
+                        return await SendAsync<T>(request, cancellationToken);
                 }
 
                 using (HttpContentStream streamContent = new HttpContentStream(responseMessage.Content, Properties.BufferSize))
@@ -491,20 +389,12 @@ namespace RestClient.Builder
                     OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = serializedObject });
                     response.Content = (T)Serializer.DeserializeObject(serializedObject, typeof(T));
                 }
-
-                OnPreResultAction?.Invoke(response);
-                OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
             }
             catch (Exception ex)
             {
                 OnExceptionAction?.Invoke(ex);
                 response = RestResult<T>.CreateFromException(ex);
             }
-
-            stopwatch.Stop();
-
-            OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
-            OnCompletedActionEA?.Invoke(new EventArgs());
 
             return response;
         }
@@ -538,7 +428,7 @@ namespace RestClient.Builder
         /// Create new HttpClient instance and set into result.HttpClient
         /// </summary>
         /// <param name="result"></param>
-        private void CreateNewHttpClientInstance(BuilderInvoker result)
+        protected void CreateNewHttpClientInstance(BuilderInvoker result)
         {
             result.HttpClient = new HttpClient(new HttpClientHandler()
             {
