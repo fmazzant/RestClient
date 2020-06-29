@@ -1567,15 +1567,19 @@ namespace RestClient
         /// <param name="result"></param>
         private void CreateNewHttpClientInstance(RestBuilder result)
         {
-            result.HttpClient = new HttpClient(new HttpClientHandler()
+            var client = new HttpClient(new HttpClientHandler()
             {
                 Credentials = result.Credentials,
                 ClientCertificateOptions = Properties.CertificateOption,
                 ServerCertificateCustomValidationCallback = result.CertificateCallback
             })
             {
-                Timeout = Properties.Timeout
+                Timeout = Properties.Timeout,
             };
+            foreach (var item in result.HttpClient.DefaultRequestHeaders)
+                client.DefaultRequestHeaders.Add(item.Key, item.Value);
+
+            result.HttpClient = client;
         }
 
         #endregion
