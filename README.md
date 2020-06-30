@@ -488,14 +488,14 @@ var result = rest
     .Post<ResponseObject>();
 ```
 
-### OnPreviewContentAsString
+### OnPreviewContentAsString -> OnPreviewContentResponseAsString (renaming)
 
-OnPreviewContentAsString is an event that triggers when the response is received and it isn't no deserialized yet.
+OnPreviewContentResponseAsString is an event that triggers when the response is received and it isn't no deserialized yet.
 
 ```c#
 var result = rest
     .Url("[URL]")
-    .OnPreviewContentAsString((e) => { 
+    .OnPreviewContentResponseAsString((e) => { 
         DoSomethings(e); 
     })
     .Payload(new BigObject{})
