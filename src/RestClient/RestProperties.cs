@@ -55,7 +55,7 @@ namespace RestClient
         /// <summary>
         /// Default buffer size 20k
         /// </summary>
-        private const int DefaultBufferSize = 5 * 4096; //20kb
+        private const int DefaultBufferSize = 5 * 4096 * 4; //80kb
 
         /// <summary>
         /// Specifies Buffer Size. Default 20kb.
