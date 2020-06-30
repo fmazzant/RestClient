@@ -747,7 +747,7 @@ namespace RestClient
         #region [ OnPreviewContentAsString ]
 
         /// <summary>
-        ///  Sets OnPreviewContentAsString, displays the response as string
+        ///  Sets OnPreviewContentResponseAsString, displays the response as string
         /// </summary>
         /// <param name="onPreviewContent"></param>
         /// <returns></returns>
