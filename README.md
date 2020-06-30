@@ -211,7 +211,7 @@ var result = rest
 
 ### BufferSize
 
-BufferSize can be use to set the buffer size during upload and download stream. Default value is 20Kb
+BufferSize can be use to set the buffer size during upload and download stream. Default value is 80Kb
 
 ```c#
 var result = rest
