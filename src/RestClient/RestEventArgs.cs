@@ -83,7 +83,8 @@ namespace RestClient
     /// </summary>
     public class PreviewContentAsStringEventArgs
     {
-        public string ContentAsString { get; set; }
+        public string ContentAsString { get; internal set; }
+        public Type ContentType { get; internal set; }
     }
 
     /// <summary>
@@ -94,12 +95,12 @@ namespace RestClient
         /// <summary>
         /// The result of
         /// </summary>
-        public RestResult Result { get; set; }
+        public RestResult Result { get; internal set; }
 
         /// <summary>
         /// true is completed
         /// </summary>
-        public bool IsCompleted { get; set; }
+        public bool IsCompleted { get; internal set; }
     }
 
     /// <summary>
@@ -110,11 +111,11 @@ namespace RestClient
         /// <summary>
         /// The result of
         /// </summary>
-        public RestResult Result { get; set; }
+        public RestResult Result { get; internal set; }
 
         /// <summary>
         /// Time of execution
         /// </summary>
-        public TimeSpan ExecutionTime { get; set; } = TimeSpan.Zero;
+        public TimeSpan ExecutionTime { get; internal set; } = TimeSpan.Zero;
     }
 }
