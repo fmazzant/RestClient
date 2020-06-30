@@ -490,7 +490,7 @@ var result = rest
 
 ### OnPreviewContentRequestAsString
 
-OnPreviewContentResponseAsString is an event that triggers when the response is received and it isn't no deserialized yet.
+OnPreviewContentRequestAsString is an event that triggers when the request is ready and it isn't no sent yet.
 
 ```c#
 var result = rest
