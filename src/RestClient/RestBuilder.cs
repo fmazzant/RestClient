@@ -141,6 +141,11 @@ namespace RestClient
         Action<StartEventArgs> OnStartAction = null;
 
         /// <summary>
+        /// On Preview Content Request As String Action
+        /// </summary>
+        Action<PreviewContentAsStringEventArgs> OnPreviewContentRequestAsStringAction = null;
+
+        /// <summary>
         /// On Upload Progress Action
         /// </summary>
         Action<ProgressEventArgs> OnUploadProgressAction = null;
@@ -682,6 +687,22 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnStartAction = onStart;
+            return result;
+        }
+
+        #endregion
+
+        #region [ OnPreviewContentRequestAsString ]
+
+        /// <summary>
+        ///  Sets OnPreviewContentRequestAsString, displays the response as string
+        /// </summary>
+        /// <param name="onPreviewContent"></param>
+        /// <returns></returns>
+        public RestBuilder OnPreviewContentRequestAsString(Action<PreviewContentAsStringEventArgs> onPreviewContent)
+        {
+            var result = (RestBuilder)this.MemberwiseClone();
+            result.OnPreviewContentRequestAsStringAction = onPreviewContent;
             return result;
         }
 
@@ -1598,26 +1619,14 @@ namespace RestClient
         {
             if (!IsEnabledFormUrlEncoded && PayloadContent != null)
             {
-                var serialized = Serializer.SerializeObject(PayloadContent, PayloadContentType);
-                return new StringContent(serialized, Encoding.UTF8, Serializer.MediaTypeAsString);
-
-                //var content = new StringContent(Serializer.SerializeObject(PayloadContent, PayloadContentType), Encoding.UTF8, Serializer.MediaTypeAsString);
-                //return new HttpContentStreamProgressable(
-                //   content,
-                //   Properties.BufferSize,
-                //   (sent, total) =>
-                //   {
-                //       Console.WriteLine(sent);
-                //       OnUploadProgressAction?.Invoke(new ProgressEventArgs
-                //       {
-                //           TotalBytes = total,
-                //           CurrentBytes = sent
-                //       });
-                //       if (cancellationToken.IsCancellationRequested) throw new TaskCanceledException();
-                //   });
+                var serializedObject = Serializer.SerializeObject(PayloadContent, PayloadContentType);
+                OnPreviewContentRequestAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = serializedObject }); ;
+                return new StringContent(serializedObject, Encoding.UTF8, Serializer.MediaTypeAsString);
             }
-            else if (IsEnabledFormUrlEncoded)
+            else if (IsEnabledFormUrlEncoded && FormUrlEncodedKeyValues != null)
             {
+                var serializedObject = Serializer.SerializeObject(FormUrlEncodedKeyValues, FormUrlEncodedKeyValues.GetType());
+                OnPreviewContentRequestAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = serializedObject }); ;
                 return new FormUrlEncodedContent(FormUrlEncodedKeyValues);
             }
             return null;

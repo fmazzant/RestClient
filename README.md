@@ -488,6 +488,20 @@ var result = rest
     .Post<ResponseObject>();
 ```
 
+### OnPreviewContentRequestAsString
+
+OnPreviewContentResponseAsString is an event that triggers when the response is received and it isn't no deserialized yet.
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .OnPreviewContentRequestAsString((e) => { 
+        DoSomethings(e); 
+    })
+    .Payload(new BigObject{})
+    .Post<ResponseObject>();
+```
+
 ### OnPreviewContentAsString -> OnPreviewContentResponseAsString (renaming)
 
 OnPreviewContentResponseAsString is an event that triggers when the response is received and it isn't no deserialized yet.
