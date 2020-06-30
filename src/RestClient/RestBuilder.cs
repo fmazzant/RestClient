@@ -1620,13 +1620,21 @@ namespace RestClient
             if (!IsEnabledFormUrlEncoded && PayloadContent != null)
             {
                 var serializedObject = Serializer.SerializeObject(PayloadContent, PayloadContentType);
-                OnPreviewContentRequestAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = serializedObject }); ;
+                OnPreviewContentRequestAsStringAction?.Invoke(new PreviewContentAsStringEventArgs
+                {
+                    ContentAsString = serializedObject,
+                    ContentType = PayloadContentType
+                });
                 return new StringContent(serializedObject, Encoding.UTF8, Serializer.MediaTypeAsString);
             }
             else if (IsEnabledFormUrlEncoded && FormUrlEncodedKeyValues != null)
             {
                 var serializedObject = Serializer.SerializeObject(FormUrlEncodedKeyValues, FormUrlEncodedKeyValues.GetType());
-                OnPreviewContentRequestAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = serializedObject }); ;
+                OnPreviewContentRequestAsStringAction?.Invoke(new PreviewContentAsStringEventArgs
+                {
+                    ContentAsString = serializedObject,
+                    ContentType = FormUrlEncodedKeyValues.GetType()
+                });
                 return new FormUrlEncodedContent(FormUrlEncodedKeyValues);
             }
             return null;
