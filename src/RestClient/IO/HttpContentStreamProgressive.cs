@@ -38,7 +38,7 @@ namespace RestClient.IO
     /// <summary>
     /// A  class representing an HTTP entity body and content headers.
     /// </summary>
-    internal class HttpContentStreamProgressable : HttpContent
+    internal class HttpContentStreamProgressive : HttpContent
     {
         /// <summary>
         /// Lets keep buffer of 20kb
@@ -65,7 +65,7 @@ namespace RestClient.IO
         /// </summary>
         /// <param name="content">Http entity body and content headers</param>
         /// <param name="progress">Progress value</param>
-        public HttpContentStreamProgressable(HttpContent content, Action<long, long> progress)
+        public HttpContentStreamProgressive(HttpContent content, Action<long, long> progress)
             : this(content, defaultBufferSize, progress)
         {
         }
@@ -76,7 +76,7 @@ namespace RestClient.IO
         /// <param name="content">Http entity body and content headers</param>
         /// <param name="bufferSize">Buffer size</param>
         /// <param name="progress">Progress value</param>
-        public HttpContentStreamProgressable(HttpContent content, int bufferSize, Action<long, long> progress)
+        public HttpContentStreamProgressive(HttpContent content, int bufferSize, Action<long, long> progress)
         {
             if (content == null)
             {
