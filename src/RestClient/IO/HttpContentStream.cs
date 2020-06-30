@@ -191,7 +191,7 @@ namespace RestClient.IO
             {
                 if (this.Content != null)
                 {
-                    var streamContent = new HttpContentStreamProgressive(
+                    var streamContent = new HttpContentStreamProgressable(
                        request.Content,
                        BufferSize,
                        (sent, total) =>
@@ -237,7 +237,7 @@ namespace RestClient.IO
 
             if (this.Content != null)
             {
-                var streamContent = new HttpContentStreamProgressive(
+                var streamContent = new HttpContentStreamProgressable(
                    Content,
                    BufferSize,
                    (sent, total) =>
