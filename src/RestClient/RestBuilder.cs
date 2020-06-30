@@ -747,10 +747,18 @@ namespace RestClient
         #region [ OnPreviewContentAsString ]
 
         /// <summary>
-        ///  Sets OnPreviewContentAsString, displays the response as string
+        ///  Sets OnPreviewResponseContentAsString, displays the response as string
         /// </summary>
         /// <param name="onPreviewContent"></param>
         /// <returns></returns>
+        public RestBuilder OnPreviewResponseContentAsString(Action<PreviewContentAsStringEventArgs> onPreviewResponseContent)
+        {
+            var result = (RestBuilder)this.MemberwiseClone();
+            result.OnPreviewContentAsStringAction = onPreviewResponseContent;
+            return result;
+        }
+
+        [Obsolete("Use: OnPreviewResponseContentAsString(onPreviewResponseContent).", true)]
         public RestBuilder OnPreviewContentAsString(Action<PreviewContentAsStringEventArgs> onPreviewContent)
         {
             var result = (RestBuilder)this.MemberwiseClone();
