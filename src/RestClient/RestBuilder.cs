@@ -751,12 +751,16 @@ namespace RestClient
         /// </summary>
         /// <param name="onPreviewContent"></param>
         /// <returns></returns>
-        public RestBuilder OnPreviewContentAsString(Action<PreviewContentAsStringEventArgs> onPreviewContent)
+        public RestBuilder OnPreviewContentResponseAsString(Action<PreviewContentAsStringEventArgs> onPreviewContent)
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnPreviewContentAsStringAction = onPreviewContent;
             return result;
         }
+
+        [Obsolete("Use: OnPreviewContentResponseAsString(onPreviewContent). OnPreviewContentAsString will be removed in 2.0.0 version", false)]
+        public RestBuilder OnPreviewContentAsString(Action<PreviewContentAsStringEventArgs> onPreviewContent)
+            => OnPreviewContentResponseAsString(onPreviewContent);
 
         #endregion
 
