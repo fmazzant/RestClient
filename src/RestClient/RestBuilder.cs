@@ -744,7 +744,7 @@ namespace RestClient
 
         #endregion
 
-        #region [ OnPreviewContentAsString ]
+        #region [ OnPreviewContentResponseAsString ]
 
         /// <summary>
         ///  Sets OnPreviewContentResponseAsString, displays the response as string
@@ -1598,7 +1598,8 @@ namespace RestClient
         {
             if (!IsEnabledFormUrlEncoded && PayloadContent != null)
             {
-                return new StringContent(Serializer.SerializeObject(PayloadContent, PayloadContentType), Encoding.UTF8, Serializer.MediaTypeAsString);
+                var serialized = Serializer.SerializeObject(PayloadContent, PayloadContentType);
+                return new StringContent(serialized, Encoding.UTF8, Serializer.MediaTypeAsString);
 
                 //var content = new StringContent(Serializer.SerializeObject(PayloadContent, PayloadContentType), Encoding.UTF8, Serializer.MediaTypeAsString);
                 //return new HttpContentStreamProgressable(
