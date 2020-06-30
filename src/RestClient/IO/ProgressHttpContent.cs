@@ -34,11 +34,11 @@ namespace RestClient.IO
     using System.Net;
     using System.Net.Http;
     using System.Threading.Tasks;
-
+    
     /// <summary>
     /// A  class representing an HTTP entity body and content headers.
     /// </summary>
-    internal class HttpContentStreamProgressable : HttpContent
+    internal class ProgressHttpContent : HttpContent
     {
         /// <summary>
         /// Lets keep buffer of 20kb
@@ -65,7 +65,7 @@ namespace RestClient.IO
         /// </summary>
         /// <param name="content">Http entity body and content headers</param>
         /// <param name="progress">Progress value</param>
-        public HttpContentStreamProgressable(HttpContent content, Action<long, long> progress)
+        public ProgressHttpContent(HttpContent content, Action<long, long> progress)
             : this(content, defaultBufferSize, progress)
         {
         }
@@ -76,7 +76,7 @@ namespace RestClient.IO
         /// <param name="content">Http entity body and content headers</param>
         /// <param name="bufferSize">Buffer size</param>
         /// <param name="progress">Progress value</param>
-        public HttpContentStreamProgressable(HttpContent content, int bufferSize, Action<long, long> progress)
+        public ProgressHttpContent(HttpContent content, int bufferSize, Action<long, long> progress)
         {
             if (content == null)
             {
@@ -111,7 +111,6 @@ namespace RestClient.IO
                 long size;
                 TryComputeLength(out size);
                 var uploaded = 0;
-
 
                 using (var sinput = await content.ReadAsStreamAsync())
                 {
