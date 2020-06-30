@@ -1642,8 +1642,9 @@ namespace RestClient
                 {
                     streamContent.ProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
                     response = Generic.RestResult<T>.CreateInstanceFrom<T>(responseMessage);
-                    response.Content = (T)Serializer.DeserializeObject(await streamContent.ReadStringAsStreamAsync(cancellationToken), typeof(T));
-                    OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = await streamContent.ReadStringAsStreamAsync(cancellationToken) });
+                    string stringContent = await streamContent.ReadStringAsStreamAsync(cancellationToken);
+                    response.Content = (T)Serializer.DeserializeObject(stringContent, typeof(T));
+                    OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = stringContent });
                 }
 
                 #endregion
