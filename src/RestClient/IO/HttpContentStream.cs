@@ -103,8 +103,7 @@ namespace RestClient.IO
         /// <returns>content as string</returns>
         public async Task<string> ReadStringAsStreamAsync(CancellationToken cancellationToken = new CancellationToken())
         {
-            long totalBytesToReceive1 = this.Content.Headers.ContentLength != null ? (int)this.Content.Headers.ContentLength : 0;
-            long totalBytesToReceive = this.Content.Headers.ContentLength.GetValueOrDefault();
+            long totalBytesToReceive = this.Content.Headers.ContentLength != null ? (int)this.Content.Headers.ContentLength : 0;
             long bytesReceived = 0;
 
             string result = string.Empty;
@@ -140,8 +139,7 @@ namespace RestClient.IO
         /// <returns>content as array bits</returns>
         public async Task<byte[]> ReadBytesAsStreamAsync(CancellationToken cancellationToken = new CancellationToken())
         {
-            long totalBytesToReceive1 = this.Content.Headers.ContentLength != null ? (int)this.Content.Headers.ContentLength : 0;
-            long totalBytesToReceive = this.Content.Headers.ContentLength.GetValueOrDefault();
+            long totalBytesToReceive = this.Content.Headers.ContentLength != null ? (int)this.Content.Headers.ContentLength : 0;
             long bytesReceived = 0;
 
             byte[] result = new byte[0];
@@ -191,7 +189,7 @@ namespace RestClient.IO
             {
                 if (this.Content != null)
                 {
-                    var streamContent = new HttpContentStreamProgressable(
+                    var streamContent = new ProgressHttpContent(
                        request.Content,
                        BufferSize,
                        (sent, total) =>
@@ -231,13 +229,10 @@ namespace RestClient.IO
         {
             HttpResponseMessage response = null;
             long totalBytesToSend = this.Content != null ? this.Content.Headers.ContentLength.Value : 1;
-            //long totalBytesToSend = this.Content.Headers.ContentLength.GetValueOrDefault();
-
-            string payload = this.Content != null ? await this.Content.ReadAsStringAsync() : "";
 
             if (this.Content != null)
             {
-                var streamContent = new HttpContentStreamProgressable(
+                var streamContent = new ProgressHttpContent(
                    Content,
                    BufferSize,
                    (sent, total) =>
