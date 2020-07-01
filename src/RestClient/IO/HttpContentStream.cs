@@ -230,9 +230,9 @@ namespace RestClient.IO
         /// <param name="request">Represents a HTTP request message.</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns></returns>
-        public async Task<HttpResponseMessage> WriteStringAsStreamAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        [Obsolete("Use: RestClient.Builder.Invoker().SendWithProgressAsync()", true)]
+        public void WriteStringAsStreamAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            HttpResponseMessage response = null;
             long totalBytesToSend = request.Content != null ? request.Content.Headers.ContentLength.Value : 1;
 
             if (request.Content != null && request.Content.GetType() != typeof(ProgressHttpContent))
@@ -251,8 +251,6 @@ namespace RestClient.IO
                    });
                 request.Content = streamContent;
             }
-
-            return response;
         }
 
         #endregion
