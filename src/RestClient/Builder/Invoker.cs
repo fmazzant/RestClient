@@ -92,11 +92,13 @@ namespace RestClient.Builder
         /// <param name="content"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public async Task<HttpResponseMessage> SendWithProgressAsync(HttpRequestMessage request, HttpContent content, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<HttpResponseMessage> SendWithProgressAsync(HttpRequestMessage request, HttpContent content, ProgressBytesChangedEventHandler handler = null, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (request.Content != null && request.Content.GetType() != typeof(ProgressHttpContent))
+            HttpContent httpContent = content ?? request.Content;
+            if (handler != null) ProgressChanged += handler;
+            if (httpContent != null && httpContent.GetType() != typeof(ProgressHttpContent))
             {
-                request.Content = new ProgressHttpContent(content, BufferSize, (current, total) => ProgressChanged?.Invoke(this, new ProgressEventArgs
+                request.Content = new ProgressHttpContent(httpContent, BufferSize, (current, total) => ProgressChanged?.Invoke(this, new ProgressEventArgs
                 {
                     CurrentBytes = current,
                     TotalBytes = total
@@ -109,10 +111,30 @@ namespace RestClient.Builder
         /// Send an HTTP request as an asynchronous operation.
         /// </summary>
         /// <param name="request"></param>
+        /// <param name="content"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task<HttpResponseMessage> SendWithProgressAsync(HttpRequestMessage request, HttpContent content, CancellationToken cancellationToken = new CancellationToken())
+            => await SendWithProgressAsync(request, content, null, cancellationToken);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="handler"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task<HttpResponseMessage> SendWithProgressAsync(HttpRequestMessage request, ProgressBytesChangedEventHandler handler = null, CancellationToken cancellationToken = new CancellationToken())
+           => await SendWithProgressAsync(request, null, handler, cancellationToken);
+
+        /// <summary>
+        /// Send an HTTP request as an asynchronous operation.
+        /// </summary>
+        /// <param name="request"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         public async Task<HttpResponseMessage> SendWithProgressAsync(HttpRequestMessage request, CancellationToken cancellationToken = new CancellationToken())
-            => await SendWithProgressAsync(request, null, cancellationToken);
+            => await SendWithProgressAsync(request, null, null, cancellationToken);
 
         /// <summary>
         /// Releases the unmanaged resources used by the Invoker and optionally disposes of the managed resources.

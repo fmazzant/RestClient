@@ -29,6 +29,7 @@
 
 namespace RestClient
 {
+    using RestClient.Builder;
     using RestClient.Generic;
     using RestClient.IO;
     using RestClient.Serialization;
@@ -56,8 +57,8 @@ namespace RestClient
         /// <summary>
         /// Provides a base class for sending HTTP requests and receiving HTTP responses from a resource identified by a URI
         /// </summary>
-        internal HttpClient HttpClient { get; private set; }
-            = new HttpClient();
+        internal Invoker HttpClient { get; private set; }
+            = new Invoker();
 
         /// <summary>
         /// Rest Properties
@@ -1275,33 +1276,39 @@ namespace RestClient
 
                     using (request.Content = MakeHttpContent())
                     {
-                        using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
+                        //using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
+                        //{
+                        //    streamContent.UploadingProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
+                        //    streamContent.WriteStringAsStreamAsync(request, cancellationToken);
+                        //    responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+                        //}
+
+                        //HttpClient.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
+
+                        using (responseMessage = await HttpClient.SendWithProgressAsync(request, (s, e) => OnUploadProgressAction?.Invoke(e), cancellationToken))
                         {
-                            streamContent.UploadingProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
-                            responseMessage = await streamContent.WriteStringAsStreamAsync(request, cancellationToken);
-                            responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-                        }
 
-                        if (!IsAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
-                        {
-                            stopwatch.Stop();
+                            if (!IsAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
+                            {
+                                stopwatch.Stop();
 
-                            IsAfterRefreshTokenCalled = true;
+                                IsAfterRefreshTokenCalled = true;
 
-                            if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
-                                return await SendAsStringAsync(method, cancellationToken);
+                                if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
+                                    return await SendAsStringAsync(method, cancellationToken);
 
-                            if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
-                                return await SendAsStringAsync(method, cancellationToken);
-                        }
+                                if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
+                                    return await SendAsStringAsync(method, cancellationToken);
+                            }
 
-                        using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
-                        {
-                            streamContent.DownloadingProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
-                            response = RestResult<string>.CreateInstanceFrom<string>(responseMessage);
-                            var result = await streamContent.ReadStringAsStreamAsync(responseMessage, cancellationToken);
-                            OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = result });
-                            response.Content = result;
+                            using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
+                            {
+                                streamContent.DownloadingProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
+                                response = RestResult<string>.CreateInstanceFrom<string>(responseMessage);
+                                var result = await streamContent.ReadStringAsStreamAsync(responseMessage, cancellationToken);
+                                OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = result });
+                                response.Content = result;
+                            }
                         }
                     }
                     responseMessage?.Dispose();
@@ -1355,33 +1362,37 @@ namespace RestClient
 
                     using (request.Content = MakeHttpContent())
                     {
+                        //using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
+                        //{
+                        //    streamContent.UploadingProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
+                        //    streamContent.WriteStringAsStreamAsync(request, cancellationToken);
+                        //    responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+                        //}
 
-                        using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
+                        //HttpClient.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
+
+                        using (responseMessage = await HttpClient.SendWithProgressAsync(request, (s, e) => OnUploadProgressAction?.Invoke(e), cancellationToken))
                         {
-                            streamContent.UploadingProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
-                            responseMessage = await streamContent.WriteStringAsStreamAsync(request, cancellationToken);
-                            responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-                        }
+                            if (!IsAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
+                            {
+                                stopwatch.Stop();
 
-                        if (!IsAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
-                        {
-                            stopwatch.Stop();
+                                IsAfterRefreshTokenCalled = true;
 
-                            IsAfterRefreshTokenCalled = true;
+                                if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
+                                    return await SendAsStreamAsync(method, cancellationToken);
 
-                            if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
-                                return await SendAsStreamAsync(method, cancellationToken);
+                                if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
+                                    return await SendAsStreamAsync(method, cancellationToken);
+                            }
 
-                            if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
-                                return await SendAsStreamAsync(method, cancellationToken);
-                        }
-
-                        using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
-                        {
-                            streamContent.DownloadingProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
-                            response = RestResult<Stream>.CreateInstanceFrom<Stream>(responseMessage);
-                            OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = string.Empty });
-                            response.Content = await responseMessage.Content.ReadAsStreamAsync();
+                            using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
+                            {
+                                streamContent.DownloadingProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
+                                response = RestResult<Stream>.CreateInstanceFrom<Stream>(responseMessage);
+                                OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = string.Empty });
+                                response.Content = await responseMessage.Content.ReadAsStreamAsync();
+                            }
                         }
                     }
 
@@ -1438,38 +1449,41 @@ namespace RestClient
 
                     using (request.Content = MakeHttpContent())
                     {
-                        using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
+                        //using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
+                        //{
+                        //    streamContent.UploadingProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
+                        //    responseMessage = await streamContent.WriteStringAsStreamAsync(request, cancellationToken);
+
+                        //    responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+                        //}
+
+                        //HttpClient.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
+
+                        using (responseMessage = await HttpClient.SendWithProgressAsync(request, (s, e) => OnUploadProgressAction?.Invoke(e), cancellationToken))
                         {
-                            streamContent.UploadingProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
-                            responseMessage = await streamContent.WriteStringAsStreamAsync(request, cancellationToken);
+                            if (!IsAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
+                            {
+                                stopwatch.Stop();
 
-                            responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-                        }
+                                IsAfterRefreshTokenCalled = true;
 
-                        if (!IsAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
-                        {
-                            stopwatch.Stop();
+                                if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
+                                    return await SendAsByteArrayAsync(method, cancellationToken);
 
-                            IsAfterRefreshTokenCalled = true;
+                                if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
+                                    return await SendAsByteArrayAsync(method, cancellationToken);
+                            }
 
-                            if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
-                                return await SendAsByteArrayAsync(method, cancellationToken);
+                            using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
+                            {
+                                streamContent.DownloadingProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
+                                response = RestResult<byte[]>.CreateInstanceFrom<byte[]>(responseMessage);
 
-                            if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
-                                return await SendAsByteArrayAsync(method, cancellationToken);
-                        }
-
-                        using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
-                        {
-                            streamContent.DownloadingProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
-                            response = RestResult<byte[]>.CreateInstanceFrom<byte[]>(responseMessage);
-
-                            response.Content = await streamContent.ReadBytesAsStreamAsync(responseMessage, cancellationToken);
-                            OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = BitConverter.ToString(response.Content) });
+                                response.Content = await streamContent.ReadBytesAsStreamAsync(responseMessage, cancellationToken);
+                                OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = BitConverter.ToString(response.Content) });
+                            }
                         }
                     }
-
-                    responseMessage?.Dispose();
                 }
 
                 OnPreResultAction?.Invoke(response);
@@ -1523,38 +1537,41 @@ namespace RestClient
 
                     using (request.Content = MakeHttpContent())
                     {
-                        using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
+                        //using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
+                        //{
+                        //    streamContent.UploadingProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
+                        //    streamContent.WriteStringAsStreamAsync(request, cancellationToken);
+                        //    responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+                        //}
+
+                        //HttpClient.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
+
+                        using (responseMessage = await HttpClient.SendWithProgressAsync(request, (s, e) => OnUploadProgressAction?.Invoke(e), cancellationToken))
                         {
-                            streamContent.UploadingProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
-                            responseMessage = await streamContent.WriteStringAsStreamAsync(request, cancellationToken);
-                            responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-                        }
+                            if (!IsAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
+                            {
+                                stopwatch.Stop();
 
-                        if (!IsAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
-                        {
-                            stopwatch.Stop();
+                                IsAfterRefreshTokenCalled = true;
 
-                            IsAfterRefreshTokenCalled = true;
+                                if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
+                                    return await SendAsync<T>(method, cancellationToken);
 
-                            if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
-                                return await SendAsync<T>(method, cancellationToken);
+                                if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
+                                    return await SendAsync<T>(method, cancellationToken);
+                            }
 
-                            if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
-                                return await SendAsync<T>(method, cancellationToken);
-                        }
+                            using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
+                            {
+                                streamContent.DownloadingProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
+                                response = Generic.RestResult<T>.CreateInstanceFrom<T>(responseMessage);
 
-                        using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
-                        {
-                            streamContent.DownloadingProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
-                            response = Generic.RestResult<T>.CreateInstanceFrom<T>(responseMessage);
-
-                            string serializedObject = await streamContent.ReadStringAsStreamAsync(responseMessage, cancellationToken);
-                            OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = serializedObject });
-                            response.Content = (T)Serializer.DeserializeObject(serializedObject, typeof(T));
+                                string serializedObject = await streamContent.ReadStringAsStreamAsync(responseMessage, cancellationToken);
+                                OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = serializedObject });
+                                response.Content = (T)Serializer.DeserializeObject(serializedObject, typeof(T));
+                            }
                         }
                     }
-
-                    responseMessage?.Dispose();
                 }
                 OnPreResultAction?.Invoke(response);
                 OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
@@ -1604,7 +1621,7 @@ namespace RestClient
         /// <param name="result"></param>
         private void CreateNewHttpClientInstance(RestBuilder result)
         {
-            var client = new HttpClient(new HttpClientHandler()
+            var client = new Invoker(new HttpClientHandler()
             {
                 Credentials = result.Credentials,
                 ClientCertificateOptions = Properties.CertificateOption,
