@@ -121,11 +121,6 @@ namespace RestClient
         object PayloadContent { get; set; }
 
         /// <summary>
-        /// Payload content's type
-        /// </summary>
-        Type PayloadContentType { get; set; }
-
-        /// <summary>
         /// Defines is enabled x-form-urlencoded
         /// </summary>
         bool IsEnabledFormUrlEncoded { get; set; } = false;
@@ -633,7 +628,7 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.PayloadContent = payload;
-            result.PayloadContentType = typeof(T);
+            //result.PayloadContentType = typeof(T);
             return result;
         }
 
@@ -1305,7 +1300,6 @@ namespace RestClient
                     response = RestResult<string>.CreateInstanceFrom<string>(responseMessage);
                     var result = await streamContent.ReadStringAsStreamAsync(responseMessage, cancellationToken);
                     OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = result });
-                    //response.StringContent = result;
                     response.Content = result;
                 }
 
@@ -1431,36 +1425,41 @@ namespace RestClient
                 OnStartAction?.Invoke(startEventArgs);
                 if (startEventArgs.Cancel) throw new OperationCanceledException();
 
-                HttpRequestMessage request = new HttpRequestMessage(method, url);
-                HttpResponseMessage responseMessage = null;
-
-                request.Content = MakeHttpContent();
-
-                using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
+                using (HttpRequestMessage request = new HttpRequestMessage(method, url))
                 {
-                    streamContent.UploadingProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
-                    responseMessage = await streamContent.WriteStringAsStreamAsync(request, cancellationToken);
-                    responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-                }
+                    HttpResponseMessage responseMessage = null;
 
-                if (!IsAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
-                {
-                    IsAfterRefreshTokenCalled = true;
+                    using (request.Content = MakeHttpContent())
+                    {
+                        using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
+                        {
+                            streamContent.UploadingProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
+                            responseMessage = await streamContent.WriteStringAsStreamAsync(request, cancellationToken);
 
-                    if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
-                        return await SendAsByteArrayAsync(method, cancellationToken);
+                            responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+                        }
 
-                    if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
-                        return await SendAsByteArrayAsync(method, cancellationToken);
-                }
+                        if (!IsAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
+                        {
+                            IsAfterRefreshTokenCalled = true;
 
-                using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
-                {
-                    streamContent.DownloadingProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
-                    response = RestResult<byte[]>.CreateInstanceFrom<byte[]>(responseMessage);
+                            if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
+                                return await SendAsByteArrayAsync(method, cancellationToken);
 
-                    response.Content = await streamContent.ReadBytesAsStreamAsync(responseMessage, cancellationToken);
-                    OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = BitConverter.ToString(response.Content) });
+                            if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
+                                return await SendAsByteArrayAsync(method, cancellationToken);
+                        }
+
+                        using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
+                        {
+                            streamContent.DownloadingProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
+                            response = RestResult<byte[]>.CreateInstanceFrom<byte[]>(responseMessage);
+
+                            response.Content = await streamContent.ReadBytesAsStreamAsync(responseMessage, cancellationToken);
+                            OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = BitConverter.ToString(response.Content) });
+                        }
+                    }
+                    responseMessage.Dispose();
                 }
 
                 OnPreResultAction?.Invoke(response);
@@ -1619,11 +1618,12 @@ namespace RestClient
         {
             if (!IsEnabledFormUrlEncoded && PayloadContent != null)
             {
-                var serializedObject = Serializer.SerializeObject(PayloadContent, PayloadContentType);
+                //var serializedObject = Serializer.SerializeObject(PayloadContent, PayloadContentType);
+                var serializedObject = Serializer.SerializeObject(PayloadContent, PayloadContent.GetType());
                 OnPreviewContentRequestAsStringAction?.Invoke(new PreviewContentAsStringEventArgs
                 {
                     ContentAsString = serializedObject,
-                    ContentType = PayloadContentType
+                    ContentType = PayloadContent.GetType()
                 });
                 return new StringContent(serializedObject, Encoding.UTF8, Serializer.MediaTypeAsString);
             }
