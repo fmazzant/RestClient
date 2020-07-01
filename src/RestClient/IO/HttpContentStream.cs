@@ -44,9 +44,14 @@ namespace RestClient.IO
     {
         #region [ Public Events ]
         /// <summary>
-        /// Occurs when the request starts.
+        /// Occurs when the uploading starts.
         /// </summary>
-        public event ProgressBytesChangedEventHandler ProgressChanged;
+        public event ProgressBytesChangedEventHandler UploadingProgressChanged;
+
+        /// <summary>
+        /// Occurs when the download starts.
+        /// </summary>
+        public event ProgressBytesChangedEventHandler DownloadingProgressChanged;
         #endregion
 
         #region [ Private ]
@@ -54,7 +59,7 @@ namespace RestClient.IO
         /// <summary>
         /// Lets keep buffer of 20kb
         /// </summary>
-        private const int DefaultBufferSize = 5 * 4096; //20kb
+        private const int DefaultBufferSize = 5 * 4096 * 4; //80kb
 
         /// <summary>
         /// Buffer size
@@ -63,20 +68,20 @@ namespace RestClient.IO
 
         #endregion
 
-        #region [ Public Properties ]
-        /// <summary>
-        /// Gets HTTP content
-        /// </summary>
-        public HttpContent Content { get; private set; }
-        #endregion
+        //#region [ Public Properties ]
+        ///// <summary>
+        ///// Gets HTTP content
+        ///// </summary>
+        //public HttpContent Content { get; private set; }
+        //#endregion
 
         #region [ Constructors ]
         /// <summary>
         /// Initializes a new instance of the VarGroup.Mobile.Core.IO.HttpContentStream class.
         /// </summary>
         /// <param name="httpContent">HTTP content</param>
-        public HttpContentStream(HttpContent httpContent)
-            : this(httpContent, DefaultBufferSize)
+        public HttpContentStream()
+            : this(DefaultBufferSize)
         {
 
         }
@@ -86,10 +91,10 @@ namespace RestClient.IO
         /// </summary>
         /// <param name="httpContent"></param>
         /// <param name="bufferSize"></param>
-        public HttpContentStream(HttpContent httpContent, int bufferSize)
+        public HttpContentStream(int bufferSize)
             : base()
         {
-            this.Content = httpContent;
+            //this.Content = httpContent;
             this.BufferSize = bufferSize;
         }
         #endregion
@@ -101,13 +106,13 @@ namespace RestClient.IO
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <param name="progress">Proveder for progress update</param>
         /// <returns>content as string</returns>
-        public async Task<string> ReadStringAsStreamAsync(CancellationToken cancellationToken = new CancellationToken())
+        public async Task<string> ReadStringAsStreamAsync(HttpResponseMessage response, CancellationToken cancellationToken = new CancellationToken())
         {
-            long totalBytesToReceive = this.Content.Headers.ContentLength != null ? (int)this.Content.Headers.ContentLength : 0;
+            long totalBytesToReceive = response.Content.Headers.ContentLength != null ? (int)response.Content.Headers.ContentLength : 0;
             long bytesReceived = 0;
 
             string result = string.Empty;
-            using (Stream stream = await this.Content.ReadAsStreamAsync())
+            using (Stream stream = await response.Content.ReadAsStreamAsync())
             {
                 byte[] data = new byte[BufferSize];
                 using (MemoryStream ms = new MemoryStream())
@@ -118,7 +123,7 @@ namespace RestClient.IO
                         bytesReceived += numBytesRead;
                         ms.Write(data, 0, numBytesRead);
 
-                        ProgressChanged?.Invoke(this, new ProgressEventArgs
+                        DownloadingProgressChanged?.Invoke(this, new ProgressEventArgs
                         {
                             TotalBytes = totalBytesToReceive,
                             CurrentBytes = bytesReceived
@@ -137,13 +142,13 @@ namespace RestClient.IO
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <param name="progress">Proveder for progress update</param>
         /// <returns>content as array bits</returns>
-        public async Task<byte[]> ReadBytesAsStreamAsync(CancellationToken cancellationToken = new CancellationToken())
+        public async Task<byte[]> ReadBytesAsStreamAsync(HttpResponseMessage response, CancellationToken cancellationToken = new CancellationToken())
         {
-            long totalBytesToReceive = this.Content.Headers.ContentLength != null ? (int)this.Content.Headers.ContentLength : 0;
+            long totalBytesToReceive = response.Content.Headers.ContentLength != null ? (int)response.Content.Headers.ContentLength : 0;
             long bytesReceived = 0;
 
             byte[] result = new byte[0];
-            using (Stream stream = await this.Content.ReadAsStreamAsync())
+            using (Stream stream = await response.Content.ReadAsStreamAsync())
             {
                 byte[] data = new byte[BufferSize];
                 using (MemoryStream ms = new MemoryStream())
@@ -154,7 +159,7 @@ namespace RestClient.IO
                         bytesReceived += numBytesRead;
                         ms.Write(data, 0, numBytesRead);
 
-                        ProgressChanged?.Invoke(this, new ProgressEventArgs
+                        DownloadingProgressChanged?.Invoke(this, new ProgressEventArgs
                         {
                             TotalBytes = totalBytesToReceive,
                             CurrentBytes = bytesReceived
@@ -181,20 +186,20 @@ namespace RestClient.IO
         public async Task<HttpResponseMessage> WriteStringAsStreamAsync(HttpClient client, HttpRequestMessage request, CancellationToken cancellationToken)
         {
             HttpResponseMessage response = null;
-            long totalBytesToSend = this.Content != null ? this.Content.Headers.ContentLength.Value : 1;
+            long totalBytesToSend = request.Content != null ? request.Content.Headers.ContentLength.Value : 1;
 
-            string payload = this.Content != null ? await this.Content.ReadAsStringAsync() : "";
+            string payload = request.Content != null ? await request.Content.ReadAsStringAsync() : "";
 
             try
             {
-                if (this.Content != null)
+                if (request.Content != null)
                 {
                     var streamContent = new ProgressHttpContent(
                        request.Content,
                        BufferSize,
                        (sent, total) =>
                        {
-                           ProgressChanged?.Invoke(this, new ProgressEventArgs
+                           UploadingProgressChanged?.Invoke(this, new ProgressEventArgs
                            {
                                TotalBytes = total,
                                CurrentBytes = sent
@@ -210,7 +215,7 @@ namespace RestClient.IO
             }
             catch (Exception)
             {
-                ProgressChanged?.Invoke(this, new ProgressEventArgs
+                UploadingProgressChanged?.Invoke(this, new ProgressEventArgs
                 {
                     TotalBytes = 1,
                     CurrentBytes = 1
@@ -228,16 +233,16 @@ namespace RestClient.IO
         public async Task<HttpResponseMessage> WriteStringAsStreamAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             HttpResponseMessage response = null;
-            long totalBytesToSend = this.Content != null ? this.Content.Headers.ContentLength.Value : 1;
+            long totalBytesToSend = request.Content != null ? request.Content.Headers.ContentLength.Value : 1;
 
-            if (this.Content != null)
+            if (request.Content != null && request.Content.GetType() != typeof(ProgressHttpContent))
             {
                 var streamContent = new ProgressHttpContent(
-                   Content,
+                   request.Content,
                    BufferSize,
                    (sent, total) =>
                    {
-                       ProgressChanged?.Invoke(this, new ProgressEventArgs
+                       UploadingProgressChanged?.Invoke(this, new ProgressEventArgs
                        {
                            TotalBytes = total,
                            CurrentBytes = sent
@@ -276,7 +281,13 @@ namespace RestClient.IO
             {
                 if (disposing)
                 {
-                    if (Content != null) Content.Dispose();
+                    //if (Content != null) Content.Dispose();
+                    if (UploadingProgressChanged != null)
+                        foreach (Delegate d in UploadingProgressChanged.GetInvocationList())
+                            UploadingProgressChanged -= (ProgressBytesChangedEventHandler)d;
+                    if (DownloadingProgressChanged != null)
+                        foreach (Delegate d in DownloadingProgressChanged.GetInvocationList())
+                            DownloadingProgressChanged -= (ProgressBytesChangedEventHandler)d;
                 }
                 disposed = true;
             }

@@ -33,6 +33,7 @@
 
   <ItemGroup>
     <None Remove="Builder\BuilderInvoker.cs~RF1f4020e5.TMP" />
+    <None Remove="RestBuilder.cs~RF54d6604.TMP" />
   </ItemGroup>
 
   <ItemGroup>
