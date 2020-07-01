@@ -1417,6 +1417,7 @@ namespace RestClient
                 };
 
                 OnStartAction?.Invoke(startEventArgs);
+
                 if (startEventArgs.Cancel) throw new OperationCanceledException();
 
                 using (HttpRequestMessage request = new HttpRequestMessage(method, url))
@@ -1435,6 +1436,8 @@ namespace RestClient
 
                         if (!IsAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
                         {
+                            stopwatch.Stop();
+
                             IsAfterRefreshTokenCalled = true;
 
                             if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
@@ -1453,6 +1456,7 @@ namespace RestClient
                             OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = BitConverter.ToString(response.Content) });
                         }
                     }
+
                     responseMessage.Dispose();
                 }
 
@@ -1469,7 +1473,6 @@ namespace RestClient
 
             OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
             OnCompletedActionEA?.Invoke(new EventArgs());
-
             return response;
         }
 
@@ -1502,39 +1505,44 @@ namespace RestClient
                 OnStartAction?.Invoke(startEventArgs);
                 if (startEventArgs.Cancel) throw new OperationCanceledException();
 
-                HttpRequestMessage request = new HttpRequestMessage(method, url);
-                HttpResponseMessage responseMessage = null;
-
-                request.Content = MakeHttpContent();
-
-                using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
+                using (HttpRequestMessage request = new HttpRequestMessage(method, url))
                 {
-                    streamContent.UploadingProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
-                    responseMessage = await streamContent.WriteStringAsStreamAsync(request, cancellationToken);
-                    responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+                    HttpResponseMessage responseMessage = null;
+
+                    using (request.Content = MakeHttpContent())
+                    {
+
+                        using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
+                        {
+                            streamContent.UploadingProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
+                            responseMessage = await streamContent.WriteStringAsStreamAsync(request, cancellationToken);
+                            responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+                        }
+
+                        if (!IsAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
+                        {
+                            IsAfterRefreshTokenCalled = true;
+
+                            if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
+                                return await SendAsync<T>(method, cancellationToken);
+
+                            if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
+                                return await SendAsync<T>(method, cancellationToken);
+                        }
+
+                        using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
+                        {
+                            streamContent.DownloadingProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
+                            response = Generic.RestResult<T>.CreateInstanceFrom<T>(responseMessage);
+
+                            string serializedObject = await streamContent.ReadStringAsStreamAsync(responseMessage, cancellationToken);
+                            OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = serializedObject });
+                            response.Content = (T)Serializer.DeserializeObject(serializedObject, typeof(T));
+                        }
+                    }
+
+                    responseMessage.Dispose();
                 }
-
-                if (!IsAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
-                {
-                    IsAfterRefreshTokenCalled = true;
-
-                    if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
-                        return await SendAsync<T>(method, cancellationToken);
-
-                    if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
-                        return await SendAsync<T>(method, cancellationToken);
-                }
-
-                using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
-                {
-                    streamContent.DownloadingProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
-                    response = Generic.RestResult<T>.CreateInstanceFrom<T>(responseMessage);
-
-                    string serializedObject = await streamContent.ReadStringAsStreamAsync(responseMessage, cancellationToken);
-                    OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = serializedObject });
-                    response.Content = (T)Serializer.DeserializeObject(serializedObject, typeof(T));
-                }
-
                 OnPreResultAction?.Invoke(response);
                 OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
             }
@@ -1631,7 +1639,6 @@ namespace RestClient
             }
             return null;
         }
-
         #endregion
     }
 }
