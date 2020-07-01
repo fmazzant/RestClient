@@ -34,12 +34,12 @@ namespace RestClient.Serialization.Xml
     using System.Xml.Serialization;
 
     /// <summary>
-    /// Implements a Adiacent.Library.Net.Serialization.ISerializerContent for custom XML object Serialization
+    /// Implements a RestClient.Serialization.ISerializerContent for custom XML object Serialization
     /// </summary>
     public sealed class XML : ISerializerContent
     {
         /// <summary>
-        /// Initializes a new instance of the VarGroup.Mobile.Core.Serialization.Xml.XML class for the specified JSON by using the default Serialization.
+        /// Initializes a new instance of the RestClient.Serialization.Xml.XML class for the specified JSON by using the default Serialization.
         /// </summary>
         public XML() : base() { }
 

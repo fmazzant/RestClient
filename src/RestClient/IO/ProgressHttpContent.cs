@@ -61,7 +61,7 @@ namespace RestClient.IO
         private Action<long, long> progress;
 
         /// <summary>
-        /// Initializes a new instance of the VarGroup.Mobile.Core.Net.ProgressableStreamContent class.
+        /// Initializes a new instance of the RestClient.ProgressableStreamContent class.
         /// </summary>
         /// <param name="content">Http entity body and content headers</param>
         /// <param name="progress">Progress value</param>
@@ -71,7 +71,7 @@ namespace RestClient.IO
         }
 
         /// <summary>
-        /// Initializes a new instance of the VarGroup.Mobile.Core.Net.ProgressableStreamContent class.
+        /// Initializes a new instance of the RestClient.ProgressableStreamContent class.
         /// </summary>
         /// <param name="content">Http entity body and content headers</param>
         /// <param name="bufferSize">Buffer size</param>

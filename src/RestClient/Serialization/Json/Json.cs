@@ -33,12 +33,12 @@ namespace RestClient.Serialization.Json
     using System.Text.Json;
 
     /// <summary>
-    /// Implements a Adiacent.Library.Net.Serialization.ISerializerContent for custom JSON object Serialization
+    /// Implements a RestClient.Serialization.ISerializerContent for custom JSON object Serialization
     /// </summary>
     public sealed class JSON : ISerializerContent
     {
         /// <summary>
-        /// Initializes a new instance of the VarGroup.Mobile.Core.Serialization.Json.JSON class for the specified JSON by using the default Serialization.
+        /// Initializes a new instance of the RestClient.Serialization.Json.JSON class for the specified JSON by using the default Serialization.
         /// </summary>
         public JSON() : base() { }
 

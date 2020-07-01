@@ -77,7 +77,7 @@ namespace RestClient.IO
 
         #region [ Constructors ]
         /// <summary>
-        /// Initializes a new instance of the VarGroup.Mobile.Core.IO.HttpContentStream class.
+        /// Initializes a new instance of the RestClient.IO.HttpContentStream class.
         /// </summary>
         /// <param name="httpContent">HTTP content</param>
         public HttpContentStream()
@@ -87,7 +87,7 @@ namespace RestClient.IO
         }
 
         /// <summary>
-        /// Initializes a new instance of the VarGroup.Mobile.Core.IO.HttpContentStream class.
+        /// Initializes a new instance of the RestClient.IO.HttpContentStream class.
         /// </summary>
         /// <param name="httpContent"></param>
         /// <param name="bufferSize"></param>

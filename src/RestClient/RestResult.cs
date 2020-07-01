@@ -77,12 +77,12 @@ namespace RestClient
 
         #region [ Constructors ]
         /// <summary>
-        /// Initializes a new instance of the VarGroup.Mobile.Core.Net.ActionResult class.
+        /// Initializes a new instance of the RestClient.ActionResult class.
         /// </summary>
         protected RestResult() : base() { }
 
         /// <summary>
-        /// Initializes a new instance of the VarGroup.Mobile.Core.Net.ActionResult class.
+        /// Initializes a new instance of the RestClient.ActionResult class.
         /// </summary>
         /// <param name="response">The HTTP response.</param>
         protected RestResult(HttpResponseMessage response)
@@ -91,7 +91,7 @@ namespace RestClient
         }
 
         /// <summary>
-        /// Initializes a new instance of the VarGroup.Mobile.Core.Net.ActionResult class.
+        /// Initializes a new instance of the RestClient.ActionResult class.
         /// </summary>
         /// <param name="innerException">
         /// The exception that is the cause of the current exception. If the innerException
@@ -193,7 +193,7 @@ namespace RestClient
         private bool disposed = false;
 
         /// <summary>
-        /// Releases all resources used by the VarGroup.Mobile.Core.Net.ActionResult.
+        /// Releases all resources used by the RestClient.ActionResult.
         /// </summary>
         public void Dispose()
         {
@@ -202,7 +202,7 @@ namespace RestClient
         }
 
         /// <summary>
-        /// Releases the unmanaged resources used by the VarGroup.Mobile.Core.Net.ActionResult and optionally releases the managed resources.
+        /// Releases the unmanaged resources used by the RestClient.ActionResult and optionally releases the managed resources.
         /// </summary>
         /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
@@ -234,18 +234,18 @@ namespace RestClient
         {
             #region [ Constructors ]
             /// <summary>
-            /// Initializes a new instance of the VarGroup.Mobile.Core.Net.ActionResult class.
+            /// Initializes a new instance of the RestClient.ActionResult class.
             /// </summary>
             protected RestResult() : base() { }
 
             /// <summary>
-            /// Initializes a new instance of the VarGroup.Mobile.Core.Net.ActionResult class.
+            /// Initializes a new instance of the RestClient.ActionResult class.
             /// </summary>
             /// <param name="response">The HTTP response.</param>
             protected RestResult(HttpResponseMessage response) : base(response) { }
 
             /// <summary>
-            /// Initializes a new instance of the VarGroup.Mobile.Core.Net.ActionResult class.
+            /// Initializes a new instance of the RestClient.ActionResult class.
             /// </summary>
             /// <param name="innerException">
             /// The exception that is the cause of the current exception. If the innerException
@@ -273,7 +273,7 @@ namespace RestClient
             public Exception Exception { get; internal set; }
 
             /// <summary>
-            /// Initializes a new instance of the VarGroup.Mobile.Core.Net.ActionResult from HTTP response message
+            /// Initializes a new instance of the RestClient.ActionResult from HTTP response message
             /// </summary>
             /// <typeparam name="TContent">
             /// The type of the parameter of the method that this delegate encapsulates.This
@@ -289,7 +289,7 @@ namespace RestClient
             }
 
             /// <summary>
-            /// Initializes a new instance of the VarGroup.Mobile.Core.Net.ActionResult from execption
+            /// Initializes a new instance of the RestClient.ActionResult from execption
             /// </summary>
             /// <param name="innerException">
             ///  The exception that is the cause of the current exception. If the innerException
