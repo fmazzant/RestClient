@@ -264,7 +264,7 @@ namespace RestClient.IO
         private bool disposed = false;
 
         /// <summary>
-        /// Releases all resources used by the VarGroup.Mobile.Core.IO.HttpContentStream.
+        /// Releases all resources used by the object.
         /// </summary>
         public void Dispose()
         {
@@ -272,7 +272,7 @@ namespace RestClient.IO
             GC.SuppressFinalize(this);
         }
         /// <summary>
-        /// Releases the unmanaged resources used by the VarGroup.Mobile.Core.IO.HttpContentStream and optionally releases the managed resources.
+        /// Releases the unmanaged resources used by the objet and optionally releases the managed resources.
         /// </summary>
         /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
