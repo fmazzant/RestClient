@@ -1246,8 +1246,6 @@ namespace RestClient
         ///  Send an HTTP request as an asynchronous operation.
         /// </summary>
         /// <param name="method"></param>
-        /// <param name="payloadContent"></param>
-        /// <param name="payloadContentType"></param>
         /// <returns></returns>
         private async Task<RestResult<string>> SendAsStringAsync(HttpMethod method, CancellationToken cancellationToken = new CancellationToken())
         {
@@ -1324,8 +1322,6 @@ namespace RestClient
         ///  Send an HTTP request as an asynchronous operation.
         /// </summary>
         /// <param name="method"></param>
-        /// <param name="payloadContent"></param>
-        /// <param name="payloadContentType"></param>
         /// <returns></returns>
         private async Task<RestResult<Stream>> SendAsStreamAsync(HttpMethod method, CancellationToken cancellationToken = new CancellationToken())
         {
@@ -1400,8 +1396,6 @@ namespace RestClient
         ///  Send an HTTP request as an asynchronous operation.
         /// </summary>
         /// <param name="method"></param>
-        /// <param name="payloadContent"></param>
-        /// <param name="payloadContentType"></param>
         /// <returns></returns>
         private async Task<RestResult<byte[]>> SendAsByteArrayAsync(HttpMethod method, CancellationToken cancellationToken = new CancellationToken())
         {
@@ -1484,8 +1478,6 @@ namespace RestClient
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="method"></param>
-        /// <param name="payloadContent"></param>
-        /// <param name="payloadContentType"></param>
         /// <returns></returns>
         private async Task<RestResult<T>> SendAsync<T>(HttpMethod method, CancellationToken cancellationToken = new CancellationToken())
             where T : new()
