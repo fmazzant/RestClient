@@ -1276,15 +1276,6 @@ namespace RestClient
 
                     using (request.Content = MakeHttpContent())
                     {
-                        //using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
-                        //{
-                        //    streamContent.UploadingProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
-                        //    streamContent.WriteStringAsStreamAsync(request, cancellationToken);
-                        //    responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-                        //}
-
-                        //HttpClient.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
-
                         using (responseMessage = await HttpClient.SendWithProgressAsync(request, (s, e) => OnUploadProgressAction?.Invoke(e), cancellationToken))
                         {
 
@@ -1362,15 +1353,6 @@ namespace RestClient
 
                     using (request.Content = MakeHttpContent())
                     {
-                        //using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
-                        //{
-                        //    streamContent.UploadingProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
-                        //    streamContent.WriteStringAsStreamAsync(request, cancellationToken);
-                        //    responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-                        //}
-
-                        //HttpClient.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
-
                         using (responseMessage = await HttpClient.SendWithProgressAsync(request, (s, e) => OnUploadProgressAction?.Invoke(e), cancellationToken))
                         {
                             if (!IsAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
@@ -1449,16 +1431,6 @@ namespace RestClient
 
                     using (request.Content = MakeHttpContent())
                     {
-                        //using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
-                        //{
-                        //    streamContent.UploadingProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
-                        //    responseMessage = await streamContent.WriteStringAsStreamAsync(request, cancellationToken);
-
-                        //    responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-                        //}
-
-                        //HttpClient.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
-
                         using (responseMessage = await HttpClient.SendWithProgressAsync(request, (s, e) => OnUploadProgressAction?.Invoke(e), cancellationToken))
                         {
                             if (!IsAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
@@ -1537,15 +1509,6 @@ namespace RestClient
 
                     using (request.Content = MakeHttpContent())
                     {
-                        //using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
-                        //{
-                        //    streamContent.UploadingProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
-                        //    streamContent.WriteStringAsStreamAsync(request, cancellationToken);
-                        //    responseMessage = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-                        //}
-
-                        //HttpClient.ProgressChanged += (s, e) => OnUploadProgressAction?.Invoke(e);
-
                         using (responseMessage = await HttpClient.SendWithProgressAsync(request, (s, e) => OnUploadProgressAction?.Invoke(e), cancellationToken))
                         {
                             if (!IsAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
