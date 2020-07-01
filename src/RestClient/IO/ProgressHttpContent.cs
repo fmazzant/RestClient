@@ -43,7 +43,7 @@ namespace RestClient.IO
         /// <summary>
         /// Lets keep buffer of 20kb
         /// </summary>
-        private const int defaultBufferSize = 5 * 4096; //20kb
+        private const int defaultBufferSize = 5 * 4096 * 4; //80kb
 
         /// <summary>
         /// Http entity body and content headers
