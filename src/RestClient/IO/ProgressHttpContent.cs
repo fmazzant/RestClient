@@ -34,7 +34,7 @@ namespace RestClient.IO
     using System.Net;
     using System.Net.Http;
     using System.Threading.Tasks;
-    
+
     /// <summary>
     /// A  class representing an HTTP entity body and content headers.
     /// </summary>
@@ -160,6 +160,7 @@ namespace RestClient.IO
             if (disposing)
             {
                 content.Dispose();
+                progress = null;
             }
             base.Dispose(disposing);
         }
