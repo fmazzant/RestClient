@@ -568,7 +568,7 @@ namespace RestClient
         public RestBuilder Parameter(string key, object value)
         {
             var result = (RestBuilder)this.MemberwiseClone();
-            if (Parameters.ContainsKey(key))
+            if (result.Parameters.ContainsKey(key))
                 result.Parameters[key] = value.ToString();
             else
                 result.Parameters.Add(key, value.ToString());
@@ -584,8 +584,36 @@ namespace RestClient
         public RestBuilder Parameter(RestParameter parameter, params RestParameter[] others)
         {
             var result = (RestBuilder)this.MemberwiseClone();
-            result.Parameter(parameter.Key, parameter.Value);
-            foreach (RestParameter p in others) result.Parameter(p.Key, p.Value);
+            result.Parameters.Add(parameter.Key, parameter.Value.ToString());
+            foreach (RestParameter p in others)
+                result.Parameters.Add(p.Key, p.Value.ToString());
+            return result;
+        }
+
+        /// <summary>
+        /// Adds list of rest parameter to querystring
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
+        public RestBuilder Parameter(Action<Dictionary<string, string>> parameters)
+        {
+            var result = (RestBuilder)this.MemberwiseClone();
+            parameters(result.Parameters);
+            return result;
+        }
+
+        /// <summary>
+        /// Adds list of rest parameter to querystring
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
+        public RestBuilder Parameter(Action<List<RestParameter>> parameters)
+        {
+            var result = (RestBuilder)this.MemberwiseClone();
+            List<RestParameter> list = new List<RestParameter>();
+            parameters(list);
+            foreach (RestParameter p in list)
+                result.Parameters.Add(p.Key, p.Value.ToString());
             return result;
         }
 
