@@ -595,18 +595,6 @@ namespace RestClient
         /// </summary>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public RestBuilder Parameter(Action<Dictionary<string, string>> parameters)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            parameters(result.Parameters);
-            return result;
-        }
-
-        /// <summary>
-        /// Adds list of rest parameter to querystring
-        /// </summary>
-        /// <param name="parameters"></param>
-        /// <returns></returns>
         public RestBuilder Parameter(Action<List<RestParameter>> parameters)
         {
             var result = (RestBuilder)this.MemberwiseClone();
