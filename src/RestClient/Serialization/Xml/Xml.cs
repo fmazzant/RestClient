@@ -56,7 +56,11 @@ namespace RestClient.Serialization.Xml
         /// <returns>The deserialized object from the XML string.</returns>
         public object DeserializeObject(string value, Type typeOf)
         {
-            if (string.IsNullOrEmpty(value)) return null;
+            if (string.IsNullOrEmpty(value))
+            {
+                return null;
+            }
+
             return new XmlSerializer(typeOf).Deserialize(new StringReader(value));
         }
 
@@ -68,7 +72,11 @@ namespace RestClient.Serialization.Xml
         /// <returns>A XML string representation of the object.</returns>
         public string SerializeObject(object value, Type typeOf)
         {
-            if (value == null) return string.Empty;
+            if (value == null)
+            {
+                return string.Empty;
+            }
+
             XmlSerializer xml = new XmlSerializer(typeOf);
             StringWriter writer = new StringWriter();
             xml.Serialize(writer, value);

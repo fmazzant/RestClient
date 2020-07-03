@@ -95,7 +95,11 @@ namespace RestClient.Builder
         public async Task<HttpResponseMessage> SendWithProgressAsync(HttpRequestMessage request, HttpContent content, ProgressBytesChangedEventHandler handler = null, CancellationToken cancellationToken = new CancellationToken())
         {
             HttpContent httpContent = content ?? request.Content;
-            if (handler != null) ProgressChanged += handler;
+            if (handler != null)
+            {
+                ProgressChanged += handler;
+            }
+
             if (httpContent != null && httpContent.GetType() != typeof(ProgressHttpContent))
             {
                 request.Content = new ProgressHttpContent(httpContent, BufferSize, (current, total) => ProgressChanged?.Invoke(this, new ProgressEventArgs
@@ -145,8 +149,12 @@ namespace RestClient.Builder
             if (disposing)
             {
                 if (ProgressChanged != null)
+                {
                     foreach (Delegate d in ProgressChanged.GetInvocationList())
+                    {
                         ProgressChanged -= (ProgressBytesChangedEventHandler)d;
+                    }
+                }
             }
             base.Dispose(disposing);
         }

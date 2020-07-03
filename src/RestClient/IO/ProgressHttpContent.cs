@@ -117,7 +117,10 @@ namespace RestClient.IO
                     while (true)
                     {
                         var length = sinput.Read(buffer, 0, buffer.Length);
-                        if (length <= 0) break;
+                        if (length <= 0)
+                        {
+                            break;
+                        }
 
                         uploaded += length;
                         progress?.Invoke(uploaded, size);

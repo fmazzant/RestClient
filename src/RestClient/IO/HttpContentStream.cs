@@ -128,7 +128,10 @@ namespace RestClient.IO
                             TotalBytes = totalBytesToReceive,
                             CurrentBytes = bytesReceived
                         });
-                        if (cancellationToken.IsCancellationRequested) throw new TaskCanceledException();
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            throw new TaskCanceledException();
+                        }
                     }
                     result = Encoding.UTF8.GetString(ms.ToArray(), 0, (int)ms.Length);
                 }
@@ -164,7 +167,10 @@ namespace RestClient.IO
                             TotalBytes = totalBytesToReceive,
                             CurrentBytes = bytesReceived
                         });
-                        if (cancellationToken.IsCancellationRequested) throw new TaskCanceledException();
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            throw new TaskCanceledException();
+                        }
                     }
                     result = ms.ToArray();
                 }
@@ -204,7 +210,10 @@ namespace RestClient.IO
                                TotalBytes = total,
                                CurrentBytes = sent
                            });
-                           if (cancellationToken.IsCancellationRequested) throw new TaskCanceledException();
+                           if (cancellationToken.IsCancellationRequested)
+                           {
+                               throw new TaskCanceledException();
+                           }
                        });
                     request.Content = streamContent;
                 }
@@ -247,7 +256,10 @@ namespace RestClient.IO
                            TotalBytes = total,
                            CurrentBytes = sent
                        });
-                       if (cancellationToken.IsCancellationRequested) throw new TaskCanceledException();
+                       if (cancellationToken.IsCancellationRequested)
+                       {
+                           throw new TaskCanceledException();
+                       }
                    });
                 request.Content = streamContent;
             }
@@ -281,11 +293,20 @@ namespace RestClient.IO
                 {
                     //if (Content != null) Content.Dispose();
                     if (UploadingProgressChanged != null)
+                    {
                         foreach (Delegate d in UploadingProgressChanged.GetInvocationList())
+                        {
                             UploadingProgressChanged -= (ProgressBytesChangedEventHandler)d;
+                        }
+                    }
+
                     if (DownloadingProgressChanged != null)
+                    {
                         foreach (Delegate d in DownloadingProgressChanged.GetInvocationList())
+                        {
                             DownloadingProgressChanged -= (ProgressBytesChangedEventHandler)d;
+                        }
+                    }
                 }
                 disposed = true;
             }
