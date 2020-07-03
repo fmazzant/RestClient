@@ -118,7 +118,10 @@ namespace RestClient
             get
             {
                 if (this.Response != null)
+                {
                     return Response.Headers;
+                }
+
                 return null;
             }
         }
@@ -131,7 +134,10 @@ namespace RestClient
             get
             {
                 if (this.Response != null)
+                {
                     return Response.IsSuccessStatusCode;
+                }
+
                 return false;
             }
         }
@@ -144,7 +150,10 @@ namespace RestClient
             get
             {
                 if (this.Response != null)
+                {
                     return Response.StatusCode;
+                }
+
                 return HttpStatusCode.NotFound;
             }
         }
@@ -157,7 +166,10 @@ namespace RestClient
             get
             {
                 if (this.Response != null)
+                {
                     return Response.ReasonPhrase;
+                }
+
                 return _InnerException.StackTrace;
             }
         }
@@ -175,7 +187,10 @@ namespace RestClient
             get
             {
                 if (this.Response != null)
+                {
                     return Response.Version;
+                }
+
                 return new Version("-");
             }
         }
@@ -263,7 +278,7 @@ namespace RestClient
             /// <summary>
             /// Gets response's string content
             /// </summary>
-            
+
             [Obsolete("Use: OnPreviewContentAsString((e)=> { }) to check the response as string", true)]
             public string StringContent { get; internal set; }
 

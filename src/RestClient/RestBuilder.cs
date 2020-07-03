@@ -396,7 +396,11 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder BufferSize(int bufferSize)
         {
-            if (bufferSize <= 0) throw new ArgumentOutOfRangeException(nameof(bufferSize));
+            if (bufferSize <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(bufferSize));
+            }
+
             var result = (RestBuilder)this.MemberwiseClone();
             result.Properties.BufferSize = bufferSize;
             return result;
@@ -569,9 +573,14 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             if (result.Parameters.ContainsKey(key))
+            {
                 result.Parameters[key] = value.ToString();
+            }
             else
+            {
                 result.Parameters.Add(key, value.ToString());
+            }
+
             return result;
         }
 
@@ -586,7 +595,10 @@ namespace RestClient
             var result = (RestBuilder)this.MemberwiseClone();
             result.Parameters.Add(parameter.Key, parameter.Value.ToString());
             foreach (RestParameter p in others)
+            {
                 result.Parameters.Add(p.Key, p.Value.ToString());
+            }
+
             return result;
         }
 
@@ -601,7 +613,10 @@ namespace RestClient
             List<RestParameter> list = new List<RestParameter>();
             parameters(list);
             foreach (RestParameter p in list)
+            {
                 result.Parameters.Add(p.Key, p.Value.ToString());
+            }
+
             return result;
         }
 
@@ -1274,7 +1289,10 @@ namespace RestClient
             {
                 string url = BuildFinalUrl();
 
-                if (Logger) Console.WriteLine(url);
+                if (Logger)
+                {
+                    Console.WriteLine(url);
+                }
 
                 StartEventArgs startEventArgs = new StartEventArgs()
                 {
@@ -1284,7 +1302,10 @@ namespace RestClient
                 };
                 OnStartAction?.Invoke(startEventArgs);
 
-                if (startEventArgs.Cancel) throw new OperationCanceledException();
+                if (startEventArgs.Cancel)
+                {
+                    throw new OperationCanceledException();
+                }
 
                 using (HttpRequestMessage request = new HttpRequestMessage(method, url))
                 {
@@ -1302,10 +1323,14 @@ namespace RestClient
                                 IsAfterRefreshTokenCalled = true;
 
                                 if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
+                                {
                                     return await SendAsStringAsync(method, cancellationToken);
+                                }
 
                                 if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
+                                {
                                     return await SendAsStringAsync(method, cancellationToken);
+                                }
                             }
 
                             using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
@@ -1352,7 +1377,10 @@ namespace RestClient
             {
                 string url = BuildFinalUrl();
 
-                if (Logger) Console.WriteLine(url);
+                if (Logger)
+                {
+                    Console.WriteLine(url);
+                }
 
                 StartEventArgs startEventArgs = new StartEventArgs()
                 {
@@ -1361,7 +1389,10 @@ namespace RestClient
                     Url = url
                 };
                 OnStartAction?.Invoke(startEventArgs);
-                if (startEventArgs.Cancel) throw new OperationCanceledException();
+                if (startEventArgs.Cancel)
+                {
+                    throw new OperationCanceledException();
+                }
 
                 using (HttpRequestMessage request = new HttpRequestMessage(method, url))
                 {
@@ -1378,10 +1409,14 @@ namespace RestClient
                                 IsAfterRefreshTokenCalled = true;
 
                                 if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
+                                {
                                     return await SendAsStreamAsync(method, cancellationToken);
+                                }
 
                                 if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
+                                {
                                     return await SendAsStreamAsync(method, cancellationToken);
+                                }
                             }
 
                             using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
@@ -1428,7 +1463,10 @@ namespace RestClient
             {
                 string url = BuildFinalUrl();
 
-                if (Logger) Console.WriteLine(url);
+                if (Logger)
+                {
+                    Console.WriteLine(url);
+                }
 
                 StartEventArgs startEventArgs = new StartEventArgs()
                 {
@@ -1439,7 +1477,10 @@ namespace RestClient
 
                 OnStartAction?.Invoke(startEventArgs);
 
-                if (startEventArgs.Cancel) throw new OperationCanceledException();
+                if (startEventArgs.Cancel)
+                {
+                    throw new OperationCanceledException();
+                }
 
                 using (HttpRequestMessage request = new HttpRequestMessage(method, url))
                 {
@@ -1456,10 +1497,14 @@ namespace RestClient
                                 IsAfterRefreshTokenCalled = true;
 
                                 if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
+                                {
                                     return await SendAsByteArrayAsync(method, cancellationToken);
+                                }
 
                                 if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
+                                {
                                     return await SendAsByteArrayAsync(method, cancellationToken);
+                                }
                             }
 
                             using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
@@ -1507,7 +1552,10 @@ namespace RestClient
             {
                 string url = BuildFinalUrl();
 
-                if (Logger) Console.WriteLine(url);
+                if (Logger)
+                {
+                    Console.WriteLine(url);
+                }
 
                 StartEventArgs startEventArgs = new StartEventArgs()
                 {
@@ -1517,7 +1565,10 @@ namespace RestClient
                 };
 
                 OnStartAction?.Invoke(startEventArgs);
-                if (startEventArgs.Cancel) throw new OperationCanceledException();
+                if (startEventArgs.Cancel)
+                {
+                    throw new OperationCanceledException();
+                }
 
                 using (HttpRequestMessage request = new HttpRequestMessage(method, url))
                 {
@@ -1534,10 +1585,14 @@ namespace RestClient
                                 IsAfterRefreshTokenCalled = true;
 
                                 if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
+                                {
                                     return await SendAsync<T>(method, cancellationToken);
+                                }
 
                                 if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
+                                {
                                     return await SendAsync<T>(method, cancellationToken);
+                                }
                             }
 
                             using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
@@ -1610,7 +1665,9 @@ namespace RestClient
                 Timeout = Properties.Timeout,
             };
             foreach (var item in result.HttpClient.DefaultRequestHeaders)
+            {
                 client.DefaultRequestHeaders.Add(item.Key, item.Value);
+            }
 
             result.HttpClient = client;
         }

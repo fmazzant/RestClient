@@ -55,7 +55,11 @@ namespace RestClient.Serialization.Json
         /// <returns>The deserialized object from the JSON string.</returns>
         public object DeserializeObject(string value, Type typeOf)
         {
-            if (string.IsNullOrEmpty(value)) return null;
+            if (string.IsNullOrEmpty(value))
+            {
+                return null;
+            }
+
             return JsonSerializer.Deserialize(value, typeOf);
         }
 
@@ -67,7 +71,11 @@ namespace RestClient.Serialization.Json
         /// <returns>A JSON string representation of the object.</returns>
         public string SerializeObject(object value, Type typeOf)
         {
-            if (value == null) return string.Empty;
+            if (value == null)
+            {
+                return string.Empty;
+            }
+
             return JsonSerializer.Serialize(value);
         }
     }
