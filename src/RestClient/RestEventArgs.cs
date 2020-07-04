@@ -83,7 +83,14 @@ namespace RestClient
     /// </summary>
     public class PreviewContentAsStringEventArgs
     {
+        /// <summary>
+        /// Content serialized As String
+        /// </summary>
         public string ContentAsString { get; internal set; }
+
+        /// <summary>
+        /// Content serialized Type
+        /// </summary>
         public Type ContentType { get; internal set; }
     }
 
