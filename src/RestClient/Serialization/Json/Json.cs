@@ -33,12 +33,12 @@ namespace RestClient.Serialization.Json
     using System.Text.Json;
 
     /// <summary>
-    /// Implements a Adiacent.Library.Net.Serialization.ISerializerContent for custom JSON object Serialization
+    /// Implements a RestClient.Serialization.ISerializerContent for custom JSON object Serialization
     /// </summary>
     public sealed class JSON : ISerializerContent
     {
         /// <summary>
-        /// Initializes a new instance of the VarGroup.Mobile.Core.Serialization.Json.JSON class for the specified JSON by using the default Serialization.
+        /// Initializes a new instance of the RestClient.Serialization.Json.JSON class for the specified JSON by using the default Serialization.
         /// </summary>
         public JSON() : base() { }
 
@@ -55,7 +55,11 @@ namespace RestClient.Serialization.Json
         /// <returns>The deserialized object from the JSON string.</returns>
         public object DeserializeObject(string value, Type typeOf)
         {
-            if (string.IsNullOrEmpty(value)) return null;
+            if (string.IsNullOrEmpty(value))
+            {
+                return null;
+            }
+
             return JsonSerializer.Deserialize(value, typeOf);
         }
 
@@ -67,7 +71,11 @@ namespace RestClient.Serialization.Json
         /// <returns>A JSON string representation of the object.</returns>
         public string SerializeObject(object value, Type typeOf)
         {
-            if (value == null) return string.Empty;
+            if (value == null)
+            {
+                return string.Empty;
+            }
+
             return JsonSerializer.Serialize(value);
         }
     }

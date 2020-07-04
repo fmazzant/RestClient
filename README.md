@@ -211,7 +211,7 @@ var result = rest
 
 ### BufferSize
 
-BufferSize can be use to set the buffer size during upload and download stream. Default value is 20Kb
+BufferSize can be use to set the buffer size during upload and download stream. Default value is 80Kb
 
 ```c#
 var result = rest
@@ -488,14 +488,28 @@ var result = rest
     .Post<ResponseObject>();
 ```
 
-### OnPreviewContentAsString
+### OnPreviewContentRequestAsString
 
-OnPreviewContentAsString is an event that triggers when the response is received and it isn't no deserialized yet.
+OnPreviewContentRequestAsString is an event that triggers when the request is ready and it isn't no sent yet.
 
 ```c#
 var result = rest
     .Url("[URL]")
-    .OnPreviewContentAsString((e) => { 
+    .OnPreviewContentRequestAsString((e) => { 
+        DoSomethings(e); 
+    })
+    .Payload(new BigObject{})
+    .Post<ResponseObject>();
+```
+
+### OnPreviewContentAsString -> OnPreviewContentResponseAsString (renaming)
+
+OnPreviewContentResponseAsString is an event that triggers when the response is received and it isn't no deserialized yet.
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .OnPreviewContentResponseAsString((e) => { 
         DoSomethings(e); 
     })
     .Payload(new BigObject{})
@@ -568,7 +582,7 @@ Below you find a complete code demostration a complete code example.
         => Root()
              .Authentication(() => new AuthenticationHeaderValue("Bearer", "[Token]"))
              .RefreshToken()
-             .RefreshTokenInvoke(async () => await Refresh(new RefreshRequest { }));
+             .RefreshTokenInvoke(async () => await PostRefreshAsync(new RefreshRequest { }));
     
     public RestBuilder UsersRoot() 
         => Root().Command("/Users");
@@ -581,30 +595,30 @@ Below you find a complete code demostration a complete code example.
     
     //requests
 
-    public async Task<RestResult<LoginResponse>> PostLogin(LoginRequest request) 
+    public async Task<RestResult<LoginResponse>> PostLoginAsync(LoginRequest request) 
         => await UsersRoot()
             .Command("/Login") //[URL]/Users/Login 
             .Payload(request)
             .PostAsync<LoginResponse>();
     
-     public async Task<RestResult<RuleResponse>> GetRules() 
+     public async Task<RestResult<RuleResponse>> GetRulesAsync() 
         => await UsersRoot()
             .Command("/Rules")
             .GetAsync<RuleResponse>();
     
-    public async Task<RestResult<RefreshResponse>> PostRefresh(RefreshRequest request) 
+    public async Task<RestResult<RefreshResponse>> PostRefreshAsync(RefreshRequest request) 
         => await UsersRoot()
             .Command("/Refresh")
             .Payload(request)
             .PostAsync<RefreshResponse>();
     
-    public async Task<RestResult<CountryResponse>> PostCountries(CountryRequest request) 
+    public async Task<RestResult<CountryResponse>> PostCountriesAsync(CountryRequest request) 
         => await DimensionsRoot()
             .Command("/Countries")
             .Payload(request)
             .PostAsync<CountryResponse>();
 
-    public async Task<RestResult<EventDetailResponse>> PostEventDetail(EventDetailRequest request) 
+    public async Task<RestResult<EventDetailResponse>> PostEventDetailAsync(EventDetailRequest request) 
         => await EventsRoot()
             .Command("/EventDetail")
             .Payload(request)

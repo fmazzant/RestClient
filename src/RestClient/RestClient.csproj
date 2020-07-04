@@ -15,13 +15,12 @@
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.4.2</Version>
+    <Version>1.5.0</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
-    <PackageReleaseNotes>1.4.2
-- fix OnPreviewContentAsStringAction
-
-1.4.1
-- fix headers issue
+    <PackageReleaseNotes>1.5.0
+- Refactoring builder
+- Parameter bugfix
+- General bugfix
 
 1.4.0
 - Added OnPreCompleted, OnCompleted and OnPreviewContentAsString
@@ -32,6 +31,11 @@
 
   <ItemGroup>
     <Compile Remove="HttpClientExtensions.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Builder\BuilderInvoker.cs~RF1f4020e5.TMP" />
+    <None Remove="RestBuilder.cs~RF54d6604.TMP" />
   </ItemGroup>
 
   <ItemGroup>

@@ -34,12 +34,12 @@ namespace RestClient.Serialization.Xml
     using System.Xml.Serialization;
 
     /// <summary>
-    /// Implements a Adiacent.Library.Net.Serialization.ISerializerContent for custom XML object Serialization
+    /// Implements a RestClient.Serialization.ISerializerContent for custom XML object Serialization
     /// </summary>
     public sealed class XML : ISerializerContent
     {
         /// <summary>
-        /// Initializes a new instance of the VarGroup.Mobile.Core.Serialization.Xml.XML class for the specified JSON by using the default Serialization.
+        /// Initializes a new instance of the RestClient.Serialization.Xml.XML class for the specified JSON by using the default Serialization.
         /// </summary>
         public XML() : base() { }
 
@@ -56,7 +56,11 @@ namespace RestClient.Serialization.Xml
         /// <returns>The deserialized object from the XML string.</returns>
         public object DeserializeObject(string value, Type typeOf)
         {
-            if (string.IsNullOrEmpty(value)) return null;
+            if (string.IsNullOrEmpty(value))
+            {
+                return null;
+            }
+
             return new XmlSerializer(typeOf).Deserialize(new StringReader(value));
         }
 
@@ -68,7 +72,11 @@ namespace RestClient.Serialization.Xml
         /// <returns>A XML string representation of the object.</returns>
         public string SerializeObject(object value, Type typeOf)
         {
-            if (value == null) return string.Empty;
+            if (value == null)
+            {
+                return string.Empty;
+            }
+
             XmlSerializer xml = new XmlSerializer(typeOf);
             StringWriter writer = new StringWriter();
             xml.Serialize(writer, value);
