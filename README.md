@@ -425,7 +425,7 @@ var result = rest
     .Post();
 ```
 
-It is possible to pass the parameters inside the handler and enabling the form-url-encoded:
+From 1.5.0 version it is possible to pass the parameters inside the handler and enabling the form-url-encoded:
 
 ```c#
 var result = rest
