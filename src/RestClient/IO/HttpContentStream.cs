@@ -68,13 +68,6 @@ namespace RestClient.IO
 
         #endregion
 
-        //#region [ Public Properties ]
-        ///// <summary>
-        ///// Gets HTTP content
-        ///// </summary>
-        //public HttpContent Content { get; private set; }
-        //#endregion
-
         #region [ Constructors ]
         /// <summary>
         /// Initializes a new instance of the RestClient.IO.HttpContentStream class.

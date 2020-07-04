@@ -122,7 +122,7 @@ namespace RestClient.Builder
             => await SendWithProgressAsync(request, content, null, cancellationToken);
 
         /// <summary>
-        /// 
+        /// Send an HTTP request as an asynchronous operation.
         /// </summary>
         /// <param name="request"></param>
         /// <param name="handler"></param>
