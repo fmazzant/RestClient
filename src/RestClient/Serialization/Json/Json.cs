@@ -31,7 +31,6 @@ namespace RestClient.Serialization.Json
 {
     using System;
 
-
     /// <summary>
     /// Implements a RestClient.Serialization.ISerializerContent for custom JSON object Serialization
     /// </summary>
@@ -60,7 +59,7 @@ namespace RestClient.Serialization.Json
                 return null;
             }
 
-#if !NETSTANDARD1_3
+#if NETSTANDARD2_0 || NETSTANDARD2_1
             return System.Text.Json.JsonSerializer.Deserialize(value, typeOf);
 #else
             return Newtonsoft.Json.JsonConvert.DeserializeObject(value, typeOf);
@@ -80,7 +79,7 @@ namespace RestClient.Serialization.Json
                 return string.Empty;
             }
 
-#if !NETSTANDARD1_3
+#if NETSTANDARD2_0 || NETSTANDARD2_1
             return System.Text.Json.JsonSerializer.Serialize(value);
 #else
             return Newtonsoft.Json.JsonConvert.SerializeObject(value);
