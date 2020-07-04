@@ -191,8 +191,10 @@ namespace RestClient
         /// </summary>
         internal RestBuilder()
         {
+#if NETSTANDARD2_0 || NETSTANDARD2_1
             ServicePointManager.ServerCertificateValidationCallback = (object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
                 => true;
+#endif
         }
 
         #region [ Certificate Validation ]
@@ -207,7 +209,9 @@ namespace RestClient
             var result = (RestBuilder)this.MemberwiseClone();
             result.CertificateCallback = callback;
             result.Credentials = Credentials;
+#if NETSTANDARD2_0 || NETSTANDARD2_1
             ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(callback);
+#endif
             this.CreateNewHttpClientInstance(result);
             return result;
         }
@@ -257,7 +261,7 @@ namespace RestClient
             this.CreateNewHttpClientInstance(result);
             return result;
         }
-
+#if NETSTANDARD2_0 || NETSTANDARD2_1
         /// <summary>
         /// Authentication information used by username and secure string password
         /// </summary>
@@ -271,6 +275,7 @@ namespace RestClient
             this.CreateNewHttpClientInstance(result);
             return result;
         }
+
 
         /// <summary>
         /// Authentication information used by username, secure string password and domain
@@ -286,7 +291,7 @@ namespace RestClient
             this.CreateNewHttpClientInstance(result);
             return result;
         }
-
+#endif
         #endregion
 
         #region [ Authentication ]
@@ -1731,31 +1736,6 @@ namespace RestClient
             }
             return null;
         }
-        #endregion
-
-        #region [ Preview ]
-        /// <summary>
-        /// Preview provides to print command url and payload
-        /// </summary>
-        /// <param name="output">Write on. If null Console.Out is default.</param>
-        /// <returns></returns>
-        private string Preview(TextWriter output = null)
-        {
-            TextWriter writer = output ?? Console.Out;
-            string result = BuildFinalUrl();
-
-            writer.WriteLine($"[PREVIEW] {result}");
-
-            var content = MakeHttpContent();
-            if (content != null)
-            {
-                string contentAsString = content.ReadAsStringAsync().Result;
-                result += contentAsString;
-                writer.WriteLine($"[{contentAsString}]");
-            }
-            return result;
-        }
-
         #endregion
     }
 }

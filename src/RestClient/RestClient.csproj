@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0; netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0; netstandard2.1; netstandard1.3</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <NeutralLanguage>en</NeutralLanguage>
     <Authors>Federico Mazzanti</Authors>
@@ -15,21 +15,22 @@
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.5.1-alpha1</Version>
+    <Version>1.5.2-alpha1</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
-    <PackageReleaseNotes>1.5.1
-- Target framework netstandatd2.0 and netstandatd2.1
+    <PackageReleaseNotes>
+      1.5.1
+      - Target framework netstandatd2.0 and netstandatd2.1
 
-1.5.0
-- Refactoring builder
-- Parameter bugfix
-- General bugfix
+      1.5.0
+      - Refactoring builder
+      - Parameter bugfix
+      - General bugfix
 
-1.4.0
-- Added OnPreCompleted, OnCompleted and OnPreviewContentAsString
-- Refactoring some methods.
-- Added BufferSize and check on buffer size value
-</PackageReleaseNotes>
+      1.4.0
+      - Added OnPreCompleted, OnCompleted and OnPreviewContentAsString
+      - Refactoring some methods.
+      - Added BufferSize and check on buffer size value
+    </PackageReleaseNotes>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
 
@@ -50,6 +51,14 @@
     <None Include="..\..\README.md" Link="README.md" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
+    <PackageReference Include="System.Net.Security" Version="4.3.2" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="System.Runtime.Serialization.Xml" Version="4.3.0" />
+    <PackageReference Include="System.Xml.XmlSerializer" Version="4.3.0" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="System.Text.Json">
       <Version>4.7.2</Version>
@@ -57,6 +66,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+
     <PackageReference Include="System.Text.Json">
       <Version>4.7.2</Version>
     </PackageReference>
