@@ -425,6 +425,19 @@ var result = rest
     .Post();
 ```
 
+It is possible to pass the parameters inside the handler and enabling the form-url-encoded:
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .FormUrlEncoded(true, (p) =>
+    {
+        p.Add("key1", "value1");
+        p.Add("key2", "value2");
+    })
+    .Post();
+```
+
 ### OnUploadProgress
 
 OnUploadProgress occurs when the request is running and the data is going out. We can get a percentage of the data being uploaded like this:
