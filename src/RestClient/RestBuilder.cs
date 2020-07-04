@@ -616,7 +616,6 @@ namespace RestClient
             {
                 result.Parameters.Add(p.Key, p.Value.ToString());
             }
-
             return result;
         }
 
@@ -660,7 +659,6 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.PayloadContent = payload;
-            //result.PayloadContentType = typeof(T);
             return result;
         }
 
@@ -691,12 +689,40 @@ namespace RestClient
         /// <summary>
         /// x-www-form-urlencoded key values
         /// </summary>
+        /// <param name="enableFormUrlEncoded"></param>
+        /// <param name="keyValues"></param>
+        /// <returns></returns>
+        public RestBuilder FormUrlEncoded(bool enableFormUrlEncoded, Dictionary<string, string> keyValues)
+        {
+            var result = (RestBuilder)this.MemberwiseClone();
+            result.IsEnabledFormUrlEncoded = enableFormUrlEncoded;
+            result.FormUrlEncodedKeyValues = keyValues;
+            return result;
+        }
+
+        /// <summary>
+        /// x-www-form-urlencoded key values
+        /// </summary>
         /// <param name="kesValues"></param>
         /// <returns></returns>
         public RestBuilder FormUrlEncoded(Action<Dictionary<string, string>> kesValues)
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.FormUrlEncodedKeyValues = new Dictionary<string, string>();
+            kesValues(result.FormUrlEncodedKeyValues);
+            return result;
+        }
+
+        /// <summary>
+        /// x-www-form-urlencoded key values
+        /// </summary>
+        /// <param name="enableFormUrlEncoded"></param>
+        /// <param name="kesValues"></param>
+        /// <returns></returns>
+        public RestBuilder FormUrlEncoded(bool enableFormUrlEncoded, Action<Dictionary<string, string>> kesValues)
+        {
+            var result = (RestBuilder)this.MemberwiseClone();
+            result.IsEnabledFormUrlEncoded = enableFormUrlEncoded;
             kesValues(result.FormUrlEncodedKeyValues);
             return result;
         }
@@ -1684,7 +1710,6 @@ namespace RestClient
         {
             if (!IsEnabledFormUrlEncoded && PayloadContent != null)
             {
-                //var serializedObject = Serializer.SerializeObject(PayloadContent, PayloadContentType);
                 var serializedObject = Serializer.SerializeObject(PayloadContent, PayloadContent.GetType());
                 OnPreviewContentRequestAsStringAction?.Invoke(new PreviewContentAsStringEventArgs
                 {
