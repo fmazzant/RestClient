@@ -1734,7 +1734,7 @@ namespace RestClient
 
         #region [ Preview ]
         /// <summary>
-        /// Preview provides to print command and payload before call
+        /// Preview provides to print command url and payload
         /// </summary>
         /// <param name="output">Write on. If null Console.Out is default.</param>
         /// <returns></returns>
