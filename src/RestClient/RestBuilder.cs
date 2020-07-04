@@ -1751,7 +1751,7 @@ namespace RestClient
             {
                 string contentAsString = content.ReadAsStringAsync().Result;
                 result += contentAsString;
-                writer.Write($"[{contentAsString}]");
+                writer.WriteLine($"[{contentAsString}]");
             }
             return result;
         }
