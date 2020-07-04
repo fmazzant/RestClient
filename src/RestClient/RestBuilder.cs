@@ -1748,7 +1748,9 @@ namespace RestClient
             var content = MakeHttpContent();
             if (content != null)
             {
-                writer.Write($"[{content.ReadAsStringAsync().Result}]");
+                string contentAsString = content.ReadAsStringAsync().Result;
+                result += contentAsString;
+                writer.Write($"[{contentAsString}]");
             }
             return result;
         }
