@@ -38,12 +38,12 @@ namespace RestClient.IO
     /// <summary>
     /// A  class representing an HTTP entity body and content headers.
     /// </summary>
-    internal class HttpContentStreamProgressable : HttpContent
+    internal class ProgressHttpContent : HttpContent
     {
         /// <summary>
         /// Lets keep buffer of 20kb
         /// </summary>
-        private const int defaultBufferSize = 5 * 4096; //20kb
+        private const int defaultBufferSize = 5 * 4096 * 4; //80kb
 
         /// <summary>
         /// Http entity body and content headers
@@ -61,22 +61,22 @@ namespace RestClient.IO
         private Action<long, long> progress;
 
         /// <summary>
-        /// Initializes a new instance of the VarGroup.Mobile.Core.Net.ProgressableStreamContent class.
+        /// Initializes a new instance of the RestClient.ProgressableStreamContent class.
         /// </summary>
         /// <param name="content">Http entity body and content headers</param>
         /// <param name="progress">Progress value</param>
-        public HttpContentStreamProgressable(HttpContent content, Action<long, long> progress)
+        public ProgressHttpContent(HttpContent content, Action<long, long> progress)
             : this(content, defaultBufferSize, progress)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the VarGroup.Mobile.Core.Net.ProgressableStreamContent class.
+        /// Initializes a new instance of the RestClient.ProgressableStreamContent class.
         /// </summary>
         /// <param name="content">Http entity body and content headers</param>
         /// <param name="bufferSize">Buffer size</param>
         /// <param name="progress">Progress value</param>
-        public HttpContentStreamProgressable(HttpContent content, int bufferSize, Action<long, long> progress)
+        public ProgressHttpContent(HttpContent content, int bufferSize, Action<long, long> progress)
         {
             if (content == null)
             {
@@ -112,13 +112,15 @@ namespace RestClient.IO
                 TryComputeLength(out size);
                 var uploaded = 0;
 
-
                 using (var sinput = await content.ReadAsStreamAsync())
                 {
                     while (true)
                     {
                         var length = sinput.Read(buffer, 0, buffer.Length);
-                        if (length <= 0) break;
+                        if (length <= 0)
+                        {
+                            break;
+                        }
 
                         uploaded += length;
                         progress?.Invoke(uploaded, size);
@@ -129,6 +131,15 @@ namespace RestClient.IO
                 }
                 stream.Flush();
             });
+        }
+
+        /// <summary>
+        /// Serialize the HTTP content to a memory stream as an asynchronous operation.
+        /// </summary>
+        /// <returns></returns>
+        protected override Task<Stream> CreateContentReadStreamAsync()
+        {
+            return base.CreateContentReadStreamAsync();
         }
 
         /// <summary>
@@ -152,6 +163,7 @@ namespace RestClient.IO
             if (disposing)
             {
                 content.Dispose();
+                progress = null;
             }
             base.Dispose(disposing);
         }
