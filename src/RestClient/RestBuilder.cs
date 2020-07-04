@@ -1731,5 +1731,29 @@ namespace RestClient
             return null;
         }
         #endregion
+
+        #region [ Preview ]
+        /// <summary>
+        /// Preview provides to print command and payload before call
+        /// </summary>
+        /// <param name="output">Write on. If null Console.Out is default.</param>
+        /// <returns></returns>
+        public string Preview(TextWriter output = null)
+        {
+            TextWriter writer = output ?? Console.Out;
+            string result = BuildFinalUrl();
+
+            writer.WriteLine(result);
+            writer.WriteLine("{");
+            var content = MakeHttpContent();
+            if (content != null)
+            {
+                writer.Write(content.ReadAsStringAsync().Result);
+            }
+            writer.WriteLine("}");
+            return result;
+        }
+
+        #endregion
     }
 }
