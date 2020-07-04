@@ -723,6 +723,7 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.IsEnabledFormUrlEncoded = enableFormUrlEncoded;
+            result.FormUrlEncodedKeyValues = new Dictionary<string, string>();
             kesValues(result.FormUrlEncodedKeyValues);
             return result;
         }
