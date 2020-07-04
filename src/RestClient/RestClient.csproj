@@ -18,9 +18,9 @@
     <Version>1.5.0-rc2</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
     <PackageReleaseNotes>1.5.0
-- refactoring builder
-- parameter
-- bugfix
+- Refactoring builder
+- Parameter bugfix
+- General bugfix
 
 1.4.0
 - Added OnPreCompleted, OnCompleted and OnPreviewContentAsString
