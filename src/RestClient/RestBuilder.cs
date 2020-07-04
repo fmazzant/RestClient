@@ -1739,7 +1739,7 @@ namespace RestClient
         /// </summary>
         /// <param name="output">Write on. If null Console.Out is default.</param>
         /// <returns></returns>
-        public string Preview(TextWriter output = null)
+        private string Preview(TextWriter output = null)
         {
             TextWriter writer = output ?? Console.Out;
             string result = BuildFinalUrl();
