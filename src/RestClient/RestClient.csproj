@@ -17,7 +17,7 @@
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
     <Version>1.5.2</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
-    <PackageReleaseNotes>1.5.2 
+    <PackageReleaseNotes>1.5.2
       - Target framework netstandatd1.3
 
  1.5.1
