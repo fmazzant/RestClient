@@ -58,7 +58,9 @@ namespace RestClient
         /// Provides a base class for sending HTTP requests and receiving HTTP responses from a resource identified by a URI
         /// </summary>
         internal Invoker HttpClient { get; private set; }
-            = new Invoker();
+            = new Invoker(new HttpClientHandler()
+            {
+            });
 
         /// <summary>
         /// Rest Properties
@@ -427,6 +429,19 @@ namespace RestClient
             return result;
         }
 
+        #endregion
+
+        #region [ Compression ]
+        /// <summary>
+        /// Enables gzip compression
+        /// </summary>
+        /// <returns></returns>
+        public RestBuilder Compression()
+        {
+            var result = (RestBuilder)this.MemberwiseClone();
+            result.HttpClient.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
+            return result;
+        }
         #endregion
 
         #region [ Command ]
@@ -1736,6 +1751,40 @@ namespace RestClient
             }
             return null;
         }
+        #endregion
+
+        #region [ Preview ]
+        /// <summary>
+        /// Preview provides to print command url, header and payload
+        /// </summary>
+        /// <param name="output">Write on. If null Console.Out is default.</param>
+        /// <returns></returns>
+        public string Preview(TextWriter output = null)
+        {
+            TextWriter writer = output ?? Console.Out;
+            string result = BuildFinalUrl();
+
+            writer.WriteLine($"[PREVIEW] {result}");
+
+            foreach (var item in HttpClient.DefaultRequestHeaders)
+            {
+                writer.WriteLine($"{item.Key}{item.Value}");
+                foreach (var item2 in item.Value)
+                {
+                    writer.WriteLine($"{item.Key}={item2}");
+                }
+            }
+
+            var content = MakeHttpContent();
+            if (content != null)
+            {
+                string contentAsString = content.ReadAsStringAsync().Result;
+                result += contentAsString;
+                writer.WriteLine($"[{contentAsString}]");
+            }
+            return result;
+        }
+
         #endregion
     }
 }
