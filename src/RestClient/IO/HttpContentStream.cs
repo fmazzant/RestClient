@@ -101,128 +101,82 @@ namespace RestClient.IO
         /// <param name="response">Response</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>content as string</returns>
-        public async Task<string> ReadStringAsStreamAsync(HttpResponseMessage response, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<string> ReadAsStringAsync(HttpResponseMessage response, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (response.Content.Headers.ContentEncoding.Any(x => x == "gzip"))
-            {
-                return await ResultAsStringGZipCompressed(response, cancellationToken);
-            }
-            else
-            {
-                return await ResultAsString(response, cancellationToken);
-            }
+            byte[] bytes = await ReadAsByteArrayAsync(response, cancellationToken);
+            return Encoding.UTF8.GetString(bytes.ToArray(), 0, bytes.Length);
         }
 
         /// <summary>
-        /// Reads content as stream
+        /// Reads content as byte array
         /// </summary>
-        /// <param name="response">Response</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
-        /// <returns></returns>
-        private async Task<string> ResultAsString(HttpResponseMessage response, CancellationToken cancellationToken = new CancellationToken())
+        /// <param name="response">Response</param>
+        /// <returns>content as array bits</returns>
+        public async Task<byte[]> ReadAsByteArrayAsync(HttpResponseMessage response, CancellationToken cancellationToken = new CancellationToken())
         {
-            long totalBytesToReceive = response.Content.Headers.ContentLength != null ? (int)response.Content.Headers.ContentLength : 0;
-            long bytesReceived = 0;
+            long totalBytesToReceive = response.Content.Headers.ContentLength ?? 0;
+            bool isGZipContentEncoding = response.Content.Headers.ContentEncoding.Any(x => x == "gzip");
 
-            string result = string.Empty;
             using (Stream stream = await response.Content.ReadAsStreamAsync())
             {
-                byte[] data = new byte[BufferSize];
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    int numBytesRead;
-                    while ((numBytesRead = stream.Read(data, 0, data.Length)) > 0)
-                    {
-                        bytesReceived += numBytesRead;
-                        ms.Write(data, 0, numBytesRead);
-
-                        DownloadingProgressChanged?.Invoke(this, new ProgressEventArgs
-                        {
-                            TotalBytes = totalBytesToReceive,
-                            CurrentBytes = bytesReceived
-                        });
-                        if (cancellationToken.IsCancellationRequested)
-                        {
-                            throw new TaskCanceledException();
-                        }
-                    }
-                    result = Encoding.UTF8.GetString(ms.ToArray(), 0, (int)ms.Length);
-                }
+                if(isGZipContentEncoding)
+                    using (var decompressed = new GZipStream(stream, CompressionMode.Decompress))
+                        return await ReadWithProgressAsByteArray(decompressed, totalBytesToReceive, cancellationToken);
+                return await ReadWithProgressAsByteArray(stream, totalBytesToReceive, cancellationToken);
             }
-            return result;
+
+            //if (isGZipContentEncoding)
+            //{
+            //    using (Stream stream = await response.Content.ReadAsStreamAsync())
+            //    using (var decompressed = new GZipStream(stream, CompressionMode.Decompress))
+            //    {
+            //        return await ReadWithProgressAsByteArray(decompressed, totalBytesToReceive, cancellationToken);
+            //    }
+            //}
+            //else
+            //{
+            //    using (Stream stream = await response.Content.ReadAsStreamAsync())
+            //    {
+            //        return await ReadWithProgressAsByteArray(stream, totalBytesToReceive, cancellationToken);
+            //    }
+            //}
         }
+        #endregion
 
         /// <summary>
-        /// Reads content as gzip compressed stream
+        /// Read from stream with download progress changed 
         /// </summary>
-        /// <param name="response">Response</param>
+        /// <param name="stream">Stream to read</param>
+        /// <param name="totalBytesToReceive">total bytes to receive from http content</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns></returns>
-        private async Task<string> ResultAsStringGZipCompressed(HttpResponseMessage response, CancellationToken cancellationToken = new CancellationToken())
+        private async Task<byte[]> ReadWithProgressAsByteArray(Stream stream, long totalBytesToReceive, CancellationToken cancellationToken = new CancellationToken())
         {
-            using (var s = await response.Content.ReadAsStreamAsync())
+            long bytesReceived = 0;
+            byte[] data = new byte[BufferSize];
+            using (MemoryStream ms = new MemoryStream())
             {
-                if (cancellationToken.IsCancellationRequested)
+                int numBytesRead;
+                while ((numBytesRead = await stream.ReadAsync(data, 0, data.Length)) > 0)
                 {
-                    throw new TaskCanceledException();
-                }
-                using (var decompressed = new GZipStream(s, CompressionMode.Decompress))
-                {
+                    bytesReceived += numBytesRead;
+                    ms.Write(data, 0, numBytesRead);
+
+                    DownloadingProgressChanged?.Invoke(this, new ProgressEventArgs
+                    {
+                        TotalBytes = totalBytesToReceive,
+                        CurrentBytes = bytesReceived
+                    });
+
                     if (cancellationToken.IsCancellationRequested)
                     {
                         throw new TaskCanceledException();
                     }
-                    using (var rdr = new StreamReader(decompressed))
-                    {
-                        if (cancellationToken.IsCancellationRequested)
-                        {
-                            throw new TaskCanceledException();
-                        }
-                        return await rdr.ReadToEndAsync();
-                    }
                 }
+                return ms.ToArray();
             }
         }
-
-        /// <summary>
-        /// Reads content as stream
-        /// </summary>
-        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
-        /// <param name="progress">Proveder for progress update</param>
-        /// <returns>content as array bits</returns>
-        public async Task<byte[]> ReadBytesAsStreamAsync(HttpResponseMessage response, CancellationToken cancellationToken = new CancellationToken())
-        {
-            long totalBytesToReceive = response.Content.Headers.ContentLength != null ? (int)response.Content.Headers.ContentLength : 0;
-            long bytesReceived = 0;
-
-            byte[] result = new byte[0];
-            using (Stream stream = await response.Content.ReadAsStreamAsync())
-            {
-                byte[] data = new byte[BufferSize];
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    int numBytesRead;
-                    while ((numBytesRead = stream.Read(data, 0, data.Length)) > 0)
-                    {
-                        bytesReceived += numBytesRead;
-                        ms.Write(data, 0, numBytesRead);
-
-                        DownloadingProgressChanged?.Invoke(this, new ProgressEventArgs
-                        {
-                            TotalBytes = totalBytesToReceive,
-                            CurrentBytes = bytesReceived
-                        });
-                        if (cancellationToken.IsCancellationRequested)
-                        {
-                            throw new TaskCanceledException();
-                        }
-                    }
-                    result = ms.ToArray();
-                }
-            }
-            return result;
-        }
-        #endregion
 
         #region [ Write ]
         /// <summary>
@@ -233,7 +187,7 @@ namespace RestClient.IO
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <param name="progress">Proveder for progress update</param>
         /// <returns>HttpResponseMessage</returns>
-        [Obsolete("Use: WriteStringAsStreamAsync(HttpRequestMessage request, CancellationToken cancellationToken)", true)]
+        [Obsolete("Use: RestClient.Builder.Invoker().SendWithProgressAsync()", true)]
         public async Task<HttpResponseMessage> WriteStringAsStreamAsync(HttpClient client, HttpRequestMessage request, CancellationToken cancellationToken)
         {
             HttpResponseMessage response = null;
