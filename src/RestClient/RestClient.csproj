@@ -15,10 +15,11 @@
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.5.3-alpha1</Version>
+    <Version>1.5.3-alpha2</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
     <PackageReleaseNotes>1.5.3
 - Enabled gzip compression
+- Refactoring HttpContentStream
 
 1.5.2
 - Target framework netstandatd1.3

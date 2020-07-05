@@ -1384,7 +1384,7 @@ namespace RestClient
                             {
                                 streamContent.DownloadingProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
                                 response = RestResult<string>.CreateInstanceFrom<string>(responseMessage);
-                                var result = await streamContent.ReadStringAsStreamAsync(responseMessage, cancellationToken);
+                                var result = await streamContent.ReadAsStringAsync(responseMessage, cancellationToken);
                                 OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = result });
                                 response.Content = result;
                             }
@@ -1559,7 +1559,7 @@ namespace RestClient
                                 streamContent.DownloadingProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
                                 response = RestResult<byte[]>.CreateInstanceFrom<byte[]>(responseMessage);
 
-                                response.Content = await streamContent.ReadBytesAsStreamAsync(responseMessage, cancellationToken);
+                                response.Content = await streamContent.ReadAsByteArrayAsync(responseMessage, cancellationToken);
                                 OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = BitConverter.ToString(response.Content) });
                             }
                         }
@@ -1647,7 +1647,7 @@ namespace RestClient
                                 streamContent.DownloadingProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
                                 response = Generic.RestResult<T>.CreateInstanceFrom<T>(responseMessage);
 
-                                string serializedObject = await streamContent.ReadStringAsStreamAsync(responseMessage, cancellationToken);
+                                string serializedObject = await streamContent.ReadAsStringAsync(responseMessage, cancellationToken);
                                 OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = serializedObject });
                                 response.Content = (T)Serializer.DeserializeObject(serializedObject, typeof(T));
                             }
