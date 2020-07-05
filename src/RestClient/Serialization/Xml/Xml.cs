@@ -31,8 +31,12 @@ namespace RestClient.Serialization.Xml
 {
     using System;
     using System.IO;
-    using System.Xml.Serialization;
 
+#if !NETSTANDARD1_3
+    using Serializer = System.Xml.Serialization;
+#else
+    using Serializer = System.Xml.Serialization;
+#endif
     /// <summary>
     /// Implements a RestClient.Serialization.ISerializerContent for custom XML object Serialization
     /// </summary>
@@ -61,7 +65,7 @@ namespace RestClient.Serialization.Xml
                 return null;
             }
 
-            return new XmlSerializer(typeOf).Deserialize(new StringReader(value));
+            return new Serializer.XmlSerializer(typeOf).Deserialize(new StringReader(value));
         }
 
         /// <summary>
@@ -77,7 +81,7 @@ namespace RestClient.Serialization.Xml
                 return string.Empty;
             }
 
-            XmlSerializer xml = new XmlSerializer(typeOf);
+            Serializer.XmlSerializer xml = new Serializer.XmlSerializer(typeOf);
             StringWriter writer = new StringWriter();
             xml.Serialize(writer, value);
             return writer.ToString();
