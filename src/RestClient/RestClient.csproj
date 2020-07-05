@@ -15,24 +15,26 @@
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.5.2</Version>
+    <Version>1.5.3-rc1</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
-    <PackageReleaseNotes>1.5.2
-      - Target framework netstandatd1.3
+    <PackageReleaseNotes>1.5.3
+- Enabled gzip compression
 
- 1.5.1
-      - Target framework netstandatd2.0 and netstandatd2.1
+1.5.2
+- Target framework netstandatd1.3
+
+1.5.1
+- Target framework netstandatd2.0 and netstandatd2.1
 
 1.5.0
-      - Refactoring builder
-      - Parameter bugfix
-      - General bugfix
+- Refactoring builder
+- Parameter bugfix
+- General bugfix
 
-      1.4.0
-      - Added OnPreCompleted, OnCompleted and OnPreviewContentAsString
-      - Refactoring some methods.
-      - Added BufferSize and check on buffer size value
-</PackageReleaseNotes>
+1.4.0
+- Added OnPreCompleted, OnCompleted and OnPreviewContentAsString
+- Refactoring some methods.
+- Added BufferSize and check on buffer size value</PackageReleaseNotes>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
 

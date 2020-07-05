@@ -220,6 +220,16 @@ var result = rest
     .Get();
 ```
 
+### GZip Compression
+
+Compression enables gzip compression during communication with a specified resource
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .Compression()
+    .Get();
+```
 
 ### Get
 
@@ -425,7 +435,7 @@ var result = rest
     .Post();
 ```
 
-From 1.5.0 version it is possible to pass the parameters inside the handler and enabling the form-url-encoded:
+It is possible to pass the parameters inside the handler and enabling the form-url-encoded:
 
 ```c#
 var result = rest

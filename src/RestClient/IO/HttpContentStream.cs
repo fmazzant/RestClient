@@ -32,6 +32,8 @@ namespace RestClient.IO
     using RestClient;
     using System;
     using System.IO;
+    using System.IO.Compression;
+    using System.Linq;
     using System.Net.Http;
     using System.Text;
     using System.Threading;
@@ -96,10 +98,28 @@ namespace RestClient.IO
         /// <summary>
         /// Reads content as stream
         /// </summary>
+        /// <param name="response">Response</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
-        /// <param name="progress">Proveder for progress update</param>
         /// <returns>content as string</returns>
         public async Task<string> ReadStringAsStreamAsync(HttpResponseMessage response, CancellationToken cancellationToken = new CancellationToken())
+        {
+            if (response.Content.Headers.ContentEncoding.Any(x => x == "gzip"))
+            {
+                return await ResultAsStringGZipCompressed(response, cancellationToken);
+            }
+            else
+            {
+                return await ResultAsString(response, cancellationToken);
+            }
+        }
+
+        /// <summary>
+        /// Reads content as stream
+        /// </summary>
+        /// <param name="response">Response</param>
+        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
+        /// <returns></returns>
+        private async Task<string> ResultAsString(HttpResponseMessage response, CancellationToken cancellationToken = new CancellationToken())
         {
             long totalBytesToReceive = response.Content.Headers.ContentLength != null ? (int)response.Content.Headers.ContentLength : 0;
             long bytesReceived = 0;
@@ -130,6 +150,38 @@ namespace RestClient.IO
                 }
             }
             return result;
+        }
+
+        /// <summary>
+        /// Reads content as gzip compressed stream
+        /// </summary>
+        /// <param name="response">Response</param>
+        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
+        /// <returns></returns>
+        private async Task<string> ResultAsStringGZipCompressed(HttpResponseMessage response, CancellationToken cancellationToken = new CancellationToken())
+        {
+            using (var s = await response.Content.ReadAsStreamAsync())
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    throw new TaskCanceledException();
+                }
+                using (var decompressed = new GZipStream(s, CompressionMode.Decompress))
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        throw new TaskCanceledException();
+                    }
+                    using (var rdr = new StreamReader(decompressed))
+                    {
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            throw new TaskCanceledException();
+                        }
+                        return await rdr.ReadToEndAsync();
+                    }
+                }
+            }
         }
 
         /// <summary>
