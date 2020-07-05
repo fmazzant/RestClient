@@ -120,27 +120,15 @@ namespace RestClient.IO
 
             using (Stream stream = await response.Content.ReadAsStreamAsync())
             {
-                if(isGZipContentEncoding)
+                if (isGZipContentEncoding)
+                {
                     using (var decompressed = new GZipStream(stream, CompressionMode.Decompress))
+                    {
                         return await ReadWithProgressAsByteArray(decompressed, totalBytesToReceive, cancellationToken);
+                    }
+                }
                 return await ReadWithProgressAsByteArray(stream, totalBytesToReceive, cancellationToken);
             }
-
-            //if (isGZipContentEncoding)
-            //{
-            //    using (Stream stream = await response.Content.ReadAsStreamAsync())
-            //    using (var decompressed = new GZipStream(stream, CompressionMode.Decompress))
-            //    {
-            //        return await ReadWithProgressAsByteArray(decompressed, totalBytesToReceive, cancellationToken);
-            //    }
-            //}
-            //else
-            //{
-            //    using (Stream stream = await response.Content.ReadAsStreamAsync())
-            //    {
-            //        return await ReadWithProgressAsByteArray(stream, totalBytesToReceive, cancellationToken);
-            //    }
-            //}
         }
         #endregion
 
