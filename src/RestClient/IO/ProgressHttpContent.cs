@@ -82,7 +82,7 @@ namespace RestClient.IO
 
             if (bufferSize <= 0)
             {
-                throw new ArgumentOutOfRangeException("bufferSize");
+                throw new ArgumentOutOfRangeException("the bufferSize cannot be <= 0");
             }
 
             this.bufferSize = bufferSize;
