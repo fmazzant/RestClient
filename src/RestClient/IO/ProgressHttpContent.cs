@@ -78,16 +78,13 @@ namespace RestClient.IO
         /// <param name="progress">Progress value</param>
         public ProgressHttpContent(HttpContent content, int bufferSize, Action<long, long> progress)
         {
-            if (content == null)
-            {
-                throw new ArgumentNullException("content");
-            }
+            this.content = content ?? throw new ArgumentNullException("the content cannot be null");
+
             if (bufferSize <= 0)
             {
                 throw new ArgumentOutOfRangeException("bufferSize");
             }
 
-            this.content = content;
             this.bufferSize = bufferSize;
             this.progress = progress;
 
