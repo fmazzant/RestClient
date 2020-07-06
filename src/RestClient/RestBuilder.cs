@@ -436,7 +436,7 @@ namespace RestClient
         /// Enables gzip compression
         /// </summary>
         /// <returns></returns>
-        public RestBuilder Compression()
+        public RestBuilder EnableGZipCompression()
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.HttpClient.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));

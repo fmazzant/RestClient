@@ -222,12 +222,12 @@ var result = rest
 
 ### GZip Compression
 
-Enables gzip compression during communication with a specified resource
+Enables gzip compression during communication with a specified resource:
 
 ```c#
 var result = rest
     .Url("[URL]")
-    .Compression()
+    .EnableGZipCompression()
     .Get();
 ```
 
