@@ -432,6 +432,7 @@ namespace RestClient
         #endregion
 
         #region [ Compression ]
+
         /// <summary>
         /// Enables gzip compression
         /// </summary>
@@ -442,6 +443,14 @@ namespace RestClient
             result.HttpClient.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
             return result;
         }
+
+        /// <summary>
+        /// Enables gzip compression
+        /// </summary>
+        /// <returns></returns>
+        [Obsolete("Use: EnableGZipCompression(). This method will be removed with 2.0.0 version", true)]
+        public RestBuilder Compression() => EnableGZipCompression();
+
         #endregion
 
         #region [ Command ]
