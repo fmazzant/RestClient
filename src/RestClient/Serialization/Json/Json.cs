@@ -44,7 +44,7 @@ namespace RestClient.Serialization.Json
         /// <summary>
         /// Gets JSON content-type 
         /// </summary>
-        public string MediaTypeAsString { get { return "application/json"; } }
+        public string MediaTypeAsString => "application/json";
 
         /// <summary>
         /// Deserializes the JSON string to the specified type.
@@ -58,11 +58,11 @@ namespace RestClient.Serialization.Json
             {
                 return null;
             }
-
+#if NETSTANDARD1_3
+            return Newtonsoft.Json.JsonConvert.DeserializeObject(value, typeOf);
+#endif
 #if NETSTANDARD2_0 || NETSTANDARD2_1
             return System.Text.Json.JsonSerializer.Deserialize(value, typeOf);
-#else
-            return Newtonsoft.Json.JsonConvert.DeserializeObject(value, typeOf);
 #endif
         }
 
@@ -79,10 +79,11 @@ namespace RestClient.Serialization.Json
                 return string.Empty;
             }
 
+#if NETSTANDARD1_3
+            return Newtonsoft.Json.JsonConvert.SerializeObject(value);
+#endif
 #if NETSTANDARD2_0 || NETSTANDARD2_1
             return System.Text.Json.JsonSerializer.Serialize(value);
-#else
-            return Newtonsoft.Json.JsonConvert.SerializeObject(value);
 #endif
         }
     }
