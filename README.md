@@ -222,7 +222,7 @@ var result = rest
 
 ### GZip Compression
 
-Compression enables gzip compression during communication with a specified resource
+Enables gzip compression during communication with a specified resource
 
 ```c#
 var result = rest
@@ -230,6 +230,8 @@ var result = rest
     .Compression()
     .Get();
 ```
+
+The library uncompresses automatically the response.
 
 ### Get
 
