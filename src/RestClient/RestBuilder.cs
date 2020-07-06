@@ -191,10 +191,11 @@ namespace RestClient
         /// </summary>
         internal RestBuilder()
         {
-#if NETSTANDARD2_0 || NETSTANDARD2_1
+#if NETSTANDARD2_0 || NETSTANDARD2_1 || NET45 || NET451
             ServicePointManager.ServerCertificateValidationCallback = (object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
                 => true;
 #endif
+
         }
 
         #region [ Certificate Validation ]
@@ -209,7 +210,7 @@ namespace RestClient
             var result = (RestBuilder)this.MemberwiseClone();
             result.CertificateCallback = callback;
             result.Credentials = Credentials;
-#if NETSTANDARD2_0 || NETSTANDARD2_1
+#if NETSTANDARD2_0 || NETSTANDARD2_1 || NET45 || NET451
             ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(callback);
 #endif
             this.CreateNewHttpClientInstance(result);
@@ -1691,7 +1692,9 @@ namespace RestClient
             {
                 Credentials = result.Credentials,
                 ClientCertificateOptions = Properties.CertificateOption,
+#if NETSTANDARD2_0 || NETSTANDARD2_1
                 ServerCertificateCustomValidationCallback = result.CertificateCallback
+#endif
             })
             {
                 Timeout = Properties.Timeout,
