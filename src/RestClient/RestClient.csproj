@@ -19,12 +19,12 @@
     <AssemblyName>Mafe.RestClient</AssemblyName>
     <PackageReleaseNotes>
       1.6.0
-      - Target framework net46
-      - Target framework net461
-      - Target framework net462
-      - Target framework net45
-      - Target framework net451
-      - Target framework net452
+      - Target .NET Framework 4.6    (net46)
+      - Target .NET Framework 4.6.1  (net461)
+      - Target .NET Framework 4.6.2  (net462)
+      - Target .NET Framework 4.5    (net45)
+      - Target .NET Framework 4.5.1  (net451)
+      - Target .NET Framework 4.5.2  (net452)
 
       1.5.3
       - Enabled gzip compression
@@ -89,7 +89,7 @@
     <PackageReference Include="System.Xml.XmlSerializer" Version="4.3.0" />
   </ItemGroup>
 
-  <!-- .NET 4.6.2 references, compilation flags and build options -->
+  <!-- .NET Framework 4.6.2 references, compilation flags and build options -->
   <PropertyGroup Condition="'$(TargetFramework)' == 'net462'">
     <DefineConstants>NET462; NET_FULL; NEWTONSOFT;</DefineConstants>
   </PropertyGroup>
@@ -98,7 +98,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
-  <!-- .NET 4.6.1 references, compilation flags and build options -->
+  <!-- .NET Framework 4.6.1 references, compilation flags and build options -->
   <PropertyGroup Condition="'$(TargetFramework)' == 'net461'">
     <DefineConstants>NET461; NET_FULL; NEWTONSOFT;</DefineConstants>
   </PropertyGroup>
@@ -107,7 +107,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
-  <!-- .NET 4.6 references, compilation flags and build options -->
+  <!-- .NET Framework 4.6 references, compilation flags and build options -->
   <PropertyGroup Condition="'$(TargetFramework)' == 'net46'">
     <DefineConstants>NET46; NET_FULL; NEWTONSOFT;</DefineConstants>
   </PropertyGroup>
@@ -116,7 +116,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
-  <!-- .NET 4.5.2 references, compilation flags and build options -->
+  <!-- .NET Framework 4.5.2 references, compilation flags and build options -->
   <PropertyGroup Condition="'$(TargetFramework)' == 'net452'">
     <DefineConstants>NET452; NET_FULL; NEWTONSOFT;</DefineConstants>
   </PropertyGroup>
@@ -125,7 +125,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
-  <!-- .NET 4.5.1 references, compilation flags and build options -->
+  <!-- .NET Framework 4.5.1 references, compilation flags and build options -->
   <PropertyGroup Condition="'$(TargetFramework)' == 'net451'">
     <DefineConstants>NET451; NET_FULL; NEWTONSOFT;</DefineConstants>
   </PropertyGroup>
@@ -134,7 +134,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
-  <!-- .NET 4.5 references, compilation flags and build options -->
+  <!-- .NET Framework 4.5 references, compilation flags and build options -->
   <PropertyGroup Condition="'$(TargetFramework)' == 'net45'">
     <DefineConstants>NET45; NET_FULL; NEWTONSOFT;</DefineConstants>
   </PropertyGroup>
