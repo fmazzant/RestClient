@@ -31,12 +31,8 @@ namespace RestClient.Serialization.Xml
 {
     using System;
     using System.IO;
+    using Serializer = System.Xml.Serialization;
 
-#if !NETSTANDARD1_3
-    using Serializer = System.Xml.Serialization;
-#else
-    using Serializer = System.Xml.Serialization;
-#endif
     /// <summary>
     /// Implements a RestClient.Serialization.ISerializerContent for custom XML object Serialization
     /// </summary>
@@ -50,7 +46,7 @@ namespace RestClient.Serialization.Xml
         /// <summary>
         /// Gets XML content-type 
         /// </summary>
-        public string MediaTypeAsString { get { return "application/xml"; } }
+        public string MediaTypeAsString => "application/xml";
 
         /// <summary>
         /// Deserializes the XML string to the specified type.
