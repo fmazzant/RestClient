@@ -193,7 +193,7 @@ namespace RestClient
         /// </summary>
         internal RestBuilder()
         {
-#if NETSTANDARD2_0 || NETSTANDARD2_1 || NET45 || NET451
+#if NETSTANDARD2_0 || NETSTANDARD2_1 || NET45 || NET451|| NET452
             ServicePointManager.ServerCertificateValidationCallback = (object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
                 => true;
 #endif
