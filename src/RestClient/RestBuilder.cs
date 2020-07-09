@@ -279,7 +279,6 @@ namespace RestClient
             return result;
         }
 
-
         /// <summary>
         /// Authentication information used by username, secure string password and domain
         /// </summary>
