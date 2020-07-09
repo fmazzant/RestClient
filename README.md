@@ -220,6 +220,18 @@ var result = rest
     .Get();
 ```
 
+### GZip Compression
+
+Enables gzip compression during communication with a specified resource:
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .EnableGZipCompression()
+    .Get();
+```
+
+The library uncompresses automatically the response.
 
 ### Get
 
@@ -317,6 +329,7 @@ var result = await rest
     .Payload(new Object{})
     .DeleteAsync<ResponseObject>();
 ```
+
 ### Download
 
 The DOWNLOAD method download the specified resource.
@@ -425,7 +438,7 @@ var result = rest
     .Post();
 ```
 
-From 1.5.0 version it is possible to pass the parameters inside the handler and enabling the form-url-encoded:
+It is possible to pass the parameters inside the handler and enabling the form-url-encoded:
 
 ```c#
 var result = rest
@@ -456,6 +469,7 @@ var result = rest
 ### OnDownloadProgress
 
 OnDownloadProgress occurs when the response is running and the data is coming in. We can get a percentage of the data being downloading like this:
+
 ```c#
 var result = rest
     .Url("[URL]")

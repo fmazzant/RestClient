@@ -58,7 +58,9 @@ namespace RestClient
         /// Provides a base class for sending HTTP requests and receiving HTTP responses from a resource identified by a URI
         /// </summary>
         internal Invoker HttpClient { get; private set; }
-            = new Invoker();
+            = new Invoker(new HttpClientHandler()
+            {
+            });
 
         /// <summary>
         /// Rest Properties
@@ -427,6 +429,28 @@ namespace RestClient
             defaultRequestHeaders(result.HttpClient.DefaultRequestHeaders);
             return result;
         }
+
+        #endregion
+
+        #region [ Compression ]
+
+        /// <summary>
+        /// Enables gzip compression
+        /// </summary>
+        /// <returns></returns>
+        public RestBuilder EnableGZipCompression()
+        {
+            var result = (RestBuilder)this.MemberwiseClone();
+            result.HttpClient.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
+            return result;
+        }
+
+        /// <summary>
+        /// Enables gzip compression
+        /// </summary>
+        /// <returns></returns>
+        [Obsolete("Use: EnableGZipCompression(). This method will be removed with 2.0.0 version", true)]
+        public RestBuilder Compression() => EnableGZipCompression();
 
         #endregion
 
@@ -1370,7 +1394,7 @@ namespace RestClient
                             {
                                 streamContent.DownloadingProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
                                 response = RestResult<string>.CreateInstanceFrom<string>(responseMessage);
-                                var result = await streamContent.ReadStringAsStreamAsync(responseMessage, cancellationToken);
+                                var result = await streamContent.ReadAsStringAsync(responseMessage, cancellationToken);
                                 OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = result });
                                 response.Content = result;
                             }
@@ -1545,7 +1569,7 @@ namespace RestClient
                                 streamContent.DownloadingProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
                                 response = RestResult<byte[]>.CreateInstanceFrom<byte[]>(responseMessage);
 
-                                response.Content = await streamContent.ReadBytesAsStreamAsync(responseMessage, cancellationToken);
+                                response.Content = await streamContent.ReadAsByteArrayAsync(responseMessage, cancellationToken);
                                 OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = BitConverter.ToString(response.Content) });
                             }
                         }
@@ -1633,7 +1657,7 @@ namespace RestClient
                                 streamContent.DownloadingProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
                                 response = Generic.RestResult<T>.CreateInstanceFrom<T>(responseMessage);
 
-                                string serializedObject = await streamContent.ReadStringAsStreamAsync(responseMessage, cancellationToken);
+                                string serializedObject = await streamContent.ReadAsStringAsync(responseMessage, cancellationToken);
                                 OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = serializedObject });
                                 response.Content = (T)Serializer.DeserializeObject(serializedObject, typeof(T));
                             }
@@ -1739,6 +1763,40 @@ namespace RestClient
             }
             return null;
         }
+        #endregion
+
+        #region [ Preview ]
+        /// <summary>
+        /// Preview provides to print command url, header and payload
+        /// </summary>
+        /// <param name="output">Write on. If null Console.Out is default.</param>
+        /// <returns></returns>
+        public string Preview(TextWriter output = null)
+        {
+            TextWriter writer = output ?? Console.Out;
+            string result = BuildFinalUrl();
+
+            writer.WriteLine($"[PREVIEW] {result}");
+
+            foreach (var item in HttpClient.DefaultRequestHeaders)
+            {
+                writer.WriteLine($"{item.Key}{item.Value}");
+                foreach (var item2 in item.Value)
+                {
+                    writer.WriteLine($"{item.Key}={item2}");
+                }
+            }
+
+            var content = MakeHttpContent();
+            if (content != null)
+            {
+                string contentAsString = content.ReadAsStringAsync().Result;
+                result += contentAsString;
+                writer.WriteLine($"[{contentAsString}]");
+            }
+            return result;
+        }
+
         #endregion
     }
 }
