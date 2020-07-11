@@ -1654,7 +1654,7 @@ namespace RestClient
                             using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
                             {
                                 streamContent.DownloadingProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
-                                response = Generic.RestResult<T>.CreateInstanceFrom<T>(responseMessage);
+                                response = RestResult<T>.CreateInstanceFrom<T>(responseMessage);
 
                                 string serializedObject = await streamContent.ReadAsStringAsync(responseMessage, cancellationToken);
                                 OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = serializedObject });
