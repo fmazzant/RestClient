@@ -57,10 +57,10 @@ namespace RestClient
         /// <summary>
         /// Provides a base class for sending HTTP requests and receiving HTTP responses from a resource identified by a URI
         /// </summary>
-        internal Invoker HttpClient { get; private set; }
-            = new Invoker(new HttpClientHandler()
-            {
-            });
+        //internal Invoker HttpClient { get; private set; }
+        //    = new Invoker(new HttpClientHandler()
+        //    {
+        //    });
 
         /// <summary>
         /// Rest Properties
@@ -214,7 +214,7 @@ namespace RestClient
 #if NETSTANDARD2_0 || NETSTANDARD2_1
             ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(callback);
 #endif
-            this.CreateNewHttpClientInstance(result);
+            //this.CreateNewHttpClientInstance(result);
             return result;
         }
 
@@ -231,7 +231,7 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = credential();
-            this.CreateNewHttpClientInstance(result);
+            //this.CreateNewHttpClientInstance(result);
             return result;
         }
 
@@ -245,7 +245,7 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password);
-            this.CreateNewHttpClientInstance(result);
+            //this.CreateNewHttpClientInstance(result);
             return result;
         }
 
@@ -260,7 +260,7 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password, domain);
-            this.CreateNewHttpClientInstance(result);
+            //this.CreateNewHttpClientInstance(result);
             return result;
         }
 #if NETSTANDARD2_0 || NETSTANDARD2_1
@@ -274,7 +274,7 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password);
-            this.CreateNewHttpClientInstance(result);
+            //this.CreateNewHttpClientInstance(result);
             return result;
         }
 
@@ -290,13 +290,15 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password, domain);
-            this.CreateNewHttpClientInstance(result);
+            //this.CreateNewHttpClientInstance(result);
             return result;
         }
 #endif
         #endregion
 
         #region [ Authentication ]
+
+        private Func<AuthenticationHeaderValue> onAuthentication { get; set; } = null;
 
         /// <summary>
         /// The Authorization header for an HTTP request
@@ -306,7 +308,8 @@ namespace RestClient
         public RestBuilder Authentication(Func<AuthenticationHeaderValue> authentication)
         {
             var result = (RestBuilder)this.MemberwiseClone();
-            result.HttpClient.DefaultRequestHeaders.Authorization = authentication();
+            //result.HttpClient.DefaultRequestHeaders.Authorization = authentication();
+            result.onAuthentication = new Func<AuthenticationHeaderValue>(() => authentication());
             return result;
         }
 
@@ -326,7 +329,8 @@ namespace RestClient
         public RestBuilder Authentication(string scheme)
         {
             var result = (RestBuilder)this.MemberwiseClone();
-            result.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(scheme);
+            //result.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(scheme);
+            result.onAuthentication = new Func<AuthenticationHeaderValue>(() => new AuthenticationHeaderValue(scheme));
             return result;
         }
 
@@ -347,7 +351,8 @@ namespace RestClient
         public RestBuilder Authentication(string scheme, string parameter)
         {
             var result = (RestBuilder)this.MemberwiseClone();
-            result.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(scheme, parameter);
+            //result.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(scheme, parameter);
+            result.onAuthentication = new Func<AuthenticationHeaderValue>(() => new AuthenticationHeaderValue(scheme, parameter));
             return result;
         }
 
@@ -372,9 +377,7 @@ namespace RestClient
         public RestBuilder Timeout(TimeSpan timeOut)
         {
             var result = (RestBuilder)this.MemberwiseClone();
-            result.HttpClient.Timeout
-                = result.Properties.Timeout
-                = timeOut;
+            result.Properties.Timeout = timeOut;
             return result;
         }
 
@@ -386,9 +389,7 @@ namespace RestClient
         public RestBuilder Timeout(double milliseconds)
         {
             var result = (RestBuilder)this.MemberwiseClone();
-            result.HttpClient.Timeout
-                = result.Properties.Timeout
-                = TimeSpan.FromMilliseconds(milliseconds);
+            result.Properties.Timeout = TimeSpan.FromMilliseconds(milliseconds);
             return result;
         }
 
@@ -417,6 +418,8 @@ namespace RestClient
 
         #region [ Header ]
 
+        Action<HttpRequestHeaders> onDefaultRequestHeaders { get; set; }
+
         /// <summary>
         ///  Sets the headers which should be sent with this o children requests
         /// </summary>
@@ -425,7 +428,8 @@ namespace RestClient
         public RestBuilder Header(Action<HttpRequestHeaders> defaultRequestHeaders)
         {
             var result = (RestBuilder)this.MemberwiseClone();
-            defaultRequestHeaders(result.HttpClient.DefaultRequestHeaders);
+            onDefaultRequestHeaders = defaultRequestHeaders;
+            //defaultRequestHeaders(result.HttpClient.DefaultRequestHeaders);
             return result;
         }
 
@@ -434,13 +438,26 @@ namespace RestClient
         #region [ Compression ]
 
         /// <summary>
+        /// 
+        /// </summary>
+        bool enabledGZipCompression { get; set; } = false;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        List<StringWithQualityHeaderValue> acceptEncoding = new List<StringWithQualityHeaderValue>();
+
+        /// <summary>
         /// Enables gzip compression
         /// </summary>
         /// <returns></returns>
-        public RestBuilder EnableGZipCompression()
+        public RestBuilder EnableGZipCompression(bool deflate = true)
         {
             var result = (RestBuilder)this.MemberwiseClone();
-            result.HttpClient.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
+            result.enabledGZipCompression = true;
+            result.acceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
+            if (deflate)
+                result.acceptEncoding.Add(new StringWithQualityHeaderValue("deflate"));
             return result;
         }
 
@@ -462,6 +479,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Command(string command)
         {
+            if (command == null) { throw new ArgumentNullException(); }
             var result = (RestBuilder)this.MemberwiseClone();
             string prefix = !command.StartsWith("/") ? "/" : string.Empty;
             result.Commands.Add($"{prefix}{command}");
@@ -473,7 +491,7 @@ namespace RestClient
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
-        public RestBuilder Command(int command)
+        public RestBuilder Command(uint command)
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Commands.Add($"/{command}");
@@ -580,11 +598,28 @@ namespace RestClient
         /// </summary>
         /// <param name="logger"></param>
         /// <returns></returns>
-        [Obsolete("Currently this function is temporary!", false)]
+        [Obsolete("Currently this function is temporary! Will be removed by 2.0.0 version.", true)]
         public RestBuilder Log(bool logger = true)
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Logger = logger;
+            return result;
+        }
+
+        private TextWriter LoggerTextWriter { get; set; } = null;
+        private bool LoggerEnagled { get; set; } = false;
+
+        /// <summary>
+        /// Preview provides to print command url, header and payload
+        /// </summary>
+        /// <param name="output">Write on. If null Console.Out is default.</param>
+        /// <param name="loggerEnagled">If true write the log</param>
+        /// <returns></returns>
+        public RestBuilder Log(int level = 0, TextWriter output = null, bool loggerEnagled = true)
+        {
+            var result = (RestBuilder)this.MemberwiseClone();
+            result.LoggerTextWriter = output ?? Console.Out;
+            result.LoggerEnagled = loggerEnagled;
             return result;
         }
 
@@ -609,7 +644,6 @@ namespace RestClient
             {
                 result.Parameters.Add(key, value.ToString());
             }
-
             return result;
         }
 
@@ -627,7 +661,6 @@ namespace RestClient
             {
                 result.Parameters.Add(p.Key, p.Value.ToString());
             }
-
             return result;
         }
 
@@ -826,7 +859,7 @@ namespace RestClient
         /// </summary>
         /// <param name="restResult"></param>
         /// <returns></returns>
-        [Obsolete("OnPreResult method will be removed soon, use: .OnPreCompleted((e)=> { var result = e.Result; })", false)]
+        [Obsolete("OnPreResult method will be removed in 2.0.0 version, use: .OnPreCompleted((e)=> { var result = e.Result; })", true)]
         public RestBuilder OnPreResult(Action<RestResult> restResult)
         {
             var result = (RestBuilder)this.MemberwiseClone();
@@ -862,7 +895,7 @@ namespace RestClient
             return result;
         }
 
-        [Obsolete("Use: OnPreviewContentResponseAsString(onPreviewContent). OnPreviewContentAsString will be removed in 2.0.0 version", false)]
+        [Obsolete("Use: OnPreviewContentResponseAsString(onPreviewContent). OnPreviewContentAsString will be removed in 2.0.0 version", true)]
         public RestBuilder OnPreviewContentAsString(Action<PreviewContentAsStringEventArgs> onPreviewContent)
             => OnPreviewContentResponseAsString(onPreviewContent);
 
@@ -1340,15 +1373,11 @@ namespace RestClient
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 
+
             RestResult<string> response = null;
             try
             {
                 string url = BuildFinalUrl();
-
-                if (Logger)
-                {
-                    Console.WriteLine(url);
-                }
 
                 StartEventArgs startEventArgs = new StartEventArgs()
                 {
@@ -1366,7 +1395,7 @@ namespace RestClient
                 using (HttpRequestMessage request = new HttpRequestMessage(method, url))
                 {
                     HttpResponseMessage responseMessage = null;
-
+                    /*
                     using (request.Content = MakeHttpContent())
                     {
                         using (responseMessage = await HttpClient.SendWithProgressAsync(request, (s, e) => OnUploadProgressAction?.Invoke(e), cancellationToken))
@@ -1398,7 +1427,7 @@ namespace RestClient
                                 response.Content = result;
                             }
                         }
-                    }
+                    }*/
                     responseMessage?.Dispose();
                 }
                 OnPreResultAction?.Invoke(response);
@@ -1456,6 +1485,7 @@ namespace RestClient
 
                     using (request.Content = MakeHttpContent())
                     {
+                        /*
                         using (responseMessage = await HttpClient.SendWithProgressAsync(request, (s, e) => OnUploadProgressAction?.Invoke(e), cancellationToken))
                         {
                             if (!IsAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
@@ -1483,6 +1513,7 @@ namespace RestClient
                                 response.Content = await responseMessage.Content.ReadAsStreamAsync();
                             }
                         }
+                    */
                     }
 
                     responseMessage?.Dispose();
@@ -1519,11 +1550,6 @@ namespace RestClient
             {
                 string url = BuildFinalUrl();
 
-                if (Logger)
-                {
-                    Console.WriteLine(url);
-                }
-
                 StartEventArgs startEventArgs = new StartEventArgs()
                 {
                     Cancel = false,
@@ -1544,9 +1570,26 @@ namespace RestClient
 
                     using (request.Content = MakeHttpContent())
                     {
-                        using (responseMessage = await HttpClient.SendWithProgressAsync(request, (s, e) => OnUploadProgressAction?.Invoke(e), cancellationToken))
+                        using (HttpClient client = new HttpClient(
+                             new HttpClientCompressionHandler
+                             {
+                                 EnabledGZipCompression = this.enabledGZipCompression,
+                                 UploadingProgressChanged = (s, e) => OnUploadProgressAction?.Invoke(e),
+                                 DownloadingProgressChanged = (s, e) => OnDownloadProgressAction?.Invoke(e),
+                                 Credentials = this.Credentials,
+                                 ClientCertificateOptions = Properties.CertificateOption,
+                                 ServerCertificateCustomValidationCallback = this.CertificateCallback,
+                                 MaxRequestContentBufferSize = Properties.BufferSize
+                             }, true)
                         {
-                            if (!IsAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
+                            Timeout = this.Properties.Timeout,
+                        })
+                        {
+                            client.DefaultRequestHeaders.Authorization = onAuthentication();
+                            onDefaultRequestHeaders(client.DefaultRequestHeaders);
+                            responseMessage = await client.SendAsync(request, cancellationToken);
+
+                            if (!IsAfterRefreshTokenCalled && responseMessage.StatusCode == HttpStatusCode.Unauthorized && RefreshTokenExecution)
                             {
                                 stopwatch.Stop();
 
@@ -1563,14 +1606,8 @@ namespace RestClient
                                 }
                             }
 
-                            using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
-                            {
-                                streamContent.DownloadingProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
-                                response = RestResult<byte[]>.CreateInstanceFrom<byte[]>(responseMessage);
-
-                                response.Content = await streamContent.ReadAsByteArrayAsync(responseMessage, cancellationToken);
-                                OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = BitConverter.ToString(response.Content) });
-                            }
+                            response = RestResult<byte[]>.CreateInstanceFrom<byte[]>(responseMessage);
+                            //response.Content = await client..DownloadResponseAsync(cancellationToken);
                         }
                     }
                 }
@@ -1632,6 +1669,7 @@ namespace RestClient
 
                     using (request.Content = MakeHttpContent())
                     {
+                        /*
                         using (responseMessage = await HttpClient.SendWithProgressAsync(request, (s, e) => OnUploadProgressAction?.Invoke(e), cancellationToken))
                         {
                             if (!IsAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
@@ -1661,6 +1699,7 @@ namespace RestClient
                                 response.Content = (T)Serializer.DeserializeObject(serializedObject, typeof(T));
                             }
                         }
+                    */
                     }
                 }
                 OnPreResultAction?.Invoke(response);
@@ -1711,21 +1750,21 @@ namespace RestClient
         /// <param name="result"></param>
         private void CreateNewHttpClientInstance(RestBuilder result)
         {
-            var client = new Invoker(new HttpClientHandler()
-            {
-                Credentials = result.Credentials,
-                ClientCertificateOptions = Properties.CertificateOption,
-                ServerCertificateCustomValidationCallback = result.CertificateCallback
-            })
-            {
-                Timeout = Properties.Timeout,
-            };
-            foreach (var item in result.HttpClient.DefaultRequestHeaders)
-            {
-                client.DefaultRequestHeaders.Add(item.Key, item.Value);
-            }
+            //var client = new Invoker(new HttpClientHandler()
+            //{
+            //    Credentials = result.Credentials,
+            //    ClientCertificateOptions = Properties.CertificateOption,
+            //    ServerCertificateCustomValidationCallback = result.CertificateCallback
+            //})
+            //{
+            //    Timeout = Properties.Timeout,
+            //};
+            //foreach (var item in result.HttpClient.DefaultRequestHeaders)
+            //{
+            //    client.DefaultRequestHeaders.Add(item.Key, item.Value);
+            //}
 
-            result.HttpClient = client;
+            //result.HttpClient = client;
         }
 
         #endregion
@@ -1762,38 +1801,82 @@ namespace RestClient
         }
         #endregion
 
-        #region [ Preview ]
+
+
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class HttpClientCompressionHandler : HttpClientHandler
+    {
         /// <summary>
-        /// Preview provides to print command url, header and payload
+        /// Enabled GZip Compression
         /// </summary>
-        /// <param name="output">Write on. If null Console.Out is default.</param>
+        public bool EnabledGZipCompression { get; internal set; }
+
+        /// <summary>
+        /// Occurs when the uploading starts.
+        /// </summary>
+        public ProgressBytesChangedEventHandler UploadingProgressChanged;
+
+        /// <summary>
+        /// Occurs when the download starts.
+        /// </summary>
+        public ProgressBytesChangedEventHandler DownloadingProgressChanged;
+
+        public HttpClientCompressionHandler() : base() { }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public string Preview(TextWriter output = null)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            TextWriter writer = output ?? Console.Out;
-            string result = BuildFinalUrl();
-
-            writer.WriteLine($"[PREVIEW] {result}");
-
-            foreach (var item in HttpClient.DefaultRequestHeaders)
+            if (request != null)
             {
-                writer.WriteLine($"{item.Key}{item.Value}");
-                foreach (var item2 in item.Value)
+                request.Content = new ProgressHttpContent(request.Content, (current, total) => UploadingProgressChanged(this, new ProgressEventArgs
                 {
-                    writer.WriteLine($"{item.Key}={item2}");
+                    CurrentBytes = current,
+                    TotalBytes = total
+                }));
+
+                var response = await base.SendAsync(request, cancellationToken);
+                var content = response?.Content;
+                if (content != null)
+                {
+                    long totalBytesToReceive = response.Content.Headers.ContentLength ?? 0;
+
+                    var stream = await content.ReadAsStreamAsync();
+                    long bytesReceived = 0;
+                    byte[] data = new byte[MaxRequestContentBufferSize];
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        int numBytesRead;
+                        while ((numBytesRead = await stream.ReadAsync(data, 0, data.Length)) > 0)
+                        {
+                            bytesReceived += numBytesRead;
+                            ms.Write(data, 0, numBytesRead);
+
+                            DownloadingProgressChanged?.Invoke(this, new ProgressEventArgs
+                            {
+                                TotalBytes = totalBytesToReceive,
+                                CurrentBytes = bytesReceived
+                            });
+
+                            if (cancellationToken.IsCancellationRequested)
+                            {
+                                throw new TaskCanceledException();
+                            }
+                        }
+                        response.Content = new ByteArrayContent(ms.ToArray());
+                    }
                 }
+                return response;
             }
-
-            var content = MakeHttpContent();
-            if (content != null)
-            {
-                string contentAsString = content.ReadAsStringAsync().Result;
-                result += contentAsString;
-                writer.WriteLine($"[{contentAsString}]");
-            }
-            return result;
+            return null;
         }
-
-        #endregion
     }
 }
