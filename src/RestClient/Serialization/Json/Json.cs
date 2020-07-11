@@ -58,13 +58,6 @@ namespace RestClient.Serialization.Json
             {
                 return null;
             }
-            //#if NETSTANDARD1_3 || NET45 || NET451 || NET452 || NET46 || NET461 || NET462
-            //            return Newtonsoft.Json.JsonConvert.DeserializeObject(value, typeOf);
-            //#endif
-            //#if NETSTANDARD2_0 || NETSTANDARD2_1
-            //            return System.Text.Json.JsonSerializer.Deserialize(value, typeOf);
-            //#endif
-
 #if NEWTONSOFT
             return Newtonsoft.Json.JsonConvert.DeserializeObject(value, typeOf);
 #else
@@ -85,14 +78,6 @@ namespace RestClient.Serialization.Json
             {
                 return string.Empty;
             }
-
-            //#if NETSTANDARD1_3 || NET45 || NET451 || NET452 || NET46 || NET461 || NET462
-            //            return Newtonsoft.Json.JsonConvert.SerializeObject(value);
-            //#endif
-            //#if NETSTANDARD2_0 || NETSTANDARD2_1
-            //            return System.Text.Json.JsonSerializer.Serialize(value);
-            //#endif
-
 #if NEWTONSOFT
             return Newtonsoft.Json.JsonConvert.SerializeObject(value);
 #else
