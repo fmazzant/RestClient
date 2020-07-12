@@ -1585,8 +1585,10 @@ namespace RestClient
                             Timeout = this.Properties.Timeout,
                         })
                         {
-                            client.DefaultRequestHeaders.Authorization = onAuthentication();
-                            onDefaultRequestHeaders(client.DefaultRequestHeaders);
+                            if (onAuthentication != null)
+                                client.DefaultRequestHeaders.Authorization = onAuthentication();
+                            if (onDefaultRequestHeaders != null)
+                                onDefaultRequestHeaders(client.DefaultRequestHeaders);
                             responseMessage = await client.SendAsync(request, cancellationToken);
 
                             if (!IsAfterRefreshTokenCalled && responseMessage.StatusCode == HttpStatusCode.Unauthorized && RefreshTokenExecution)
@@ -1607,7 +1609,7 @@ namespace RestClient
                             }
 
                             response = RestResult<byte[]>.CreateInstanceFrom<byte[]>(responseMessage);
-                            //response.Content = await client..DownloadResponseAsync(cancellationToken);
+                            response.Content = await responseMessage.Content.ReadAsByteArrayAsync();
                         }
                     }
                 }
@@ -1837,11 +1839,16 @@ namespace RestClient
         {
             if (request != null)
             {
-                request.Content = new ProgressHttpContent(request.Content, (current, total) => UploadingProgressChanged(this, new ProgressEventArgs
+                if (request.Content != null)
                 {
-                    CurrentBytes = current,
-                    TotalBytes = total
-                }));
+                    request.Content = new ProgressHttpContent(
+                        request.Content, 
+                        (current, total) => UploadingProgressChanged(this, new ProgressEventArgs
+                    {
+                        CurrentBytes = current,
+                        TotalBytes = total
+                    }));
+                }
 
                 var response = await base.SendAsync(request, cancellationToken);
                 var content = response?.Content;
