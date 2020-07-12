@@ -40,11 +40,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Builder\**" />
+    <Compile Remove="IO\**" />
+    <EmbeddedResource Remove="Builder\**" />
+    <EmbeddedResource Remove="IO\**" />
+    <None Remove="Builder\**" />
+    <None Remove="IO\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="HttpClientExtensions.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Builder\BuilderInvoker.cs~RF1f4020e5.TMP" />
     <None Remove="RestBuilder.cs~RF54d6604.TMP" />
   </ItemGroup>
 
