@@ -35,7 +35,7 @@ namespace RestClient.Http
     using System.Threading.Tasks;
 
     /// <summary>
-    /// 
+    /// The message compression handler by HttpClient 
     /// </summary>
     public class HttpClientCompressionHandler : HttpClientHandler
     {
@@ -116,8 +116,25 @@ namespace RestClient.Http
                         }
                     }
                 }
+
             }
             return response;
+        }
+
+        /// <summary>
+        /// Releases the unmanaged resources used by the System.Net.Http.HttpClientHandler and optionally disposes of the managed resources.
+        /// </summary>
+        /// <param name="disposing">
+        /// true to release both managed and unmanaged resources; false to releases only unmanaged resources.
+        /// </param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                UploadingProgressChanged = null;
+                DownloadingProgressChanged = null;
+            }
+            base.Dispose(disposing);
         }
     }
 }
