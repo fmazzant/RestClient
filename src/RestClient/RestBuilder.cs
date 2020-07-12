@@ -54,14 +54,6 @@ namespace RestClient
     public sealed class RestBuilder
     {
         /// <summary>
-        /// Provides a base class for sending HTTP requests and receiving HTTP responses from a resource identified by a URI
-        /// </summary>
-        //internal Invoker HttpClient { get; private set; }
-        //    = new Invoker(new HttpClientHandler()
-        //    {
-        //    });
-
-        /// <summary>
         /// Rest Properties
         /// </summary>
         public RestProperties Properties { get; internal set; }
@@ -213,7 +205,6 @@ namespace RestClient
 #if NETSTANDARD2_0 || NETSTANDARD2_1
             ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(callback);
 #endif
-            //this.CreateNewHttpClientInstance(result);
             return result;
         }
 
@@ -230,7 +221,6 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = credential();
-            //this.CreateNewHttpClientInstance(result);
             return result;
         }
 
@@ -244,7 +234,6 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password);
-            //this.CreateNewHttpClientInstance(result);
             return result;
         }
 
@@ -259,7 +248,6 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password, domain);
-            //this.CreateNewHttpClientInstance(result);
             return result;
         }
 #if NETSTANDARD2_0 || NETSTANDARD2_1
@@ -273,7 +261,6 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password);
-            //this.CreateNewHttpClientInstance(result);
             return result;
         }
 
@@ -289,7 +276,6 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password, domain);
-            //this.CreateNewHttpClientInstance(result);
             return result;
         }
 #endif
@@ -307,7 +293,6 @@ namespace RestClient
         public RestBuilder Authentication(Func<AuthenticationHeaderValue> authentication)
         {
             var result = (RestBuilder)this.MemberwiseClone();
-            //result.HttpClient.DefaultRequestHeaders.Authorization = authentication();
             result.onAuthentication = new Func<AuthenticationHeaderValue>(() => authentication());
             return result;
         }
@@ -328,7 +313,6 @@ namespace RestClient
         public RestBuilder Authentication(string scheme)
         {
             var result = (RestBuilder)this.MemberwiseClone();
-            //result.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(scheme);
             result.onAuthentication = new Func<AuthenticationHeaderValue>(() => new AuthenticationHeaderValue(scheme));
             return result;
         }
@@ -350,7 +334,6 @@ namespace RestClient
         public RestBuilder Authentication(string scheme, string parameter)
         {
             var result = (RestBuilder)this.MemberwiseClone();
-            //result.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(scheme, parameter);
             result.onAuthentication = new Func<AuthenticationHeaderValue>(() => new AuthenticationHeaderValue(scheme, parameter));
             return result;
         }
@@ -428,7 +411,6 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.onDefaultRequestHeaders = defaultRequestHeaders;
-            //defaultRequestHeaders(result.HttpClient.DefaultRequestHeaders);
             return result;
         }
 
@@ -1790,32 +1772,32 @@ namespace RestClient
 
         #endregion
 
-        #region [ Create New HttpClient Instance and set into HttpClient ]
+        //#region [ Create New HttpClient Instance and set into HttpClient ]
 
-        /// <summary>
-        /// Create new HttpClient instance and set into result.HttpClient
-        /// </summary>
-        /// <param name="result"></param>
-        private void CreateNewHttpClientInstance(RestBuilder result)
-        {
-            //var client = new Invoker(new HttpClientHandler()
-            //{
-            //    Credentials = result.Credentials,
-            //    ClientCertificateOptions = Properties.CertificateOption,
-            //    ServerCertificateCustomValidationCallback = result.CertificateCallback
-            //})
-            //{
-            //    Timeout = Properties.Timeout,
-            //};
-            //foreach (var item in result.HttpClient.DefaultRequestHeaders)
-            //{
-            //    client.DefaultRequestHeaders.Add(item.Key, item.Value);
-            //}
+        ///// <summary>
+        ///// Create new HttpClient instance and set into result.HttpClient
+        ///// </summary>
+        ///// <param name="result"></param>
+        //private void CreateNewHttpClientInstance(RestBuilder result)
+        //{
+        //    //var client = new Invoker(new HttpClientHandler()
+        //    //{
+        //    //    Credentials = result.Credentials,
+        //    //    ClientCertificateOptions = Properties.CertificateOption,
+        //    //    ServerCertificateCustomValidationCallback = result.CertificateCallback
+        //    //})
+        //    //{
+        //    //    Timeout = Properties.Timeout,
+        //    //};
+        //    //foreach (var item in result.HttpClient.DefaultRequestHeaders)
+        //    //{
+        //    //    client.DefaultRequestHeaders.Add(item.Key, item.Value);
+        //    //}
 
-            //result.HttpClient = client;
-        }
+        //    //result.HttpClient = client;
+        //}
 
-        #endregion
+        //#endregion
 
         #region [ Make Http Content ]
 
@@ -1823,7 +1805,7 @@ namespace RestClient
         /// Make Http Contenxt
         /// </summary>
         /// <returns></returns>
-        public HttpContent MakeHttpContent(CancellationToken cancellationToken = new CancellationToken())
+        private HttpContent MakeHttpContent(CancellationToken cancellationToken = new CancellationToken())
         {
             if (!IsEnabledFormUrlEncoded && PayloadContent != null)
             {
