@@ -29,9 +29,8 @@
 
 namespace RestClient
 {
-    using RestClient.Builder;
     using RestClient.Generic;
-    using RestClient.IO;
+    using RestClient.Http;
     using RestClient.Serialization;
     using RestClient.Serialization.Json;
     using RestClient.Serialization.Xml;
@@ -428,7 +427,7 @@ namespace RestClient
         public RestBuilder Header(Action<HttpRequestHeaders> defaultRequestHeaders)
         {
             var result = (RestBuilder)this.MemberwiseClone();
-            onDefaultRequestHeaders = defaultRequestHeaders;
+            result.onDefaultRequestHeaders = defaultRequestHeaders;
             //defaultRequestHeaders(result.HttpClient.DefaultRequestHeaders);
             return result;
         }
@@ -457,7 +456,10 @@ namespace RestClient
             result.enabledGZipCompression = true;
             result.acceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
             if (deflate)
+            {
                 result.acceptEncoding.Add(new StringWithQualityHeaderValue("deflate"));
+            }
+
             return result;
         }
 
@@ -1373,8 +1375,8 @@ namespace RestClient
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 
-
             RestResult<string> response = null;
+
             try
             {
                 string url = BuildFinalUrl();
@@ -1385,6 +1387,7 @@ namespace RestClient
                     Payload = PayloadContent,
                     Url = url
                 };
+
                 OnStartAction?.Invoke(startEventArgs);
 
                 if (startEventArgs.Cancel)
@@ -1395,13 +1398,33 @@ namespace RestClient
                 using (HttpRequestMessage request = new HttpRequestMessage(method, url))
                 {
                     HttpResponseMessage responseMessage = null;
-                    /*
+
                     using (request.Content = MakeHttpContent())
                     {
-                        using (responseMessage = await HttpClient.SendWithProgressAsync(request, (s, e) => OnUploadProgressAction?.Invoke(e), cancellationToken))
+                        using (HttpClient client = new HttpClient(new HttpClientCompressionHandler
                         {
+                            EnabledGZipCompression = this.enabledGZipCompression,
+                            UploadingProgressChanged = (s, e) => OnUploadProgressAction?.Invoke(e),
+                            DownloadingProgressChanged = (s, e) => OnDownloadProgressAction?.Invoke(e),
+                            BufferSize = Properties.BufferSize,
+                            Credentials = Credentials,
+                            ClientCertificateOptions = Properties.CertificateOption,
+                            ServerCertificateCustomValidationCallback = CertificateCallback
+                        })
+                        {
+                            Timeout = Properties.Timeout,
+                        })
+                        {
+                            if (onAuthentication != null)
+                            {
+                                client.DefaultRequestHeaders.Authorization = onAuthentication();
+                            }
 
-                            if (!IsAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
+                            onDefaultRequestHeaders?.Invoke(client.DefaultRequestHeaders);
+
+                            responseMessage = await client.SendAsync(request, cancellationToken);
+
+                            if (!IsAfterRefreshTokenCalled && responseMessage.StatusCode == HttpStatusCode.Unauthorized && RefreshTokenExecution)
                             {
                                 stopwatch.Stop();
 
@@ -1417,19 +1440,15 @@ namespace RestClient
                                     return await SendAsStringAsync(method, cancellationToken);
                                 }
                             }
+                            response = RestResult<string>.CreateInstanceFrom<string>(responseMessage);
 
-                            using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
-                            {
-                                streamContent.DownloadingProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
-                                response = RestResult<string>.CreateInstanceFrom<string>(responseMessage);
-                                var result = await streamContent.ReadAsStringAsync(responseMessage, cancellationToken);
-                                OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = result });
-                                response.Content = result;
-                            }
+                            string serializedObject = await responseMessage.Content.ReadAsStringAsync();
+                            OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = serializedObject });
+                            response.Content = serializedObject;
                         }
-                    }*/
-                    responseMessage?.Dispose();
+                    }
                 }
+
                 OnPreResultAction?.Invoke(response);
                 OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
             }
@@ -1458,14 +1477,10 @@ namespace RestClient
             stopwatch.Start();
 
             RestResult<Stream> response = null;
+
             try
             {
                 string url = BuildFinalUrl();
-
-                if (Logger)
-                {
-                    Console.WriteLine(url);
-                }
 
                 StartEventArgs startEventArgs = new StartEventArgs()
                 {
@@ -1473,7 +1488,9 @@ namespace RestClient
                     Payload = PayloadContent,
                     Url = url
                 };
+
                 OnStartAction?.Invoke(startEventArgs);
+
                 if (startEventArgs.Cancel)
                 {
                     throw new OperationCanceledException();
@@ -1485,10 +1502,30 @@ namespace RestClient
 
                     using (request.Content = MakeHttpContent())
                     {
-                        /*
-                        using (responseMessage = await HttpClient.SendWithProgressAsync(request, (s, e) => OnUploadProgressAction?.Invoke(e), cancellationToken))
+                        using (HttpClient client = new HttpClient(new HttpClientCompressionHandler
                         {
-                            if (!IsAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
+                            EnabledGZipCompression = this.enabledGZipCompression,
+                            UploadingProgressChanged = (s, e) => OnUploadProgressAction?.Invoke(e),
+                            DownloadingProgressChanged = (s, e) => OnDownloadProgressAction?.Invoke(e),
+                            BufferSize = Properties.BufferSize,
+                            Credentials = Credentials,
+                            ClientCertificateOptions = Properties.CertificateOption,
+                            ServerCertificateCustomValidationCallback = CertificateCallback
+                        })
+                        {
+                            Timeout = Properties.Timeout,
+                        })
+                        {
+                            if (onAuthentication != null)
+                            {
+                                client.DefaultRequestHeaders.Authorization = onAuthentication();
+                            }
+
+                            onDefaultRequestHeaders?.Invoke(client.DefaultRequestHeaders);
+
+                            responseMessage = await client.SendAsync(request, cancellationToken);
+
+                            if (!IsAfterRefreshTokenCalled && responseMessage.StatusCode == HttpStatusCode.Unauthorized && RefreshTokenExecution)
                             {
                                 stopwatch.Stop();
 
@@ -1504,20 +1541,16 @@ namespace RestClient
                                     return await SendAsStreamAsync(method, cancellationToken);
                                 }
                             }
+                            response = RestResult<Stream>.CreateInstanceFrom<Stream>(responseMessage);
 
-                            using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
-                            {
-                                streamContent.DownloadingProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
-                                response = RestResult<Stream>.CreateInstanceFrom<Stream>(responseMessage);
-                                OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = string.Empty });
-                                response.Content = await responseMessage.Content.ReadAsStreamAsync();
-                            }
+                            Stream stream = await responseMessage.Content.ReadAsStreamAsync();
+
+                            OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = string.Empty });
+                            response.Content = stream;
                         }
-                    */
                     }
-
-                    responseMessage?.Dispose();
                 }
+
                 OnPreResultAction?.Invoke(response);
                 OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
             }
@@ -1570,25 +1603,27 @@ namespace RestClient
 
                     using (request.Content = MakeHttpContent())
                     {
-                        using (HttpClient client = new HttpClient(
-                             new HttpClientCompressionHandler
-                             {
-                                 EnabledGZipCompression = this.enabledGZipCompression,
-                                 UploadingProgressChanged = (s, e) => OnUploadProgressAction?.Invoke(e),
-                                 DownloadingProgressChanged = (s, e) => OnDownloadProgressAction?.Invoke(e),
-                                 Credentials = this.Credentials,
-                                 ClientCertificateOptions = Properties.CertificateOption,
-                                 ServerCertificateCustomValidationCallback = this.CertificateCallback,
-                                 MaxRequestContentBufferSize = Properties.BufferSize
-                             }, true)
+                        using (HttpClient client = new HttpClient(new HttpClientCompressionHandler
                         {
-                            Timeout = this.Properties.Timeout,
+                            EnabledGZipCompression = this.enabledGZipCompression,
+                            UploadingProgressChanged = (s, e) => OnUploadProgressAction?.Invoke(e),
+                            DownloadingProgressChanged = (s, e) => OnDownloadProgressAction?.Invoke(e),
+                            BufferSize = Properties.BufferSize,
+                            Credentials = Credentials,
+                            ClientCertificateOptions = Properties.CertificateOption,
+                            ServerCertificateCustomValidationCallback = CertificateCallback
+                        })
+                        {
+                            Timeout = Properties.Timeout,
                         })
                         {
                             if (onAuthentication != null)
+                            {
                                 client.DefaultRequestHeaders.Authorization = onAuthentication();
-                            if (onDefaultRequestHeaders != null)
-                                onDefaultRequestHeaders(client.DefaultRequestHeaders);
+                            }
+
+                            onDefaultRequestHeaders?.Invoke(client.DefaultRequestHeaders);
+
                             responseMessage = await client.SendAsync(request, cancellationToken);
 
                             if (!IsAfterRefreshTokenCalled && responseMessage.StatusCode == HttpStatusCode.Unauthorized && RefreshTokenExecution)
@@ -1607,7 +1642,6 @@ namespace RestClient
                                     return await SendAsByteArrayAsync(method, cancellationToken);
                                 }
                             }
-
                             response = RestResult<byte[]>.CreateInstanceFrom<byte[]>(responseMessage);
                             response.Content = await responseMessage.Content.ReadAsByteArrayAsync();
                         }
@@ -1627,6 +1661,7 @@ namespace RestClient
 
             OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
             OnCompletedActionEA?.Invoke(new EventArgs());
+
             return response;
         }
 
@@ -1647,11 +1682,6 @@ namespace RestClient
             {
                 string url = BuildFinalUrl();
 
-                if (Logger)
-                {
-                    Console.WriteLine(url);
-                }
-
                 StartEventArgs startEventArgs = new StartEventArgs()
                 {
                     Cancel = false,
@@ -1660,6 +1690,7 @@ namespace RestClient
                 };
 
                 OnStartAction?.Invoke(startEventArgs);
+
                 if (startEventArgs.Cancel)
                 {
                     throw new OperationCanceledException();
@@ -1671,10 +1702,30 @@ namespace RestClient
 
                     using (request.Content = MakeHttpContent())
                     {
-                        /*
-                        using (responseMessage = await HttpClient.SendWithProgressAsync(request, (s, e) => OnUploadProgressAction?.Invoke(e), cancellationToken))
+                        using (HttpClient client = new HttpClient(new HttpClientCompressionHandler
                         {
-                            if (!IsAfterRefreshTokenCalled && RefreshTokenExecution && responseMessage.StatusCode == HttpStatusCode.Unauthorized)
+                            EnabledGZipCompression = this.enabledGZipCompression,
+                            UploadingProgressChanged = (s, e) => OnUploadProgressAction?.Invoke(e),
+                            DownloadingProgressChanged = (s, e) => OnDownloadProgressAction?.Invoke(e),
+                            BufferSize = Properties.BufferSize,
+                            Credentials = Credentials,
+                            ClientCertificateOptions = Properties.CertificateOption,
+                            ServerCertificateCustomValidationCallback = CertificateCallback
+                        })
+                        {
+                            Timeout = Properties.Timeout,
+                        })
+                        {
+                            if (onAuthentication != null)
+                            {
+                                client.DefaultRequestHeaders.Authorization = onAuthentication();
+                            }
+
+                            onDefaultRequestHeaders?.Invoke(client.DefaultRequestHeaders);
+
+                            responseMessage = await client.SendAsync(request, cancellationToken);
+
+                            if (!IsAfterRefreshTokenCalled && responseMessage.StatusCode == HttpStatusCode.Unauthorized && RefreshTokenExecution)
                             {
                                 stopwatch.Stop();
 
@@ -1690,20 +1741,15 @@ namespace RestClient
                                     return await SendAsync<T>(method, cancellationToken);
                                 }
                             }
+                            response = RestResult<T>.CreateInstanceFrom<T>(responseMessage);
 
-                            using (HttpContentStream streamContent = new HttpContentStream(Properties.BufferSize))
-                            {
-                                streamContent.DownloadingProgressChanged += (s, e) => OnDownloadProgressAction?.Invoke(e);
-                                response = Generic.RestResult<T>.CreateInstanceFrom<T>(responseMessage);
-
-                                string serializedObject = await streamContent.ReadAsStringAsync(responseMessage, cancellationToken);
-                                OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = serializedObject });
-                                response.Content = (T)Serializer.DeserializeObject(serializedObject, typeof(T));
-                            }
+                            string serializedObject = await responseMessage.Content.ReadAsStringAsync();
+                            OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = serializedObject });
+                            response.Content = (T)Serializer.DeserializeObject(serializedObject, typeof(T));
                         }
-                    */
                     }
                 }
+
                 OnPreResultAction?.Invoke(response);
                 OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
             }
@@ -1802,88 +1848,5 @@ namespace RestClient
             return null;
         }
         #endregion
-
-
-
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public class HttpClientCompressionHandler : HttpClientHandler
-    {
-        /// <summary>
-        /// Enabled GZip Compression
-        /// </summary>
-        public bool EnabledGZipCompression { get; internal set; }
-
-        /// <summary>
-        /// Occurs when the uploading starts.
-        /// </summary>
-        public ProgressBytesChangedEventHandler UploadingProgressChanged;
-
-        /// <summary>
-        /// Occurs when the download starts.
-        /// </summary>
-        public ProgressBytesChangedEventHandler DownloadingProgressChanged;
-
-        public HttpClientCompressionHandler() : base() { }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="request"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            if (request != null)
-            {
-                if (request.Content != null)
-                {
-                    request.Content = new ProgressHttpContent(
-                        request.Content, 
-                        (current, total) => UploadingProgressChanged(this, new ProgressEventArgs
-                    {
-                        CurrentBytes = current,
-                        TotalBytes = total
-                    }));
-                }
-
-                var response = await base.SendAsync(request, cancellationToken);
-                var content = response?.Content;
-                if (content != null)
-                {
-                    long totalBytesToReceive = response.Content.Headers.ContentLength ?? 0;
-
-                    var stream = await content.ReadAsStreamAsync();
-                    long bytesReceived = 0;
-                    byte[] data = new byte[MaxRequestContentBufferSize];
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        int numBytesRead;
-                        while ((numBytesRead = await stream.ReadAsync(data, 0, data.Length)) > 0)
-                        {
-                            bytesReceived += numBytesRead;
-                            ms.Write(data, 0, numBytesRead);
-
-                            DownloadingProgressChanged?.Invoke(this, new ProgressEventArgs
-                            {
-                                TotalBytes = totalBytesToReceive,
-                                CurrentBytes = bytesReceived
-                            });
-
-                            if (cancellationToken.IsCancellationRequested)
-                            {
-                                throw new TaskCanceledException();
-                            }
-                        }
-                        response.Content = new ByteArrayContent(ms.ToArray());
-                    }
-                }
-                return response;
-            }
-            return null;
-        }
     }
 }
