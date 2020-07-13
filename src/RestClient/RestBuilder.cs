@@ -1772,33 +1772,6 @@ namespace RestClient
 
         #endregion
 
-        //#region [ Create New HttpClient Instance and set into HttpClient ]
-
-        ///// <summary>
-        ///// Create new HttpClient instance and set into result.HttpClient
-        ///// </summary>
-        ///// <param name="result"></param>
-        //private void CreateNewHttpClientInstance(RestBuilder result)
-        //{
-        //    //var client = new Invoker(new HttpClientHandler()
-        //    //{
-        //    //    Credentials = result.Credentials,
-        //    //    ClientCertificateOptions = Properties.CertificateOption,
-        //    //    ServerCertificateCustomValidationCallback = result.CertificateCallback
-        //    //})
-        //    //{
-        //    //    Timeout = Properties.Timeout,
-        //    //};
-        //    //foreach (var item in result.HttpClient.DefaultRequestHeaders)
-        //    //{
-        //    //    client.DefaultRequestHeaders.Add(item.Key, item.Value);
-        //    //}
-
-        //    //result.HttpClient = client;
-        //}
-
-        //#endregion
-
         #region [ Make Http Content ]
 
         /// <summary>
