@@ -1397,6 +1397,10 @@ namespace RestClient
                             Timeout = Properties.Timeout,
                         })
                         {
+                            if (enabledGZipCompression)
+                            {
+                                client.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
+                            }
                             if (onAuthentication != null)
                             {
                                 client.DefaultRequestHeaders.Authorization = onAuthentication();

@@ -30,7 +30,10 @@
 namespace RestClient.Http
 {
     using System.IO;
+    using System.IO.Compression;
+    using System.Linq;
     using System.Net.Http;
+    using System.Net.Http.Headers;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -88,8 +91,11 @@ namespace RestClient.Http
                 if (response.Content != null)
                 {
                     long totalBytesToReceive = response.Content.Headers.ContentLength ?? 0;
+                    bool isGZipContentEncoding = response.Content.Headers.ContentEncoding.Any(x => x == "gzip");
 
-                    using (Stream stream = await response.Content.ReadAsStreamAsync())
+                    using (Stream stream = isGZipContentEncoding
+                        ? new GZipStream(await response.Content.ReadAsStreamAsync(), CompressionMode.Decompress)
+                        : await response.Content.ReadAsStreamAsync())
                     {
                         long bytesReceived = 0;
                         byte[] data = new byte[BufferSize];
