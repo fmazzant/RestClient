@@ -419,14 +419,10 @@ namespace RestClient
         #region [ Compression ]
 
         /// <summary>
-        /// 
+        /// true if gzip compression is enabled, false otherwise
         /// </summary>
         bool enabledGZipCompression { get; set; } = false;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        List<StringWithQualityHeaderValue> acceptEncoding = new List<StringWithQualityHeaderValue>();
 
         /// <summary>
         /// Enables gzip compression
@@ -436,12 +432,6 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.enabledGZipCompression = true;
-            result.acceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
-            if (deflate)
-            {
-                result.acceptEncoding.Add(new StringWithQualityHeaderValue("deflate"));
-            }
-
             return result;
         }
 
@@ -476,6 +466,18 @@ namespace RestClient
         /// <param name="command"></param>
         /// <returns></returns>
         public RestBuilder Command(uint command)
+        {
+            var result = (RestBuilder)this.MemberwiseClone();
+            result.Commands.Add($"/{command}");
+            return result;
+        }
+
+        /// <summary>
+        /// Adds the command to request
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        public RestBuilder Command(int command)
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Commands.Add($"/{command}");
@@ -1502,6 +1504,11 @@ namespace RestClient
                             Timeout = Properties.Timeout,
                         })
                         {
+                            if (enabledGZipCompression)
+                            {
+                                client.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
+                            }
+
                             if (onAuthentication != null)
                             {
                                 client.DefaultRequestHeaders.Authorization = onAuthentication();
@@ -1603,6 +1610,11 @@ namespace RestClient
                             Timeout = Properties.Timeout,
                         })
                         {
+                            if (enabledGZipCompression)
+                            {
+                                client.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
+                            }
+
                             if (onAuthentication != null)
                             {
                                 client.DefaultRequestHeaders.Authorization = onAuthentication();
@@ -1702,6 +1714,11 @@ namespace RestClient
                             Timeout = Properties.Timeout,
                         })
                         {
+                            if (enabledGZipCompression)
+                            {
+                                client.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
+                            }
+
                             if (onAuthentication != null)
                             {
                                 client.DefaultRequestHeaders.Authorization = onAuthentication();
