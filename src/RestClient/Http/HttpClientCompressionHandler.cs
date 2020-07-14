@@ -33,7 +33,6 @@ namespace RestClient.Http
     using System.IO.Compression;
     using System.Linq;
     using System.Net.Http;
-    using System.Net.Http.Headers;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -122,7 +121,6 @@ namespace RestClient.Http
                         }
                     }
                 }
-
             }
             return response;
         }
