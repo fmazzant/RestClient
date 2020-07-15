@@ -1428,6 +1428,7 @@ namespace RestClient
                                     return await SendAsStringAsync(method, cancellationToken);
                                 }
                             }
+                            
                             response = RestResult<string>.CreateInstanceFrom<string>(responseMessage);
 
                             string serializedObject = await responseMessage.Content.ReadAsStringAsync();
@@ -1534,6 +1535,7 @@ namespace RestClient
                                     return await SendAsStreamAsync(method, cancellationToken);
                                 }
                             }
+                            
                             response = RestResult<Stream>.CreateInstanceFrom<Stream>(responseMessage);
 
                             Stream stream = await responseMessage.Content.ReadAsStreamAsync();
@@ -1640,6 +1642,7 @@ namespace RestClient
                                     return await SendAsByteArrayAsync(method, cancellationToken);
                                 }
                             }
+                            
                             response = RestResult<byte[]>.CreateInstanceFrom<byte[]>(responseMessage);
                             response.Content = await responseMessage.Content.ReadAsByteArrayAsync();
                         }
@@ -1744,6 +1747,7 @@ namespace RestClient
                                     return await SendAsync<T>(method, cancellationToken);
                                 }
                             }
+                            
                             response = RestResult<T>.CreateInstanceFrom<T>(responseMessage);
 
                             string serializedObject = await responseMessage.Content.ReadAsStringAsync();
