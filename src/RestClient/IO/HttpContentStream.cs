@@ -30,6 +30,7 @@
 namespace RestClient.IO
 {
     using RestClient;
+    using RestClient.Http;
     using System;
     using System.IO;
     using System.IO.Compression;
