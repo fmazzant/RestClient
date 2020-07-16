@@ -15,7 +15,7 @@
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.6.0-alpha1</Version>
+    <Version>1.6.0-rc1</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
     <PackageReleaseNotes>1.6.0
       - Target .NET Framework 4.6    (net46)
