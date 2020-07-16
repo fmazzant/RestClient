@@ -1,60 +1,52 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0; netstandard2.1; netstandard1.3</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0; netstandard2.1; netstandard1.3; net45; net451; net452; net46; net461; net462</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <NeutralLanguage>en</NeutralLanguage>
     <Authors>Federico Mazzanti</Authors>
     <Description>RestClient is a library for .net that can help you to consume REST services.</Description>
     <RepositoryType>GitHub</RepositoryType>
     <RepositoryUrl>https://github.com/fmazzant/RestClient</RepositoryUrl>
-    <PackageTags>rest-client, c-sharp, dotnet-standard, http-client, restclient, mafe, xml, json, rest, fluent</PackageTags>
+    <PackageTags>rest-client, c-sharp, dotnet-standard, dotnet-framework, http-client, restclient, mafe, xml, json, rest, fluent</PackageTags>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <Copyright>Copyright (c) 2020 Federico Mazzanti</Copyright>
     <Company />
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.5.3</Version>
+    <Version>1.6.0-rc1</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
-    <PackageReleaseNotes>1.5.3
-- Enabled gzip compression
-- Refactoring HttpContentStream
+    <PackageReleaseNotes>1.6.0
+      - Target .NET Framework 4.6    (net46)
+      - Target .NET Framework 4.6.1  (net461)
+      - Target .NET Framework 4.6.2  (net462)
+      - Target .NET Framework 4.5    (net45)
+      - Target .NET Framework 4.5.1  (net451)
+      - Target .NET Framework 4.5.2  (net452)
 
-1.5.2
-- Target framework netstandatd1.3
+      1.5.3
+      - Enabled gzip compression
+      - Refactoring HttpContentStream
 
-1.5.1
-- Target framework netstandatd2.0 and netstandatd2.1
+      1.5.2
+      - Target framework netstandatd1.3
 
-1.5.0
-- Refactoring builder
-- Parameter bugfix
-- General bugfix
+      1.5.1
+      - Target framework netstandatd2.0 and netstandatd2.1
 
-1.4.0
-- Added OnPreCompleted, OnCompleted and OnPreviewContentAsString
-- Refactoring some methods.
-- Added BufferSize and check on buffer size value</PackageReleaseNotes>
+      1.5.0
+      - Refactoring builder
+      - Parameter bugfix
+      - General bugfix
+
+      1.4.0
+      - Added OnPreCompleted, OnCompleted and OnPreviewContentAsString
+      - Refactoring some methods.
+      - Added BufferSize and check on buffer size value
+    </PackageReleaseNotes>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="Builder\**" />
-    <Compile Remove="IO\**" />
-    <EmbeddedResource Remove="Builder\**" />
-    <EmbeddedResource Remove="IO\**" />
-    <None Remove="Builder\**" />
-    <None Remove="IO\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="HttpClientExtensions.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="RestBuilder.cs~RF54d6604.TMP" />
-  </ItemGroup>
 
   <ItemGroup>
     <None Include="..\..\LICENSE">
@@ -64,6 +56,30 @@
     <None Include="..\..\README.md" Link="README.md" />
   </ItemGroup>
 
+  <!-- .NET Standard 2.1 references, compilation flags and build options -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+    <DefineConstants>NETSTANDARD2_1; NETSTANDARD_FULL;</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+    <PackageReference Include="System.Text.Json">
+      <Version>4.7.2</Version>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- .NET Standard 2.0 references, compilation flags and build options -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <DefineConstants>NETSTANDARD2_0; NETSTANDARD_FULL;</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="System.Text.Json">
+      <Version>4.7.2</Version>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- .NET Standard 1.3 references, compilation flags and build options -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
+    <DefineConstants>NETSTANDARD1_3; NETSTANDARD_FULL; NEWTONSOFT;</DefineConstants>
+  </PropertyGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
     <PackageReference Include="System.Net.Security" Version="4.3.2" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
@@ -72,16 +88,58 @@
     <PackageReference Include="System.Xml.XmlSerializer" Version="4.3.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="System.Text.Json">
-      <Version>4.7.2</Version>
-    </PackageReference>
+  <!-- .NET Framework 4.6.2 references, compilation flags and build options -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net462'">
+    <DefineConstants>NET462; NET_FULL; NEWTONSOFT;</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
-    <PackageReference Include="System.Text.Json">
-      <Version>4.7.2</Version>
-    </PackageReference>
+  <!-- .NET Framework 4.6.1 references, compilation flags and build options -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net461'">
+    <DefineConstants>NET461; NET_FULL; NEWTONSOFT;</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
+
+  <!-- .NET Framework 4.6 references, compilation flags and build options -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net46'">
+    <DefineConstants>NET46; NET_FULL; NEWTONSOFT;</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net46'">
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
+
+  <!-- .NET Framework 4.5.2 references, compilation flags and build options -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net452'">
+    <DefineConstants>NET452; NET_FULL; NEWTONSOFT;</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net452'">
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
+
+  <!-- .NET Framework 4.5.1 references, compilation flags and build options -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net451'">
+    <DefineConstants>NET451; NET_FULL; NEWTONSOFT;</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net451'">
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
+
+  <!-- .NET Framework 4.5 references, compilation flags and build options -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net45'">
+    <DefineConstants>NET45; NET_FULL; NEWTONSOFT;</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
 </Project>

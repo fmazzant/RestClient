@@ -184,10 +184,11 @@ namespace RestClient
         /// </summary>
         internal RestBuilder()
         {
-#if NETSTANDARD2_0 || NETSTANDARD2_1
+#if NETSTANDARD2_0 || NETSTANDARD2_1 || NET_FULL
             ServicePointManager.ServerCertificateValidationCallback = (object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
                 => true;
 #endif
+
         }
 
         #region [ Certificate Validation ]
@@ -202,7 +203,7 @@ namespace RestClient
             var result = (RestBuilder)this.MemberwiseClone();
             result.CertificateCallback = callback;
             result.Credentials = Credentials;
-#if NETSTANDARD2_0 || NETSTANDARD2_1
+#if NETSTANDARD2_0 || NETSTANDARD2_1 || NET_FULL
             ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(callback);
 #endif
             return result;
@@ -263,7 +264,6 @@ namespace RestClient
             result.Credentials = new NetworkCredential(username, password);
             return result;
         }
-
 
         /// <summary>
         /// Authentication information used by username, secure string password and domain
