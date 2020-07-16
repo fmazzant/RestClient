@@ -43,6 +43,7 @@ namespace RestClient.IO
     /// <summary>
     /// Provides a specific stream from HttpContent instance.
     /// </summary>
+    [Obsolete("HttpContentStream can no longer be used. It will be removed in 2.0.0 version", true)]
     public class HttpContentStream : IDisposable
     {
         #region [ Public Events ]
