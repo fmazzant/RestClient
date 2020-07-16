@@ -1825,10 +1825,9 @@ namespace RestClient
             }
             else if (IsEnabledFormUrlEncoded && FormUrlEncodedKeyValues != null)
             {
-                var serializedObject = Serializer.SerializeObject(FormUrlEncodedKeyValues, FormUrlEncodedKeyValues.GetType());
                 OnPreviewContentRequestAsStringAction?.Invoke(new PreviewContentAsStringEventArgs
                 {
-                    ContentAsString = serializedObject,
+                    ContentAsString = Serializer.SerializeObject(FormUrlEncodedKeyValues, FormUrlEncodedKeyValues.GetType()),
                     ContentType = FormUrlEncodedKeyValues.GetType()
                 });
                 return new FormUrlEncodedContent(FormUrlEncodedKeyValues);
