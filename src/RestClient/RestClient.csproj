@@ -15,11 +15,13 @@
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.6.0-rc2</Version>
+    <Version>1.7.0-alpha1</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
     <PackageReleaseNotes>
-      1.6.0
+      1.7.0
       - Optimization and Refactoring HttpClientCompressionHandler
+
+      1.6.0
       - Target .NET Framework 4.6    (net46)
       - Target .NET Framework 4.6.1  (net461)
       - Target .NET Framework 4.6.2  (net462)
