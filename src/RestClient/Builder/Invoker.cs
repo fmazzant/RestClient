@@ -38,6 +38,7 @@ namespace RestClient.Builder
     /// <summary>
     /// Provides a set of methods for building the requests
     /// </summary>
+    [Obsolete("", true)]
     public class Invoker : HttpClient
     {
         /// <summary>
