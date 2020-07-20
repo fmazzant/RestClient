@@ -302,7 +302,7 @@ namespace RestClient
         /// </summary>
         /// <param name="authentication"></param>
         /// <returns></returns>
-        [Obsolete("OnAuthentication: this method will be removed soon", false)]
+        [Obsolete("OnAuthentication: This method will be removed with 2.0.0 version.", false)]
         public RestBuilder OnAuthentication(Func<AuthenticationHeaderValue> authentication) => Authentication(authentication);
 
         /// <summary>
@@ -322,7 +322,7 @@ namespace RestClient
         /// </summary>
         /// <param name="scheme"></param>
         /// <returns></returns>
-        [Obsolete("OnAuthentication: this method will be removed soon", false)]
+        [Obsolete("OnAuthentication: This method will be removed with 2.0.0 version.", false)]
         public RestBuilder OnAuthentication(string scheme) => Authentication(scheme);
 
         /// <summary>
@@ -344,7 +344,7 @@ namespace RestClient
         /// <param name="scheme"></param>
         /// <param name="parameter"></param>
         /// <returns></returns>
-        [Obsolete("OnAuthentication: this method will be removed soon", false)]
+        [Obsolete("OnAuthentication: This method will be removed with 2.0.0 version.", false)]
         public RestBuilder OnAuthentication(string scheme, string parameter) => Authentication(scheme, parameter);
 
         #endregion
@@ -439,7 +439,7 @@ namespace RestClient
         /// Enables gzip compression
         /// </summary>
         /// <returns></returns>
-        [Obsolete("Use: EnableGZipCompression(). This method will be removed with 2.0.0 version", true)]
+        [Obsolete("Use: EnableGZipCompression(). This method will be removed with 2.0.0 version.", true)]
         public RestBuilder Compression() => EnableGZipCompression();
 
         #endregion
@@ -584,7 +584,7 @@ namespace RestClient
         /// </summary>
         /// <param name="logger"></param>
         /// <returns></returns>
-        [Obsolete("Currently this function is temporary! Will be removed by 2.0.0 version.", true)]
+        [Obsolete("Currently this function is temporary! This method will be removed with 2.0.0 version.", true)]
         public RestBuilder Log(bool logger = true)
         {
             var result = (RestBuilder)this.MemberwiseClone();
@@ -845,7 +845,7 @@ namespace RestClient
         /// </summary>
         /// <param name="restResult"></param>
         /// <returns></returns>
-        [Obsolete("OnPreResult method will be removed in 2.0.0 version, use: .OnPreCompleted((e)=> { var result = e.Result; })", true)]
+        [Obsolete("Use: .OnPreCompleted((e)=> { var result = e.Result; }). OnPreResult method will be removed with 2.0.0 version.", true)]
         public RestBuilder OnPreResult(Action<RestResult> restResult)
         {
             var result = (RestBuilder)this.MemberwiseClone();
@@ -881,7 +881,7 @@ namespace RestClient
             return result;
         }
 
-        [Obsolete("Use: OnPreviewContentResponseAsString(onPreviewContent). OnPreviewContentAsString will be removed in 2.0.0 version", true)]
+        [Obsolete("Use: OnPreviewContentResponseAsString(onPreviewContent). OnPreviewContentAsString This method will be removed with 2.0.0 version.", true)]
         public RestBuilder OnPreviewContentAsString(Action<PreviewContentAsStringEventArgs> onPreviewContent)
             => OnPreviewContentResponseAsString(onPreviewContent);
 
