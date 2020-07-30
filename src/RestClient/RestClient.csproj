@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0; netstandard2.1; netstandard1.3; net45; net451; net452; net46; net461; net462</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1; netstandard2.0; netstandard1.3; net45; net451; net452; net46; net461; net462</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <NeutralLanguage>en</NeutralLanguage>
     <Authors>Federico Mazzanti</Authors>
@@ -15,9 +15,12 @@
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.6.0</Version>
+    <Version>1.7.0-rc1</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
-    <PackageReleaseNotes>1.6.0
+    <PackageReleaseNotes>1.7.0
+      - Optimization and Refactoring HttpClientCompressionHandler
+
+1.6.0
       - Target .NET Framework 4.6    (net46)
       - Target .NET Framework 4.6.1  (net461)
       - Target .NET Framework 4.6.2  (net462)
@@ -25,28 +28,37 @@
       - Target .NET Framework 4.5.1  (net451)
       - Target .NET Framework 4.5.2  (net452)
 
-      1.5.3
+1.5.3
       - Enabled gzip compression
       - Refactoring HttpContentStream
 
-      1.5.2
+1.5.2
       - Target framework netstandatd1.3
 
-      1.5.1
+1.5.1
       - Target framework netstandatd2.0 and netstandatd2.1
 
-      1.5.0
+1.5.0
       - Refactoring builder
       - Parameter bugfix
       - General bugfix
 
-      1.4.0
+1.4.0
       - Added OnPreCompleted, OnCompleted and OnPreviewContentAsString
       - Refactoring some methods.
       - Added BufferSize and check on buffer size value
-    </PackageReleaseNotes>
+</PackageReleaseNotes>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Builder\**" />
+    <Compile Remove="IO\**" />
+    <EmbeddedResource Remove="Builder\**" />
+    <EmbeddedResource Remove="IO\**" />
+    <None Remove="Builder\**" />
+    <None Remove="IO\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="..\..\LICENSE">
