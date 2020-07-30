@@ -27,7 +27,7 @@
 /// 
 /// </summary>
 
-namespace RestClient.IO
+namespace RestClient.Http
 {
     using System;
     using System.IO;
@@ -68,6 +68,7 @@ namespace RestClient.IO
         public ProgressHttpContent(HttpContent content, Action<long, long> progress)
             : this(content, defaultBufferSize, progress)
         {
+
         }
 
         /// <summary>
