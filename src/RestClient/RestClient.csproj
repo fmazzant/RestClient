@@ -20,7 +20,7 @@
     <PackageReleaseNotes>1.7.0
       - Optimization and Refactoring HttpClientCompressionHandler
 
-      1.6.0
+1.6.0
       - Target .NET Framework 4.6    (net46)
       - Target .NET Framework 4.6.1  (net461)
       - Target .NET Framework 4.6.2  (net462)
@@ -28,26 +28,26 @@
       - Target .NET Framework 4.5.1  (net451)
       - Target .NET Framework 4.5.2  (net452)
 
-      1.5.3
+1.5.3
       - Enabled gzip compression
       - Refactoring HttpContentStream
 
-      1.5.2
+1.5.2
       - Target framework netstandatd1.3
 
-      1.5.1
+1.5.1
       - Target framework netstandatd2.0 and netstandatd2.1
 
-      1.5.0
+1.5.0
       - Refactoring builder
       - Parameter bugfix
       - General bugfix
 
-      1.4.0
+1.4.0
       - Added OnPreCompleted, OnCompleted and OnPreviewContentAsString
       - Refactoring some methods.
       - Added BufferSize and check on buffer size value
-    </PackageReleaseNotes>
+</PackageReleaseNotes>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
 
