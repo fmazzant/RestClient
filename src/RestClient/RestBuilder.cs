@@ -593,19 +593,19 @@ namespace RestClient
         }
 
         private TextWriter LoggerTextWriter { get; set; } = null;
-        private bool LoggerEnagled { get; set; } = false;
+        private bool LoggerEnabled { get; set; } = false;
 
         /// <summary>
         /// Preview provides to print command url, header and payload
         /// </summary>
         /// <param name="output">Write on. If null Console.Out is default.</param>
-        /// <param name="loggerEnagled">If true write the log</param>
+        /// <param name="loggerEnabled">If true write the log</param>
         /// <returns></returns>
-        public RestBuilder Log(int level = 0, TextWriter output = null, bool loggerEnagled = true)
+        public RestBuilder Log(int level = 0, TextWriter output = null, bool loggerEnabled = true)
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.LoggerTextWriter = output ?? Console.Out;
-            result.LoggerEnagled = loggerEnagled;
+            result.LoggerEnabled = loggerEnabled;
             return result;
         }
 
