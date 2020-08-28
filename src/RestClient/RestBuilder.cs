@@ -175,7 +175,7 @@ namespace RestClient
         Action<Exception> OnExceptionAction = null;
 
         /// <summary>
-        /// isAfterRefreshTokenCalled
+        /// Is After Refresh Token Called
         /// </summary>
         bool IsAfterRefreshTokenCalled = false;
 
@@ -592,8 +592,20 @@ namespace RestClient
             return result;
         }
 
+        /// <summary>
+        /// Log writer
+        /// </summary>
         private TextWriter LoggerTextWriter { get; set; } = null;
+
+        /// <summary>
+        /// if true provides write the log
+        /// </summary>
         private bool LoggerEnabled { get; set; } = false;
+
+        /// <summary>
+        /// Defines the log's level.
+        /// </summary>
+        private int LoggerLevel { get; set; } = 0;
 
         /// <summary>
         /// Preview provides to print command url, header and payload
@@ -606,6 +618,29 @@ namespace RestClient
             var result = (RestBuilder)this.MemberwiseClone();
             result.LoggerTextWriter = output ?? Console.Out;
             result.LoggerEnabled = loggerEnabled;
+            result.LoggerLevel = level;
+            return result;
+        }
+
+        /// <summary>
+        /// Enables the log writer without changing the logger writer instance.
+        /// </summary>
+        /// <returns></returns>
+        public RestBuilder EnableLog()
+        {
+            var result = (RestBuilder)this.MemberwiseClone();
+            result.LoggerEnabled = true;
+            return result;
+        }
+
+        /// <summary>
+        /// Disables the log writer without changing the logger writer instance.
+        /// </summary>
+        /// <returns></returns>
+        public RestBuilder DisableLog()
+        {
+            var result = (RestBuilder)this.MemberwiseClone();
+            result.LoggerEnabled = false;
             return result;
         }
 
