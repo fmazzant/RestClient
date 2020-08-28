@@ -644,6 +644,28 @@ namespace RestClient
             return result;
         }
 
+        /// <summary>
+        /// Write log if condition is true
+        /// </summary>
+        /// <param name="log">Log</param>
+        void WriteLog(bool condition, string log)
+        {
+            if (LoggerEnabled && LoggerTextWriter != null && condition)
+            {
+                string line = $"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}] => {log}";
+                LoggerTextWriter.WriteLine(line);
+            }
+        }
+
+        /// <summary>
+        /// Write log
+        /// </summary>
+        /// <param name="log">Log</param>
+        void WriteLog(string log)
+        {
+            WriteLog(true, log);
+        }
+
         #endregion
 
         #region [ Parameter ]

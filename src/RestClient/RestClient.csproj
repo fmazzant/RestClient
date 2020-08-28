@@ -19,7 +19,7 @@
     <AssemblyName>Mafe.RestClient</AssemblyName>
     <PackageReleaseNotes>
       1.7.1
-      - Enabled log
+      - Enabled light logger
       - Target framework netcoreapp3.0, netcoreapp2.2, netcoreapp2.1 and netcoreapp2.0
 
       1.7.0
