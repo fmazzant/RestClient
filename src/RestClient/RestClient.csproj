@@ -17,10 +17,12 @@
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
     <Version>1.7.1-alpha1</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
-    <PackageReleaseNotes>
-      1.7.1
-      - Enabled light logger
-      - Target framework netcoreapp3.0, netcoreapp2.2, netcoreapp2.1 and netcoreapp2.0
+    <PackageReleaseNotes>1.7.1
+      - Enabled logger
+      - Target .NET Core 3.0 (netcoreapp3.0)
+      - Target .NET Core 2.2 (netcoreapp2.2)
+      - Target .NET Core 2.1 (netcoreapp2.1)
+      - Target .NET Core 2.0 (netcoreapp2.0)
 
       1.7.0
       - Optimization and Refactoring HttpClientCompressionHandler
@@ -52,7 +54,7 @@
       - Added OnPreCompleted, OnCompleted and OnPreviewContentAsString
       - Refactoring some methods.
       - Added BufferSize and check on buffer size value
-    </PackageReleaseNotes>
+</PackageReleaseNotes>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
 
