@@ -1418,7 +1418,7 @@ namespace RestClient
 
             RestResult<string> response = null;
 
-            WriteLog($"Call {method.ToString().ToUpper()} is starting...");
+            WriteLog($"Call {method.ToString().ToUpper()} with SendAsStringAsync is starting...");
 
             try
             {
@@ -1534,9 +1534,13 @@ namespace RestClient
 
             RestResult<Stream> response = null;
 
+            WriteLog($"Call {method.ToString().ToUpper()} with SendAsStreamAsync is starting...");
+
             try
             {
                 string url = BuildFinalUrl();
+
+                WriteLog($"{method.ToString().ToUpper()} {url}");
 
                 StartEventArgs startEventArgs = new StartEventArgs()
                 {
@@ -1549,6 +1553,7 @@ namespace RestClient
 
                 if (startEventArgs.Cancel)
                 {
+                    WriteLog($"throw OperationCanceledException");
                     throw new OperationCanceledException();
                 }
 
@@ -1620,6 +1625,7 @@ namespace RestClient
             }
             catch (Exception ex)
             {
+                WriteLog($"Exception {ex.StackTrace}");
                 OnExceptionAction?.Invoke(ex);
                 response = RestResult<Stream>.CreateFromException(ex);
             }
@@ -1628,6 +1634,8 @@ namespace RestClient
 
             OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
             OnCompletedActionEA?.Invoke(new EventArgs());
+
+            WriteLog($"Call completed in {stopwatch.Elapsed.TotalMilliseconds} ms");
 
             return response;
         }
@@ -1643,9 +1651,14 @@ namespace RestClient
             stopwatch.Start();
 
             RestResult<byte[]> response = null;
+
+            WriteLog($"Call {method.ToString().ToUpper()} with SendAsByteArrayAsync is starting...");
+
             try
             {
                 string url = BuildFinalUrl();
+
+                WriteLog($"{method.ToString().ToUpper()} {url}");
 
                 StartEventArgs startEventArgs = new StartEventArgs()
                 {
@@ -1658,6 +1671,7 @@ namespace RestClient
 
                 if (startEventArgs.Cancel)
                 {
+                    WriteLog($"throw OperationCanceledException");
                     throw new OperationCanceledException();
                 }
 
@@ -1725,6 +1739,7 @@ namespace RestClient
             }
             catch (Exception ex)
             {
+                WriteLog($"Exception {ex.StackTrace}");
                 OnExceptionAction?.Invoke(ex);
                 response = RestResult<byte[]>.CreateFromException(ex);
             }
@@ -1733,6 +1748,8 @@ namespace RestClient
 
             OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
             OnCompletedActionEA?.Invoke(new EventArgs());
+
+            WriteLog($"Call completed in {stopwatch.Elapsed.TotalMilliseconds} ms");
 
             return response;
         }
@@ -1750,9 +1767,14 @@ namespace RestClient
             stopwatch.Start();
 
             RestResult<T> response = null;
+
+            WriteLog($"Call {method.ToString().ToUpper()} with SendAsync<{typeof(T)}> is starting...");
+
             try
             {
                 string url = BuildFinalUrl();
+
+                WriteLog($"{method.ToString().ToUpper()} {url}");
 
                 StartEventArgs startEventArgs = new StartEventArgs()
                 {
@@ -1765,6 +1787,7 @@ namespace RestClient
 
                 if (startEventArgs.Cancel)
                 {
+                    WriteLog($"throw OperationCanceledException");
                     throw new OperationCanceledException();
                 }
 
@@ -1835,6 +1858,7 @@ namespace RestClient
             }
             catch (Exception ex)
             {
+                WriteLog($"Exception {ex.StackTrace}");
                 OnExceptionAction?.Invoke(ex);
                 response = RestResult<T>.CreateFromException(ex);
             }
@@ -1843,6 +1867,8 @@ namespace RestClient
 
             OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
             OnCompletedActionEA?.Invoke(new EventArgs());
+
+            WriteLog($"Call completed in {stopwatch.Elapsed.TotalMilliseconds} ms");
 
             return response;
         }
