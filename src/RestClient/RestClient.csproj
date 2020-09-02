@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1; netstandard2.0; netstandard1.3; netcoreapp3.0; netcoreapp2.2; netcoreapp2.1; netcoreapp2.0; net45; net451; net452; net46; net461; net462</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1; netstandard2.0; netstandard1.3; netcoreapp3.0; netcoreapp2.2; netcoreapp2.1; netcoreapp2.0; net45; net451; net452; net46; net461; net462; net47; net471; net472; net48</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <NeutralLanguage>en</NeutralLanguage>
     <Authors>Federico Mazzanti</Authors>
@@ -23,6 +23,10 @@
       - Target .NET Core 2.2 (netcoreapp2.2)
       - Target .NET Core 2.1 (netcoreapp2.1)
       - Target .NET Core 2.0 (netcoreapp2.0)
+      - Target .NET Framework 4.7    (net47)
+      - Target .NET Framework 4.7.1  (net471)
+      - Target .NET Framework 4.7.2  (net472)
+      - Target .NET Framework 4.8    (net48)
 
       1.7.0
       - Optimization and Refactoring HttpClientCompressionHandler
@@ -146,6 +150,50 @@
     <PackageReference Include="System.Text.Json">
       <Version>4.7.2</Version>
     </PackageReference>
+  </ItemGroup>
+
+  <!-- .NET Framework 4.7.0 references, compilation flags and build options -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net47'">
+    <DefineConstants>NET47; NET_FULL;</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net47'">
+    <PackageReference Include="System.Text.Json">
+      <Version>4.7.2</Version>
+    </PackageReference>
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+  </ItemGroup>
+
+  <!-- .NET Framework 4.7.1 references, compilation flags and build options -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net471'">
+    <DefineConstants>NET471; NET_FULL;</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net471'">
+    <PackageReference Include="System.Text.Json">
+      <Version>4.7.2</Version>
+    </PackageReference>
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+  </ItemGroup>
+
+  <!-- .NET Framework 4.7.2 references, compilation flags and build options -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net472'">
+    <DefineConstants>NET472; NET_FULL;</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
+    <PackageReference Include="System.Text.Json">
+      <Version>4.7.2</Version>
+    </PackageReference>
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+  </ItemGroup>
+
+  <!-- .NET Framework 4.8.0 references, compilation flags and build options -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net48'">
+    <DefineConstants>NET48; NET_FULL;</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+    <PackageReference Include="System.Text.Json">
+      <Version>4.7.2</Version>
+    </PackageReference>
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
 
   <!-- .NET Framework 4.6.2 references, compilation flags and build options -->
