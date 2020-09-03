@@ -15,7 +15,7 @@
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.7.1-alpha1</Version>
+    <Version>1.7.1-alpha2</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
     <PackageReleaseNotes>1.7.1
       - Enabled logger
