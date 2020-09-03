@@ -59,7 +59,7 @@
       - Added OnPreCompleted, OnCompleted and OnPreviewContentAsString
       - Refactoring some methods.
       - Added BufferSize and check on buffer size value
-</PackageReleaseNotes>
+    </PackageReleaseNotes>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
 
@@ -152,14 +152,21 @@
     </PackageReference>
   </ItemGroup>
 
+  <!-- .NET Framework 4.8.0 references, compilation flags and build options -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net48'">
+    <DefineConstants>NET48; NET_FULL;</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+    <PackageReference Include="System.Text.Json" Version="4.7.2" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+  </ItemGroup>
+
   <!-- .NET Framework 4.7.0 references, compilation flags and build options -->
   <PropertyGroup Condition="'$(TargetFramework)' == 'net47'">
     <DefineConstants>NET47; NET_FULL;</DefineConstants>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net47'">
-    <PackageReference Include="System.Text.Json">
-      <Version>4.7.2</Version>
-    </PackageReference>
+    <PackageReference Include="System.Text.Json" Version="4.7.2" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
 
@@ -168,9 +175,7 @@
     <DefineConstants>NET471; NET_FULL;</DefineConstants>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net471'">
-    <PackageReference Include="System.Text.Json">
-      <Version>4.7.2</Version>
-    </PackageReference>
+    <PackageReference Include="System.Text.Json" Version="4.7.2" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
 
@@ -179,20 +184,7 @@
     <DefineConstants>NET472; NET_FULL;</DefineConstants>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
-    <PackageReference Include="System.Text.Json">
-      <Version>4.7.2</Version>
-    </PackageReference>
-    <PackageReference Include="System.Net.Http" Version="4.3.4" />
-  </ItemGroup>
-
-  <!-- .NET Framework 4.8.0 references, compilation flags and build options -->
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net48'">
-    <DefineConstants>NET48; NET_FULL;</DefineConstants>
-  </PropertyGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
-    <PackageReference Include="System.Text.Json">
-      <Version>4.7.2</Version>
-    </PackageReference>
+    <PackageReference Include="System.Text.Json" Version="4.7.2" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
 
