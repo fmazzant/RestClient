@@ -830,6 +830,7 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.FormUrlEncodedKeyValues = keyValues;
+            WriteLog(LogOptions.Payload, keyValues);
             return result;
         }
 
@@ -844,6 +845,7 @@ namespace RestClient
             var result = (RestBuilder)this.MemberwiseClone();
             result.IsEnabledFormUrlEncoded = enableFormUrlEncoded;
             result.FormUrlEncodedKeyValues = keyValues;
+            WriteLog(LogOptions.Payload, keyValues);
             return result;
         }
 
@@ -857,6 +859,7 @@ namespace RestClient
             var result = (RestBuilder)this.MemberwiseClone();
             result.FormUrlEncodedKeyValues = new Dictionary<string, string>();
             kesValues(result.FormUrlEncodedKeyValues);
+            WriteLog(LogOptions.Payload, result.FormUrlEncodedKeyValues);
             return result;
         }
 
@@ -872,6 +875,7 @@ namespace RestClient
             result.IsEnabledFormUrlEncoded = enableFormUrlEncoded;
             result.FormUrlEncodedKeyValues = new Dictionary<string, string>();
             kesValues(result.FormUrlEncodedKeyValues);
+            WriteLog(LogOptions.Payload, result.FormUrlEncodedKeyValues);
             return result;
         }
 
