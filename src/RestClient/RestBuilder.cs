@@ -49,6 +49,23 @@ namespace RestClient
     using System.Threading.Tasks;
 
     /// <summary>
+    /// Log options
+    /// </summary>
+    public enum LogOptions : short
+    {
+        /// <summary>
+        /// Default
+        /// </summary>
+        None = 0,
+
+        /// <summary>
+        /// Occors when payload is set
+        /// </summary>
+        Payload = 1
+
+    }
+
+    /// <summary>
     /// Provides a set of methods for building the requests
     /// </summary>
     public sealed class RestBuilder
@@ -605,7 +622,7 @@ namespace RestClient
         /// <summary>
         /// Defines the log's level.
         /// </summary>
-        private int LoggerLevel { get; set; } = 0;
+        private LogOptions LoggerLevel { get; set; } = LogOptions.None;
 
         /// <summary>
         /// Preview provides to print command url, header and payload
@@ -613,7 +630,7 @@ namespace RestClient
         /// <param name="output">Write on. If null Console.Out is default.</param>
         /// <param name="loggerEnabled">If true write the log</param>
         /// <returns></returns>
-        public RestBuilder Log(int level = 0, TextWriter output = null, bool loggerEnabled = true)
+        public RestBuilder Log(LogOptions level = LogOptions.None, TextWriter output = null, bool loggerEnabled = true)
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.LoggerTextWriter = output ?? Console.Out;
@@ -654,6 +671,30 @@ namespace RestClient
             {
                 string line = $"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}] => {log}";
                 LoggerTextWriter.WriteLine(line);
+            }
+        }
+
+        /// <summary>
+        /// Write log if options is contained into LoggerLevel
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="log"></param>
+        void WriteLog(LogOptions options, string log)
+        {
+            WriteLog((LoggerLevel & options) > 0, log);
+        }
+
+        /// <summary>
+        /// Write log if options is contained into LoggerLevel and it is true then the object is serialized
+        /// </summary>
+        /// <typeparam name="T">Object's type</typeparam>
+        /// <param name="options">Log options</param>
+        /// <param name="obj">Object to serialize</param>
+        private void WriteLog<T>(LogOptions options, T obj)
+        {
+            if ((LoggerLevel & options) > 0)
+            {
+                WriteLog($"Payload:{Serializer.SerializeObject(obj, typeof(T))}");
             }
         }
 
@@ -764,6 +805,7 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.PayloadContent = payload;
+            WriteLog(LogOptions.Payload, payload);
             return result;
         }
 
@@ -1613,7 +1655,6 @@ namespace RestClient
                             response = RestResult<Stream>.CreateInstanceFrom<Stream>(responseMessage);
 
                             Stream stream = await responseMessage.Content.ReadAsStreamAsync();
-
                             OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = string.Empty });
                             response.Content = stream;
                         }
@@ -1916,9 +1957,10 @@ namespace RestClient
             }
             else if (IsEnabledFormUrlEncoded && FormUrlEncodedKeyValues != null)
             {
+                var serializedObject = Serializer.SerializeObject(FormUrlEncodedKeyValues, FormUrlEncodedKeyValues.GetType());
                 OnPreviewContentRequestAsStringAction?.Invoke(new PreviewContentAsStringEventArgs
                 {
-                    ContentAsString = Serializer.SerializeObject(FormUrlEncodedKeyValues, FormUrlEncodedKeyValues.GetType()),
+                    ContentAsString = serializedObject,
                     ContentType = FormUrlEncodedKeyValues.GetType()
                 });
                 return new FormUrlEncodedContent(FormUrlEncodedKeyValues);
