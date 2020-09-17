@@ -690,11 +690,11 @@ namespace RestClient
         /// <typeparam name="T">Object's type</typeparam>
         /// <param name="options">Log options</param>
         /// <param name="obj">Object to serialize</param>
-        private void WriteLog<T>(LogOptions options, T obj)
+        private void WriteLog<T>(LogOptions options, string name, T obj)
         {
             if ((LoggerLevel & options) > 0)
             {
-                WriteLog($"Payload:{Serializer.SerializeObject(obj, typeof(T))}");
+                WriteLog($"{name}: {Serializer.SerializeObject(obj, typeof(T))}");
             }
         }
 
@@ -805,7 +805,7 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.PayloadContent = payload;
-            WriteLog(LogOptions.Payload, payload);
+            WriteLog(LogOptions.Payload, "Payload", payload);
             return result;
         }
 
@@ -830,7 +830,7 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.FormUrlEncodedKeyValues = keyValues;
-            WriteLog(LogOptions.Payload, keyValues);
+            WriteLog(LogOptions.Payload, "Payload", keyValues);
             return result;
         }
 
@@ -845,7 +845,7 @@ namespace RestClient
             var result = (RestBuilder)this.MemberwiseClone();
             result.IsEnabledFormUrlEncoded = enableFormUrlEncoded;
             result.FormUrlEncodedKeyValues = keyValues;
-            WriteLog(LogOptions.Payload, keyValues);
+            WriteLog(LogOptions.Payload, "Payload", keyValues);
             return result;
         }
 
@@ -859,7 +859,7 @@ namespace RestClient
             var result = (RestBuilder)this.MemberwiseClone();
             result.FormUrlEncodedKeyValues = new Dictionary<string, string>();
             kesValues(result.FormUrlEncodedKeyValues);
-            WriteLog(LogOptions.Payload, result.FormUrlEncodedKeyValues);
+            WriteLog(LogOptions.Payload, "Payload", result.FormUrlEncodedKeyValues);
             return result;
         }
 
@@ -875,7 +875,7 @@ namespace RestClient
             result.IsEnabledFormUrlEncoded = enableFormUrlEncoded;
             result.FormUrlEncodedKeyValues = new Dictionary<string, string>();
             kesValues(result.FormUrlEncodedKeyValues);
-            WriteLog(LogOptions.Payload, result.FormUrlEncodedKeyValues);
+            WriteLog(LogOptions.Payload, "Payload", result.FormUrlEncodedKeyValues);
             return result;
         }
 
