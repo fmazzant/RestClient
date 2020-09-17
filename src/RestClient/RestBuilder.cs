@@ -61,8 +61,17 @@ namespace RestClient
         /// <summary>
         /// Occors when payload is set
         /// </summary>
-        Payload = 1
+        Payload = 1,
 
+        /// <summary>
+        /// Occors when fluet properties are set
+        /// </summary>
+        Setting = 2,
+
+        /// <summary>
+        /// Occors when on handlers are invoked
+        /// </summary>
+        Handler = 4,
     }
 
     /// <summary>
@@ -217,6 +226,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder CertificateValidation(Func<object, X509Certificate, X509Chain, SslPolicyErrors, bool> callback)
         {
+            WriteLog(LogOptions.Setting, "CertificateValidation(Func<object, X509Certificate, X509Chain, SslPolicyErrors, bool> callback) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.CertificateCallback = callback;
             result.Credentials = Credentials;
@@ -237,6 +247,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder NetworkCredential(Func<NetworkCredential> credential)
         {
+            WriteLog(LogOptions.Setting, "NetworkCredential(Func<NetworkCredential> credential) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = credential();
             return result;
@@ -250,6 +261,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder NetworkCredential(string username, string password)
         {
+            WriteLog(LogOptions.Setting, "NetworkCredential setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password);
             return result;
@@ -264,6 +276,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder NetworkCredential(string username, string password, string domain)
         {
+            WriteLog(LogOptions.Setting, "NetworkCredential(string username, string password, string domain) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password, domain);
             return result;
@@ -277,6 +290,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder NetworkCredential(string username, System.Security.SecureString password)
         {
+            WriteLog(LogOptions.Setting, "NetworkCredential(string username, System.Security.SecureString password) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password);
             return result;
@@ -291,6 +305,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder NetworkCredential(string username, System.Security.SecureString password, string domain)
         {
+            WriteLog(LogOptions.Setting, "NetworkCredential(string username, System.Security.SecureString password, string domain) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password, domain);
             return result;
@@ -309,6 +324,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Authentication(Func<AuthenticationHeaderValue> authentication)
         {
+            WriteLog(LogOptions.Setting, "Authentication setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.onAuthentication = new Func<AuthenticationHeaderValue>(() => authentication());
             return result;
@@ -329,6 +345,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Authentication(string scheme)
         {
+            WriteLog(LogOptions.Setting, "Authentication(string scheme) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.onAuthentication = new Func<AuthenticationHeaderValue>(() => new AuthenticationHeaderValue(scheme));
             return result;
@@ -350,6 +367,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Authentication(string scheme, string parameter)
         {
+            WriteLog(LogOptions.Setting, "Authentication setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.onAuthentication = new Func<AuthenticationHeaderValue>(() => new AuthenticationHeaderValue(scheme, parameter));
             return result;
@@ -375,6 +393,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Timeout(TimeSpan timeOut)
         {
+            WriteLog(LogOptions.Setting, $"Timeout({timeOut}) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Properties.Timeout = timeOut;
             return result;
@@ -387,6 +406,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Timeout(double milliseconds)
         {
+            WriteLog(LogOptions.Setting, $"Timeout({milliseconds}) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Properties.Timeout = TimeSpan.FromMilliseconds(milliseconds);
             return result;
@@ -403,6 +423,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder BufferSize(int bufferSize)
         {
+            WriteLog(LogOptions.Setting, $"BufferSize({bufferSize}) setting");
             if (bufferSize <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(bufferSize));
@@ -426,6 +447,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Header(Action<HttpRequestHeaders> defaultRequestHeaders)
         {
+            WriteLog(LogOptions.Setting, "Header(Action<HttpRequestHeaders> defaultRequestHeaders) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.onDefaultRequestHeaders = defaultRequestHeaders;
             return result;
@@ -447,6 +469,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder EnableGZipCompression(bool deflate = true)
         {
+            WriteLog(LogOptions.Setting, "EnableGZipCompression setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.enabledGZipCompression = true;
             return result;
@@ -470,6 +493,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Command(string command)
         {
+            WriteLog(LogOptions.Setting, $"Command({command}) setting");
             if (command == null) { throw new ArgumentNullException(); }
             var result = (RestBuilder)this.MemberwiseClone();
             string prefix = !command.StartsWith("/") ? "/" : string.Empty;
@@ -484,6 +508,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Command(uint command)
         {
+            WriteLog(LogOptions.Setting, $"Command {command} setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Commands.Add($"/{command}");
             return result;
@@ -496,6 +521,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Command(int command)
         {
+            WriteLog(LogOptions.Setting, $"Command({command}) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Commands.Add($"/{command}");
             return result;
@@ -508,6 +534,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Command(Guid command)
         {
+            WriteLog(LogOptions.Setting, $"Command({command}) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Commands.Add($"/{command}");
             return result;
@@ -524,6 +551,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder RefreshToken(bool refreshToken = true)
         {
+            WriteLog(LogOptions.Setting, $"RefreshToken({refreshToken}) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.RefreshTokenExecution = refreshToken;
             return result;
@@ -536,6 +564,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder RefreshTokenInvoke(Func<RestResult> refreshTokenApi)
         {
+            WriteLog(LogOptions.Setting, $"RefreshTokenInvoke(Func<RestResult> refreshTokenApi) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.RefreshTokenApi = refreshTokenApi;
             return result;
@@ -548,6 +577,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder RefreshTokenInvoke(Func<Task<RestResult>> refreshTokenApi)
         {
+            WriteLog(LogOptions.Setting, $"RefreshTokenInvoke(Func<Task<RestResult>> refreshTokenApi) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.RefreshTokenApiAsync = refreshTokenApi;
             return result;
@@ -563,6 +593,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Xml()
         {
+            WriteLog(LogOptions.Setting, $"Xml setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Serializer = new XML();
             return result;
@@ -574,6 +605,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Json()
         {
+            WriteLog(LogOptions.Setting, $"Json() setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Serializer = new JSON();
             return result;
@@ -586,6 +618,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder CustomSerializer(ISerializerContent serializer)
         {
+            WriteLog(LogOptions.Setting, $"CustomSerializer(ISerializerContent serializer) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Serializer = serializer;
             return result;
@@ -632,6 +665,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Log(LogOptions level = LogOptions.None, TextWriter output = null, bool loggerEnabled = true)
         {
+            WriteLog(LogOptions.Setting, $"Log(LogOptions level = LogOptions.None, TextWriter output = null, bool loggerEnabled = true) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.LoggerTextWriter = output ?? Console.Out;
             result.LoggerEnabled = loggerEnabled;
@@ -645,6 +679,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder EnableLog()
         {
+            WriteLog(LogOptions.Setting, $"EnableLog() setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.LoggerEnabled = true;
             return result;
@@ -656,6 +691,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder DisableLog()
         {
+            WriteLog(LogOptions.Setting, $"DisableLog() setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.LoggerEnabled = false;
             return result;
@@ -719,6 +755,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Parameter(string key, object value)
         {
+            WriteLog(LogOptions.Setting, $"Parameter(string key, object value) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             if (result.Parameters.ContainsKey(key))
             {
@@ -739,6 +776,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Parameter(RestParameter parameter, params RestParameter[] others)
         {
+            WriteLog(LogOptions.Setting, $"Parameter(RestParameter parameter, params RestParameter[] others) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Parameters.Add(parameter.Key, parameter.Value.ToString());
             foreach (RestParameter p in others)
@@ -755,6 +793,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Parameter(Action<List<RestParameter>> parameters)
         {
+            WriteLog(LogOptions.Setting, $"Parameter(Action<List<RestParameter>> parameters) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             List<RestParameter> list = new List<RestParameter>();
             parameters(list);
@@ -776,6 +815,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Url(string url)
         {
+            WriteLog(LogOptions.Setting, $"Url(string url) setting");
             return this.Url(new Uri(url));
         }
 
@@ -786,6 +826,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Url(Uri uri)
         {
+            WriteLog(LogOptions.Setting, $"Url(Uri uri) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Properties.EndPoint = uri;
             return result;
@@ -913,7 +954,7 @@ namespace RestClient
 
         #endregion
 
-        #region [ Upload & Download Progress ]
+        #region [ OnUploadProgress & OnDownloadProgress ]
 
         /// <summary>
         /// Sets onUploadProgress action, occurs when the request is processing 
@@ -941,7 +982,7 @@ namespace RestClient
 
         #endregion
 
-        #region [ PreResult ]
+        #region [ OnPreCompleted ]
 
         /// <summary>
         /// Sets onPreResult, occurs when the result of request il builded and it isn't completed yet
@@ -990,7 +1031,7 @@ namespace RestClient
 
         #endregion
 
-        #region [ Completed ]
+        #region [ OnCompleted ]
 
         /// <summary>
         /// Sets onCompleted action, occurs when the call is completed.
@@ -1006,7 +1047,7 @@ namespace RestClient
 
         #endregion
 
-        #region [ Exception ]
+        #region [ OnException ]
 
         /// <summary>
         /// Sets onException, occurs when there is an exception during the call
