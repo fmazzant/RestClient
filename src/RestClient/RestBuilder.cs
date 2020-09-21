@@ -49,32 +49,6 @@ namespace RestClient
     using System.Threading.Tasks;
 
     /// <summary>
-    /// Log options
-    /// </summary>
-    public enum LogOptions : short
-    {
-        /// <summary>
-        /// Default
-        /// </summary>
-        None = 0,
-
-        /// <summary>
-        /// Occors when payload is set
-        /// </summary>
-        Payload = 1,
-
-        /// <summary>
-        /// Occors when fluet properties are set
-        /// </summary>
-        Setting = 2,
-
-        /// <summary>
-        /// Occors when on handlers are invoked
-        /// </summary>
-        Handler = 4,
-    }
-
-    /// <summary>
     /// Provides a set of methods for building the requests
     /// </summary>
     public sealed class RestBuilder
@@ -214,7 +188,6 @@ namespace RestClient
             ServicePointManager.ServerCertificateValidationCallback = (object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
                 => true;
 #endif
-
         }
 
         #region [ Certificate Validation ]
