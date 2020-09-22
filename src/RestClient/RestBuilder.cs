@@ -817,9 +817,9 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Payload<T>(T payload)
         {
+            WriteLog(LogOptions.Payload, "Payload", payload);
             var result = (RestBuilder)this.MemberwiseClone();
             result.PayloadContent = payload;
-            WriteLog(LogOptions.Payload, "Payload", payload);
             return result;
         }
 
@@ -842,9 +842,9 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder FormUrlEncoded(Dictionary<string, string> keyValues)
         {
+            WriteLog(LogOptions.Payload, "Payload", keyValues);
             var result = (RestBuilder)this.MemberwiseClone();
             result.FormUrlEncodedKeyValues = keyValues;
-            WriteLog(LogOptions.Payload, "Payload", keyValues);
             return result;
         }
 
@@ -856,10 +856,10 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder FormUrlEncoded(bool enableFormUrlEncoded, Dictionary<string, string> keyValues)
         {
+            WriteLog(LogOptions.Payload, "Payload", keyValues);
             var result = (RestBuilder)this.MemberwiseClone();
             result.IsEnabledFormUrlEncoded = enableFormUrlEncoded;
             result.FormUrlEncodedKeyValues = keyValues;
-            WriteLog(LogOptions.Payload, "Payload", keyValues);
             return result;
         }
 
@@ -885,11 +885,11 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder FormUrlEncoded(bool enableFormUrlEncoded, Action<Dictionary<string, string>> kesValues)
         {
+            WriteLog(LogOptions.Payload, "Payload", kesValues);
             var result = (RestBuilder)this.MemberwiseClone();
             result.IsEnabledFormUrlEncoded = enableFormUrlEncoded;
             result.FormUrlEncodedKeyValues = new Dictionary<string, string>();
             kesValues(result.FormUrlEncodedKeyValues);
-            WriteLog(LogOptions.Payload, "Payload", result.FormUrlEncodedKeyValues);
             return result;
         }
 
@@ -904,6 +904,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder OnStart(Action<StartEventArgs> onStart)
         {
+            WriteLog(LogOptions.Handler, "OnStart(Action<StartEventArgs> onStart)");
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnStartAction = onStart;
             return result;
@@ -920,6 +921,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder OnPreviewContentRequestAsString(Action<PreviewContentAsStringEventArgs> onPreviewContent)
         {
+            WriteLog(LogOptions.Handler, "OnPreviewContentRequestAsString(Action<PreviewContentAsStringEventArgs> onPreviewContent)");
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnPreviewContentRequestAsStringAction = onPreviewContent;
             return result;
@@ -936,6 +938,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder OnUploadProgress(Action<ProgressEventArgs> onProgress)
         {
+            WriteLog(LogOptions.Handler, "OnUploadProgress(Action<ProgressEventArgs> onProgress)");
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnUploadProgressAction = onProgress;
             return result;
@@ -948,6 +951,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder OnDownloadProgress(Action<ProgressEventArgs> onProgress)
         {
+            WriteLog(LogOptions.Handler, "OnDownloadProgress(Action<ProgressEventArgs> onProgress)");
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnDownloadProgressAction = onProgress;
             return result;
@@ -965,6 +969,7 @@ namespace RestClient
         [Obsolete("Use: .OnPreCompleted((e)=> { var result = e.Result; }). OnPreResult method will be removed with 2.0.0 version.", true)]
         public RestBuilder OnPreResult(Action<RestResult> restResult)
         {
+            WriteLog(LogOptions.Handler, "OnPreResult(Action<RestResult> restResult)");
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnPreResultAction = restResult;
             return result;
@@ -977,6 +982,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder OnPreCompleted(Action<PreCompletedEventArgs> onPreCompleted)
         {
+            WriteLog(LogOptions.Handler, "OnPreCompleted(Action<PreCompletedEventArgs> onPreCompleted)");
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnPreCompletedAction = onPreCompleted;
             return result;
@@ -993,6 +999,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder OnPreviewContentResponseAsString(Action<PreviewContentAsStringEventArgs> onPreviewContent)
         {
+            WriteLog(LogOptions.Handler, "OnPreviewContentResponseAsString(Action<PreviewContentAsStringEventArgs> onPreviewContent)");
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnPreviewContentAsStringAction = onPreviewContent;
             return result;
@@ -1013,6 +1020,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder OnCompleted(Action<CompletedEventArgs> onCompleted)
         {
+            WriteLog(LogOptions.Handler, "OnCompleted(Action<CompletedEventArgs> onCompleted)");
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnCompletedAction = onCompleted;
             return result;
@@ -1029,6 +1037,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder OnException(Action<Exception> exception)
         {
+            WriteLog(LogOptions.Handler, "OnException(Action<Exception> exception)");
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnExceptionAction = exception;
             return result;
