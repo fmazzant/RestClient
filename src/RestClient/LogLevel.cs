@@ -29,42 +29,29 @@
 
 namespace RestClient
 {
-    using System;
-    using System.Net.Http;
-
     /// <summary>
-    /// Provides a class for rest connection properties
+    /// Log options
     /// </summary>
-    public class RestProperties
+    public enum LogLevel : short
     {
         /// <summary>
-        /// Default buffer size 20k
+        /// Default
         /// </summary>
-        private const int DefaultBufferSize = 5 * 4096 * 4; //80kb
+        None = 0,
 
         /// <summary>
-        /// End Point
+        /// Occors when payload is set
         /// </summary>
-        public Uri EndPoint { get; set; }
+        Payload = 1,
 
         /// <summary>
-        /// Specifies how client certificated are provided. Default is "Manual"
+        /// Occors when fluet properties are set
         /// </summary>
-        public ClientCertificateOption CertificateOption { get; set; } = ClientCertificateOption.Manual;
+        Setting = 2,
 
         /// <summary>
-        /// Specifies timeout. Default 100.000 milliseconds.
+        /// Occors when on handlers are invoked
         /// </summary>
-        public TimeSpan Timeout { get; set; } = TimeSpan.FromMilliseconds(100000);
-
-        /// <summary>
-        /// Specifies Buffer Size. Default 20kb.
-        /// </summary>
-        public int BufferSize { get; set; } = DefaultBufferSize;
-
-        /// <summary>
-        /// Specifies logger options. Default the logger is disabled
-        /// </summary>
-        public LogOptions LoggerOptions { get; internal set; } = new LogOptions { };
+        Handler = 4,
     }
 }
