@@ -65,6 +65,6 @@ namespace RestClient
         /// <summary>
         /// Specifies logger options. Default the logger is disabled
         /// </summary>
-        public LogOptions LoggerOptions { get; internal set; } = new LogOptions { };
+        public LogOptions LoggerOptions { get; set; } = new LogOptions { };
     }
 }
