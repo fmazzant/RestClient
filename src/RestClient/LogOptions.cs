@@ -1,4 +1,7 @@
-﻿/// <summary>
+﻿
+using System;
+using System.IO;
+/// <summary>
 /// 
 /// The MIT License (MIT)
 /// 
@@ -26,32 +29,26 @@
 /// OTHER DEALINGS IN THE SOFTWARE.
 /// 
 /// </summary>
-
 namespace RestClient
 {
     /// <summary>
-    /// Log options
+    /// Provides a class for logger options properties
     /// </summary>
-    public enum LogOptions : short
+    public class LogOptions
     {
         /// <summary>
-        /// Default
+        /// Text writer specification
         /// </summary>
-        None = 0,
+        public TextWriter TextWriter { get; set; } = Console.Out;
 
         /// <summary>
-        /// Occors when payload is set
+        /// if true provides write the log
         /// </summary>
-        Payload = 1,
+        public bool Enabled { get; set; } = false;
 
         /// <summary>
-        /// Occors when fluet properties are set
+        /// Defines the log's level.
         /// </summary>
-        Setting = 2,
-
-        /// <summary>
-        /// Occors when on handlers are invoked
-        /// </summary>
-        Handler = 4,
+        public LogLevel Level { get; set; } = LogLevel.None;
     }
 }

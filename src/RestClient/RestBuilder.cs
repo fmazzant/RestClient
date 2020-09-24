@@ -199,7 +199,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder CertificateValidation(Func<object, X509Certificate, X509Chain, SslPolicyErrors, bool> callback)
         {
-            WriteLog(LogOptions.Setting, "CertificateValidation(Func<object, X509Certificate, X509Chain, SslPolicyErrors, bool> callback) setting");
+            WriteLog(LogLevel.Setting, "CertificateValidation(Func<object, X509Certificate, X509Chain, SslPolicyErrors, bool> callback) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.CertificateCallback = callback;
             result.Credentials = Credentials;
@@ -220,7 +220,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder NetworkCredential(Func<NetworkCredential> credential)
         {
-            WriteLog(LogOptions.Setting, "NetworkCredential(Func<NetworkCredential> credential) setting");
+            WriteLog(LogLevel.Setting, "NetworkCredential(Func<NetworkCredential> credential) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = credential();
             return result;
@@ -234,7 +234,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder NetworkCredential(string username, string password)
         {
-            WriteLog(LogOptions.Setting, "NetworkCredential setting");
+            WriteLog(LogLevel.Setting, "NetworkCredential setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password);
             return result;
@@ -249,7 +249,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder NetworkCredential(string username, string password, string domain)
         {
-            WriteLog(LogOptions.Setting, "NetworkCredential(string username, string password, string domain) setting");
+            WriteLog(LogLevel.Setting, "NetworkCredential(string username, string password, string domain) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password, domain);
             return result;
@@ -263,7 +263,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder NetworkCredential(string username, System.Security.SecureString password)
         {
-            WriteLog(LogOptions.Setting, "NetworkCredential(string username, System.Security.SecureString password) setting");
+            WriteLog(LogLevel.Setting, "NetworkCredential(string username, System.Security.SecureString password) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password);
             return result;
@@ -278,7 +278,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder NetworkCredential(string username, System.Security.SecureString password, string domain)
         {
-            WriteLog(LogOptions.Setting, "NetworkCredential(string username, System.Security.SecureString password, string domain) setting");
+            WriteLog(LogLevel.Setting, "NetworkCredential(string username, System.Security.SecureString password, string domain) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password, domain);
             return result;
@@ -297,7 +297,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Authentication(Func<AuthenticationHeaderValue> authentication)
         {
-            WriteLog(LogOptions.Setting, "Authentication setting");
+            WriteLog(LogLevel.Setting, "Authentication setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.onAuthentication = new Func<AuthenticationHeaderValue>(() => authentication());
             return result;
@@ -318,7 +318,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Authentication(string scheme)
         {
-            WriteLog(LogOptions.Setting, "Authentication(string scheme) setting");
+            WriteLog(LogLevel.Setting, "Authentication(string scheme) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.onAuthentication = new Func<AuthenticationHeaderValue>(() => new AuthenticationHeaderValue(scheme));
             return result;
@@ -340,7 +340,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Authentication(string scheme, string parameter)
         {
-            WriteLog(LogOptions.Setting, "Authentication setting");
+            WriteLog(LogLevel.Setting, "Authentication setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.onAuthentication = new Func<AuthenticationHeaderValue>(() => new AuthenticationHeaderValue(scheme, parameter));
             return result;
@@ -366,7 +366,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Timeout(TimeSpan timeOut)
         {
-            WriteLog(LogOptions.Setting, $"Timeout({timeOut}) setting");
+            WriteLog(LogLevel.Setting, $"Timeout({timeOut}) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Properties.Timeout = timeOut;
             return result;
@@ -379,7 +379,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Timeout(double milliseconds)
         {
-            WriteLog(LogOptions.Setting, $"Timeout({milliseconds}) setting");
+            WriteLog(LogLevel.Setting, $"Timeout({milliseconds}) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Properties.Timeout = TimeSpan.FromMilliseconds(milliseconds);
             return result;
@@ -396,7 +396,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder BufferSize(int bufferSize)
         {
-            WriteLog(LogOptions.Setting, $"BufferSize({bufferSize}) setting");
+            WriteLog(LogLevel.Setting, $"BufferSize({bufferSize}) setting");
             if (bufferSize <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(bufferSize));
@@ -420,7 +420,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Header(Action<HttpRequestHeaders> defaultRequestHeaders)
         {
-            WriteLog(LogOptions.Setting, "Header(Action<HttpRequestHeaders> defaultRequestHeaders) setting");
+            WriteLog(LogLevel.Setting, "Header(Action<HttpRequestHeaders> defaultRequestHeaders) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.onDefaultRequestHeaders = defaultRequestHeaders;
             return result;
@@ -442,7 +442,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder EnableGZipCompression(bool deflate = true)
         {
-            WriteLog(LogOptions.Setting, "EnableGZipCompression setting");
+            WriteLog(LogLevel.Setting, "EnableGZipCompression setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.enabledGZipCompression = true;
             return result;
@@ -466,7 +466,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Command(string command)
         {
-            WriteLog(LogOptions.Setting, $"Command({command}) setting");
+            WriteLog(LogLevel.Setting, $"Command({command}) setting");
             if (command == null) { throw new ArgumentNullException(); }
             var result = (RestBuilder)this.MemberwiseClone();
             string prefix = !command.StartsWith("/") ? "/" : string.Empty;
@@ -481,7 +481,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Command(uint command)
         {
-            WriteLog(LogOptions.Setting, $"Command {command} setting");
+            WriteLog(LogLevel.Setting, $"Command {command} setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Commands.Add($"/{command}");
             return result;
@@ -494,7 +494,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Command(int command)
         {
-            WriteLog(LogOptions.Setting, $"Command({command}) setting");
+            WriteLog(LogLevel.Setting, $"Command({command}) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Commands.Add($"/{command}");
             return result;
@@ -507,7 +507,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Command(Guid command)
         {
-            WriteLog(LogOptions.Setting, $"Command({command}) setting");
+            WriteLog(LogLevel.Setting, $"Command({command}) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Commands.Add($"/{command}");
             return result;
@@ -524,7 +524,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder RefreshToken(bool refreshToken = true)
         {
-            WriteLog(LogOptions.Setting, $"RefreshToken({refreshToken}) setting");
+            WriteLog(LogLevel.Setting, $"RefreshToken({refreshToken}) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.RefreshTokenExecution = refreshToken;
             return result;
@@ -537,7 +537,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder RefreshTokenInvoke(Func<RestResult> refreshTokenApi)
         {
-            WriteLog(LogOptions.Setting, $"RefreshTokenInvoke(Func<RestResult> refreshTokenApi) setting");
+            WriteLog(LogLevel.Setting, $"RefreshTokenInvoke(Func<RestResult> refreshTokenApi) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.RefreshTokenApi = refreshTokenApi;
             return result;
@@ -550,7 +550,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder RefreshTokenInvoke(Func<Task<RestResult>> refreshTokenApi)
         {
-            WriteLog(LogOptions.Setting, $"RefreshTokenInvoke(Func<Task<RestResult>> refreshTokenApi) setting");
+            WriteLog(LogLevel.Setting, $"RefreshTokenInvoke(Func<Task<RestResult>> refreshTokenApi) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.RefreshTokenApiAsync = refreshTokenApi;
             return result;
@@ -566,7 +566,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Xml()
         {
-            WriteLog(LogOptions.Setting, $"Xml setting");
+            WriteLog(LogLevel.Setting, $"Xml setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Serializer = new XML();
             return result;
@@ -578,7 +578,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Json()
         {
-            WriteLog(LogOptions.Setting, $"Json() setting");
+            WriteLog(LogLevel.Setting, $"Json() setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Serializer = new JSON();
             return result;
@@ -591,7 +591,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder CustomSerializer(ISerializerContent serializer)
         {
-            WriteLog(LogOptions.Setting, $"CustomSerializer(ISerializerContent serializer) setting");
+            WriteLog(LogLevel.Setting, $"CustomSerializer(ISerializerContent serializer) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Serializer = serializer;
             return result;
@@ -615,20 +615,20 @@ namespace RestClient
             return result;
         }
 
-        /// <summary>
-        /// Log writer
-        /// </summary>
-        private TextWriter LoggerTextWriter { get; set; } = null;
+        ///// <summary>
+        ///// Log writer
+        ///// </summary>
+        //private TextWriter LoggerTextWriter { get; set; } = null;
 
-        /// <summary>
-        /// if true provides write the log
-        /// </summary>
-        private bool LoggerEnabled { get; set; } = false;
+        ///// <summary>
+        ///// if true provides write the log
+        ///// </summary>
+        //private bool LoggerEnabled { get; set; } = false;
 
-        /// <summary>
-        /// Defines the log's level.
-        /// </summary>
-        private LogOptions LoggerLevel { get; set; } = LogOptions.None;
+        ///// <summary>
+        ///// Defines the log's level.
+        ///// </summary>
+        //private LogOptions LoggerLevel { get; set; } = LogOptions.None;
 
         /// <summary>
         /// Preview provides to print command url, header and payload
@@ -636,13 +636,13 @@ namespace RestClient
         /// <param name="output">Write on. If null Console.Out is default.</param>
         /// <param name="loggerEnabled">If true write the log</param>
         /// <returns></returns>
-        public RestBuilder Log(LogOptions level = LogOptions.None, TextWriter output = null, bool loggerEnabled = true)
+        public RestBuilder Log(LogLevel level = LogLevel.None, TextWriter output = null, bool loggerEnabled = true)
         {
-            WriteLog(LogOptions.Setting, $"Log(LogOptions level = LogOptions.None, TextWriter output = null, bool loggerEnabled = true) setting");
+            WriteLog(LogLevel.Setting, $"Log(LogOptions level = LogOptions.None, TextWriter output = null, bool loggerEnabled = true) setting");
             var result = (RestBuilder)this.MemberwiseClone();
-            result.LoggerTextWriter = output ?? Console.Out;
-            result.LoggerEnabled = loggerEnabled;
-            result.LoggerLevel = level;
+            result.Properties.LoggerOptions.TextWriter = output ?? Console.Out;
+            result.Properties.LoggerOptions.Enabled = loggerEnabled;
+            result.Properties.LoggerOptions.Level = level;
             return result;
         }
 
@@ -652,9 +652,9 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder EnableLog()
         {
-            WriteLog(LogOptions.Setting, $"EnableLog() setting");
+            WriteLog(LogLevel.Setting, $"EnableLog() setting");
             var result = (RestBuilder)this.MemberwiseClone();
-            result.LoggerEnabled = true;
+            //result.LoggerEnabled = true;
             return result;
         }
 
@@ -664,9 +664,8 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder DisableLog()
         {
-            WriteLog(LogOptions.Setting, $"DisableLog() setting");
+            WriteLog(LogLevel.Setting, $"DisableLog() setting");
             var result = (RestBuilder)this.MemberwiseClone();
-            result.LoggerEnabled = false;
             return result;
         }
 
@@ -676,10 +675,10 @@ namespace RestClient
         /// <param name="log">Log</param>
         void WriteLog(bool condition, string log)
         {
-            if (LoggerEnabled && LoggerTextWriter != null && condition)
+            if (Properties.LoggerOptions.Enabled && Properties.LoggerOptions.TextWriter != null && condition)
             {
                 string line = $"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}] => {log}";
-                LoggerTextWriter.WriteLine(line);
+                Properties.LoggerOptions.TextWriter.WriteLine(line);
             }
         }
 
@@ -688,20 +687,20 @@ namespace RestClient
         /// </summary>
         /// <param name="options"></param>
         /// <param name="log"></param>
-        void WriteLog(LogOptions options, string log)
+        void WriteLog(LogLevel options, string log)
         {
-            WriteLog((LoggerLevel & options) > 0, log);
+            WriteLog((Properties.LoggerOptions.Level & options) > 0, log);
         }
 
         /// <summary>
         /// Write log if options is contained into LoggerLevel and it is true then the object is serialized
         /// </summary>
         /// <typeparam name="T">Object's type</typeparam>
-        /// <param name="options">Log options</param>
+        /// <param name="level">Log options</param>
         /// <param name="obj">Object to serialize</param>
-        private void WriteLog<T>(LogOptions options, string name, T obj)
+        private void WriteLog<T>(LogLevel level, string name, T obj)
         {
-            if ((LoggerLevel & options) > 0)
+            if ((Properties.LoggerOptions.Level & level) > 0)
             {
                 WriteLog($"{name}: {Serializer.SerializeObject(obj, typeof(T))}");
             }
@@ -728,7 +727,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Parameter(string key, object value)
         {
-            WriteLog(LogOptions.Setting, $"Parameter(string key, object value) setting");
+            WriteLog(LogLevel.Setting, $"Parameter(string key, object value) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             if (result.Parameters.ContainsKey(key))
             {
@@ -749,7 +748,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Parameter(RestParameter parameter, params RestParameter[] others)
         {
-            WriteLog(LogOptions.Setting, $"Parameter(RestParameter parameter, params RestParameter[] others) setting");
+            WriteLog(LogLevel.Setting, $"Parameter(RestParameter parameter, params RestParameter[] others) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Parameters.Add(parameter.Key, parameter.Value.ToString());
             foreach (RestParameter p in others)
@@ -766,7 +765,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Parameter(Action<List<RestParameter>> parameters)
         {
-            WriteLog(LogOptions.Setting, $"Parameter(Action<List<RestParameter>> parameters) setting");
+            WriteLog(LogLevel.Setting, $"Parameter(Action<List<RestParameter>> parameters) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             List<RestParameter> list = new List<RestParameter>();
             parameters(list);
@@ -788,7 +787,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Url(string url)
         {
-            WriteLog(LogOptions.Setting, $"Url(string url) setting");
+            WriteLog(LogLevel.Setting, $"Url(string url) setting");
             return this.Url(new Uri(url));
         }
 
@@ -799,7 +798,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Url(Uri uri)
         {
-            WriteLog(LogOptions.Setting, $"Url(Uri uri) setting");
+            WriteLog(LogLevel.Setting, $"Url(Uri uri) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Properties.EndPoint = uri;
             return result;
@@ -817,7 +816,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Payload<T>(T payload)
         {
-            WriteLog(LogOptions.Payload, "Payload", payload);
+            WriteLog(LogLevel.Payload, "Payload", payload);
             var result = (RestBuilder)this.MemberwiseClone();
             result.PayloadContent = payload;
             return result;
@@ -842,7 +841,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder FormUrlEncoded(Dictionary<string, string> keyValues)
         {
-            WriteLog(LogOptions.Payload, "Payload", keyValues);
+            WriteLog(LogLevel.Payload, "Payload", keyValues);
             var result = (RestBuilder)this.MemberwiseClone();
             result.FormUrlEncodedKeyValues = keyValues;
             return result;
@@ -856,7 +855,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder FormUrlEncoded(bool enableFormUrlEncoded, Dictionary<string, string> keyValues)
         {
-            WriteLog(LogOptions.Payload, "Payload", keyValues);
+            WriteLog(LogLevel.Payload, "Payload", keyValues);
             var result = (RestBuilder)this.MemberwiseClone();
             result.IsEnabledFormUrlEncoded = enableFormUrlEncoded;
             result.FormUrlEncodedKeyValues = keyValues;
@@ -873,7 +872,7 @@ namespace RestClient
             var result = (RestBuilder)this.MemberwiseClone();
             result.FormUrlEncodedKeyValues = new Dictionary<string, string>();
             kesValues(result.FormUrlEncodedKeyValues);
-            WriteLog(LogOptions.Payload, "Payload", result.FormUrlEncodedKeyValues);
+            WriteLog(LogLevel.Payload, "Payload", result.FormUrlEncodedKeyValues);
             return result;
         }
 
@@ -885,7 +884,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder FormUrlEncoded(bool enableFormUrlEncoded, Action<Dictionary<string, string>> kesValues)
         {
-            WriteLog(LogOptions.Payload, "Payload", kesValues);
+            WriteLog(LogLevel.Payload, "Payload", kesValues);
             var result = (RestBuilder)this.MemberwiseClone();
             result.IsEnabledFormUrlEncoded = enableFormUrlEncoded;
             result.FormUrlEncodedKeyValues = new Dictionary<string, string>();
@@ -904,7 +903,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder OnStart(Action<StartEventArgs> onStart)
         {
-            WriteLog(LogOptions.Handler, "OnStart(Action<StartEventArgs> onStart)");
+            WriteLog(LogLevel.Handler, "OnStart(Action<StartEventArgs> onStart)");
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnStartAction = onStart;
             return result;
@@ -921,7 +920,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder OnPreviewContentRequestAsString(Action<PreviewContentAsStringEventArgs> onPreviewContent)
         {
-            WriteLog(LogOptions.Handler, "OnPreviewContentRequestAsString(Action<PreviewContentAsStringEventArgs> onPreviewContent)");
+            WriteLog(LogLevel.Handler, "OnPreviewContentRequestAsString(Action<PreviewContentAsStringEventArgs> onPreviewContent)");
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnPreviewContentRequestAsStringAction = onPreviewContent;
             return result;
@@ -938,7 +937,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder OnUploadProgress(Action<ProgressEventArgs> onProgress)
         {
-            WriteLog(LogOptions.Handler, "OnUploadProgress(Action<ProgressEventArgs> onProgress)");
+            WriteLog(LogLevel.Handler, "OnUploadProgress(Action<ProgressEventArgs> onProgress)");
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnUploadProgressAction = onProgress;
             return result;
@@ -951,7 +950,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder OnDownloadProgress(Action<ProgressEventArgs> onProgress)
         {
-            WriteLog(LogOptions.Handler, "OnDownloadProgress(Action<ProgressEventArgs> onProgress)");
+            WriteLog(LogLevel.Handler, "OnDownloadProgress(Action<ProgressEventArgs> onProgress)");
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnDownloadProgressAction = onProgress;
             return result;
@@ -969,7 +968,7 @@ namespace RestClient
         [Obsolete("Use: .OnPreCompleted((e)=> { var result = e.Result; }). OnPreResult method will be removed with 2.0.0 version.", true)]
         public RestBuilder OnPreResult(Action<RestResult> restResult)
         {
-            WriteLog(LogOptions.Handler, "OnPreResult(Action<RestResult> restResult)");
+            WriteLog(LogLevel.Handler, "OnPreResult(Action<RestResult> restResult)");
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnPreResultAction = restResult;
             return result;
@@ -982,7 +981,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder OnPreCompleted(Action<PreCompletedEventArgs> onPreCompleted)
         {
-            WriteLog(LogOptions.Handler, "OnPreCompleted(Action<PreCompletedEventArgs> onPreCompleted)");
+            WriteLog(LogLevel.Handler, "OnPreCompleted(Action<PreCompletedEventArgs> onPreCompleted)");
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnPreCompletedAction = onPreCompleted;
             return result;
@@ -999,7 +998,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder OnPreviewContentResponseAsString(Action<PreviewContentAsStringEventArgs> onPreviewContent)
         {
-            WriteLog(LogOptions.Handler, "OnPreviewContentResponseAsString(Action<PreviewContentAsStringEventArgs> onPreviewContent)");
+            WriteLog(LogLevel.Handler, "OnPreviewContentResponseAsString(Action<PreviewContentAsStringEventArgs> onPreviewContent)");
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnPreviewContentAsStringAction = onPreviewContent;
             return result;
@@ -1020,7 +1019,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder OnCompleted(Action<CompletedEventArgs> onCompleted)
         {
-            WriteLog(LogOptions.Handler, "OnCompleted(Action<CompletedEventArgs> onCompleted)");
+            WriteLog(LogLevel.Handler, "OnCompleted(Action<CompletedEventArgs> onCompleted)");
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnCompletedAction = onCompleted;
             return result;
@@ -1037,7 +1036,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder OnException(Action<Exception> exception)
         {
-            WriteLog(LogOptions.Handler, "OnException(Action<Exception> exception)");
+            WriteLog(LogLevel.Handler, "OnException(Action<Exception> exception)");
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnExceptionAction = exception;
             return result;
