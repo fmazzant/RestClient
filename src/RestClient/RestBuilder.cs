@@ -184,7 +184,7 @@ namespace RestClient
         /// </summary>
         internal RestBuilder()
         {
-#if NETSTANDARD2_0 || NETSTANDARD2_1 || NET_FULL
+#if NETSTANDARD2_0 || NETSTANDARD2_1 || NETFRAMEWORK
             ServicePointManager.ServerCertificateValidationCallback = (object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
                 => true;
 #endif
@@ -203,7 +203,7 @@ namespace RestClient
             var result = (RestBuilder)this.MemberwiseClone();
             result.CertificateCallback = callback;
             result.Credentials = Credentials;
-#if NETSTANDARD2_0 || NETSTANDARD2_1 || NET_FULL
+#if NETSTANDARD2_0 || NETSTANDARD2_1 || NETFRAMEWORK
             ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(callback);
 #endif
             return result;
@@ -630,44 +630,43 @@ namespace RestClient
         ///// </summary>
         //private LogOptions LoggerLevel { get; set; } = LogOptions.None;
 
-        /// <summary>
-        /// Preview provides to print command url, header and payload
-        /// </summary>
-        /// <param name="output">Write on. If null Console.Out is default.</param>
-        /// <param name="loggerEnabled">If true write the log</param>
-        /// <returns></returns>
-        public RestBuilder Log(LogLevel level = LogLevel.None, TextWriter output = null, bool loggerEnabled = true)
-        {
-            WriteLog(LogLevel.Setting, $"Log(LogOptions level = LogOptions.None, TextWriter output = null, bool loggerEnabled = true) setting");
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.Properties.LoggerOptions.TextWriter = output ?? Console.Out;
-            result.Properties.LoggerOptions.Enabled = loggerEnabled;
-            result.Properties.LoggerOptions.Level = level;
-            return result;
-        }
+        ///// <summary>
+        ///// Preview provides to print command url, header and payload
+        ///// </summary>
+        ///// <param name="output">Write on. If null Console.Out is default.</param>
+        ///// <param name="loggerEnabled">If true write the log</param>
+        ///// <returns></returns>
+        //public RestBuilder Log(LogLevel level = LogLevel.None, TextWriter output = null, bool loggerEnabled = true)
+        //{
+        //    WriteLog(LogLevel.Setting, $"Log(LogOptions level = LogOptions.None, TextWriter output = null, bool loggerEnabled = true) setting");
+        //    var result = (RestBuilder)this.MemberwiseClone();
+        //    result.Properties.LoggerOptions.TextWriter = output ?? Console.Out;
+        //    result.Properties.LoggerOptions.Enabled = loggerEnabled;
+        //    result.Properties.LoggerOptions.Level = level;
+        //    return result;
+        //}
 
-        /// <summary>
-        /// Enables the log writer without changing the logger writer instance.
-        /// </summary>
-        /// <returns></returns>
-        public RestBuilder EnableLog()
-        {
-            WriteLog(LogLevel.Setting, $"EnableLog() setting");
-            var result = (RestBuilder)this.MemberwiseClone();
-            //result.LoggerEnabled = true;
-            return result;
-        }
+        ///// <summary>
+        ///// Enables the log writer without changing the logger writer instance.
+        ///// </summary>
+        ///// <returns></returns>
+        //public RestBuilder EnableLog()
+        //{
+        //    WriteLog(LogLevel.Setting, $"EnableLog() setting");
+        //    var result = (RestBuilder)this.MemberwiseClone();
+        //    return result;
+        //}
 
-        /// <summary>
-        /// Disables the log writer without changing the logger writer instance.
-        /// </summary>
-        /// <returns></returns>
-        public RestBuilder DisableLog()
-        {
-            WriteLog(LogLevel.Setting, $"DisableLog() setting");
-            var result = (RestBuilder)this.MemberwiseClone();
-            return result;
-        }
+        ///// <summary>
+        ///// Disables the log writer without changing the logger writer instance.
+        ///// </summary>
+        ///// <returns></returns>
+        //public RestBuilder DisableLog()
+        //{
+        //    WriteLog(LogLevel.Setting, $"DisableLog() setting");
+        //    var result = (RestBuilder)this.MemberwiseClone();
+        //    return result;
+        //}
 
         /// <summary>
         /// Write log if condition is true
