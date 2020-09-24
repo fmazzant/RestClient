@@ -602,73 +602,6 @@ namespace RestClient
         #region [ Logger ]
 
         /// <summary>
-        /// Sets log, true is enabled, when false is disabled.
-        /// Currently this function is temporary. 
-        /// </summary>
-        /// <param name="logger"></param>
-        /// <returns></returns>
-        [Obsolete("Currently this function is temporary! This method will be removed with 2.0.0 version.", true)]
-        public RestBuilder Log(bool logger = true)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.Logger = logger;
-            return result;
-        }
-
-        ///// <summary>
-        ///// Log writer
-        ///// </summary>
-        //private TextWriter LoggerTextWriter { get; set; } = null;
-
-        ///// <summary>
-        ///// if true provides write the log
-        ///// </summary>
-        //private bool LoggerEnabled { get; set; } = false;
-
-        ///// <summary>
-        ///// Defines the log's level.
-        ///// </summary>
-        //private LogOptions LoggerLevel { get; set; } = LogOptions.None;
-
-        ///// <summary>
-        ///// Preview provides to print command url, header and payload
-        ///// </summary>
-        ///// <param name="output">Write on. If null Console.Out is default.</param>
-        ///// <param name="loggerEnabled">If true write the log</param>
-        ///// <returns></returns>
-        //public RestBuilder Log(LogLevel level = LogLevel.None, TextWriter output = null, bool loggerEnabled = true)
-        //{
-        //    WriteLog(LogLevel.Setting, $"Log(LogOptions level = LogOptions.None, TextWriter output = null, bool loggerEnabled = true) setting");
-        //    var result = (RestBuilder)this.MemberwiseClone();
-        //    result.Properties.LoggerOptions.TextWriter = output ?? Console.Out;
-        //    result.Properties.LoggerOptions.Enabled = loggerEnabled;
-        //    result.Properties.LoggerOptions.Level = level;
-        //    return result;
-        //}
-
-        ///// <summary>
-        ///// Enables the log writer without changing the logger writer instance.
-        ///// </summary>
-        ///// <returns></returns>
-        //public RestBuilder EnableLog()
-        //{
-        //    WriteLog(LogLevel.Setting, $"EnableLog() setting");
-        //    var result = (RestBuilder)this.MemberwiseClone();
-        //    return result;
-        //}
-
-        ///// <summary>
-        ///// Disables the log writer without changing the logger writer instance.
-        ///// </summary>
-        ///// <returns></returns>
-        //public RestBuilder DisableLog()
-        //{
-        //    WriteLog(LogLevel.Setting, $"DisableLog() setting");
-        //    var result = (RestBuilder)this.MemberwiseClone();
-        //    return result;
-        //}
-
-        /// <summary>
         /// Write log if condition is true
         /// </summary>
         /// <param name="log">Log</param>
@@ -678,6 +611,7 @@ namespace RestClient
             {
                 string line = $"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}] => {log}";
                 Properties.LoggerOptions.TextWriter.WriteLine(line);
+                Properties.LoggerOptions.TextWriter.Flush();
             }
         }
 
