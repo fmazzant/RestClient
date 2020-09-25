@@ -61,10 +61,5 @@ namespace RestClient
         /// Specifies Buffer Size. Default 20kb.
         /// </summary>
         public int BufferSize { get; set; } = DefaultBufferSize;
-
-        /// <summary>
-        /// Specifies logger options. Default the logger is disabled
-        /// </summary>
-        public LogOptions LoggerOptions { get; set; } = new LogOptions { };
     }
 }
