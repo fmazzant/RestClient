@@ -15,10 +15,9 @@
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.7.1-alpha2</Version>
+    <Version>1.7.1-rc1</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
     <PackageReleaseNotes>1.7.1
-      - Enabled logger
       - Target .NET Core 3.0 (netcoreapp3.0)
       - Target .NET Core 2.2 (netcoreapp2.2)
       - Target .NET Core 2.1 (netcoreapp2.1)
@@ -70,6 +69,11 @@
     <EmbeddedResource Remove="IO\**" />
     <None Remove="Builder\**" />
     <None Remove="IO\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="LogLevel.cs" />
+    <Compile Remove="LogOptions.cs" />
   </ItemGroup>
 
   <ItemGroup>

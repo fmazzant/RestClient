@@ -199,7 +199,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder CertificateValidation(Func<object, X509Certificate, X509Chain, SslPolicyErrors, bool> callback)
         {
-            WriteLog(LogLevel.Setting, "CertificateValidation(Func<object, X509Certificate, X509Chain, SslPolicyErrors, bool> callback) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.CertificateCallback = callback;
             result.Credentials = Credentials;
@@ -220,7 +219,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder NetworkCredential(Func<NetworkCredential> credential)
         {
-            WriteLog(LogLevel.Setting, "NetworkCredential(Func<NetworkCredential> credential) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = credential();
             return result;
@@ -234,7 +232,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder NetworkCredential(string username, string password)
         {
-            WriteLog(LogLevel.Setting, "NetworkCredential setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password);
             return result;
@@ -249,7 +246,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder NetworkCredential(string username, string password, string domain)
         {
-            WriteLog(LogLevel.Setting, "NetworkCredential(string username, string password, string domain) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password, domain);
             return result;
@@ -263,7 +259,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder NetworkCredential(string username, System.Security.SecureString password)
         {
-            WriteLog(LogLevel.Setting, "NetworkCredential(string username, System.Security.SecureString password) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password);
             return result;
@@ -278,7 +273,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder NetworkCredential(string username, System.Security.SecureString password, string domain)
         {
-            WriteLog(LogLevel.Setting, "NetworkCredential(string username, System.Security.SecureString password, string domain) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Credentials = new NetworkCredential(username, password, domain);
             return result;
@@ -297,8 +291,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Authentication(Func<AuthenticationHeaderValue> authentication)
         {
-            WriteLog(LogLevel.Setting, "Authentication setting");
-            var result = (RestBuilder)this.MemberwiseClone();
+             var result = (RestBuilder)this.MemberwiseClone();
             result.onAuthentication = new Func<AuthenticationHeaderValue>(() => authentication());
             return result;
         }
@@ -318,8 +311,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Authentication(string scheme)
         {
-            WriteLog(LogLevel.Setting, "Authentication(string scheme) setting");
-            var result = (RestBuilder)this.MemberwiseClone();
+             var result = (RestBuilder)this.MemberwiseClone();
             result.onAuthentication = new Func<AuthenticationHeaderValue>(() => new AuthenticationHeaderValue(scheme));
             return result;
         }
@@ -340,7 +332,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Authentication(string scheme, string parameter)
         {
-            WriteLog(LogLevel.Setting, "Authentication setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.onAuthentication = new Func<AuthenticationHeaderValue>(() => new AuthenticationHeaderValue(scheme, parameter));
             return result;
@@ -366,7 +357,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Timeout(TimeSpan timeOut)
         {
-            WriteLog(LogLevel.Setting, $"Timeout({timeOut}) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Properties.Timeout = timeOut;
             return result;
@@ -379,7 +369,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Timeout(double milliseconds)
         {
-            WriteLog(LogLevel.Setting, $"Timeout({milliseconds}) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Properties.Timeout = TimeSpan.FromMilliseconds(milliseconds);
             return result;
@@ -396,8 +385,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder BufferSize(int bufferSize)
         {
-            WriteLog(LogLevel.Setting, $"BufferSize({bufferSize}) setting");
-            if (bufferSize <= 0)
+             if (bufferSize <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(bufferSize));
             }
@@ -420,8 +408,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Header(Action<HttpRequestHeaders> defaultRequestHeaders)
         {
-            WriteLog(LogLevel.Setting, "Header(Action<HttpRequestHeaders> defaultRequestHeaders) setting");
-            var result = (RestBuilder)this.MemberwiseClone();
+             var result = (RestBuilder)this.MemberwiseClone();
             result.onDefaultRequestHeaders = defaultRequestHeaders;
             return result;
         }
@@ -442,7 +429,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder EnableGZipCompression(bool deflate = true)
         {
-            WriteLog(LogLevel.Setting, "EnableGZipCompression setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.enabledGZipCompression = true;
             return result;
@@ -466,8 +452,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Command(string command)
         {
-            WriteLog(LogLevel.Setting, $"Command({command}) setting");
-            if (command == null) { throw new ArgumentNullException(); }
+             if (command == null) { throw new ArgumentNullException(); }
             var result = (RestBuilder)this.MemberwiseClone();
             string prefix = !command.StartsWith("/") ? "/" : string.Empty;
             result.Commands.Add($"{prefix}{command}");
@@ -481,8 +466,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Command(uint command)
         {
-            WriteLog(LogLevel.Setting, $"Command {command} setting");
-            var result = (RestBuilder)this.MemberwiseClone();
+             var result = (RestBuilder)this.MemberwiseClone();
             result.Commands.Add($"/{command}");
             return result;
         }
@@ -494,8 +478,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Command(int command)
         {
-            WriteLog(LogLevel.Setting, $"Command({command}) setting");
-            var result = (RestBuilder)this.MemberwiseClone();
+             var result = (RestBuilder)this.MemberwiseClone();
             result.Commands.Add($"/{command}");
             return result;
         }
@@ -507,7 +490,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Command(Guid command)
         {
-            WriteLog(LogLevel.Setting, $"Command({command}) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Commands.Add($"/{command}");
             return result;
@@ -524,8 +506,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder RefreshToken(bool refreshToken = true)
         {
-            WriteLog(LogLevel.Setting, $"RefreshToken({refreshToken}) setting");
-            var result = (RestBuilder)this.MemberwiseClone();
+             var result = (RestBuilder)this.MemberwiseClone();
             result.RefreshTokenExecution = refreshToken;
             return result;
         }
@@ -537,8 +518,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder RefreshTokenInvoke(Func<RestResult> refreshTokenApi)
         {
-            WriteLog(LogLevel.Setting, $"RefreshTokenInvoke(Func<RestResult> refreshTokenApi) setting");
-            var result = (RestBuilder)this.MemberwiseClone();
+             var result = (RestBuilder)this.MemberwiseClone();
             result.RefreshTokenApi = refreshTokenApi;
             return result;
         }
@@ -550,7 +530,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder RefreshTokenInvoke(Func<Task<RestResult>> refreshTokenApi)
         {
-            WriteLog(LogLevel.Setting, $"RefreshTokenInvoke(Func<Task<RestResult>> refreshTokenApi) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.RefreshTokenApiAsync = refreshTokenApi;
             return result;
@@ -566,7 +545,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Xml()
         {
-            WriteLog(LogLevel.Setting, $"Xml setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Serializer = new XML();
             return result;
@@ -578,7 +556,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Json()
         {
-            WriteLog(LogLevel.Setting, $"Json() setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Serializer = new JSON();
             return result;
@@ -591,61 +568,9 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder CustomSerializer(ISerializerContent serializer)
         {
-            WriteLog(LogLevel.Setting, $"CustomSerializer(ISerializerContent serializer) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Serializer = serializer;
             return result;
-        }
-
-        #endregion
-
-        #region [ Logger ]
-
-        /// <summary>
-        /// Write log if condition is true
-        /// </summary>
-        /// <param name="log">Log</param>
-        void WriteLog(bool condition, string log)
-        {
-            if (Properties.LoggerOptions.Enabled && Properties.LoggerOptions.TextWriter != null && condition)
-            {
-                string line = $"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}] => {log}";
-                Properties.LoggerOptions.TextWriter.WriteLine(line);
-                Properties.LoggerOptions.TextWriter.Flush();
-            }
-        }
-
-        /// <summary>
-        /// Write log if options is contained into LoggerLevel
-        /// </summary>
-        /// <param name="options"></param>
-        /// <param name="log"></param>
-        void WriteLog(LogLevel options, string log)
-        {
-            WriteLog((Properties.LoggerOptions.Level & options) > 0, log);
-        }
-
-        /// <summary>
-        /// Write log if options is contained into LoggerLevel and it is true then the object is serialized
-        /// </summary>
-        /// <typeparam name="T">Object's type</typeparam>
-        /// <param name="level">Log options</param>
-        /// <param name="obj">Object to serialize</param>
-        private void WriteLog<T>(LogLevel level, string name, T obj)
-        {
-            if ((Properties.LoggerOptions.Level & level) > 0)
-            {
-                WriteLog($"{name}: {Serializer.SerializeObject(obj, typeof(T))}");
-            }
-        }
-
-        /// <summary>
-        /// Write log
-        /// </summary>
-        /// <param name="log">Log</param>
-        void WriteLog(string log)
-        {
-            WriteLog(true, log);
         }
 
         #endregion
@@ -660,7 +585,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Parameter(string key, object value)
         {
-            WriteLog(LogLevel.Setting, $"Parameter(string key, object value) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             if (result.Parameters.ContainsKey(key))
             {
@@ -681,7 +605,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Parameter(RestParameter parameter, params RestParameter[] others)
         {
-            WriteLog(LogLevel.Setting, $"Parameter(RestParameter parameter, params RestParameter[] others) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Parameters.Add(parameter.Key, parameter.Value.ToString());
             foreach (RestParameter p in others)
@@ -698,7 +621,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Parameter(Action<List<RestParameter>> parameters)
         {
-            WriteLog(LogLevel.Setting, $"Parameter(Action<List<RestParameter>> parameters) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             List<RestParameter> list = new List<RestParameter>();
             parameters(list);
@@ -720,7 +642,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Url(string url)
         {
-            WriteLog(LogLevel.Setting, $"Url(string url) setting");
             return this.Url(new Uri(url));
         }
 
@@ -731,7 +652,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Url(Uri uri)
         {
-            WriteLog(LogLevel.Setting, $"Url(Uri uri) setting");
             var result = (RestBuilder)this.MemberwiseClone();
             result.Properties.EndPoint = uri;
             return result;
@@ -749,7 +669,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Payload<T>(T payload)
         {
-            WriteLog(LogLevel.Payload, "Payload", payload);
             var result = (RestBuilder)this.MemberwiseClone();
             result.PayloadContent = payload;
             return result;
@@ -774,7 +693,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder FormUrlEncoded(Dictionary<string, string> keyValues)
         {
-            WriteLog(LogLevel.Payload, "Payload", keyValues);
             var result = (RestBuilder)this.MemberwiseClone();
             result.FormUrlEncodedKeyValues = keyValues;
             return result;
@@ -788,7 +706,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder FormUrlEncoded(bool enableFormUrlEncoded, Dictionary<string, string> keyValues)
         {
-            WriteLog(LogLevel.Payload, "Payload", keyValues);
             var result = (RestBuilder)this.MemberwiseClone();
             result.IsEnabledFormUrlEncoded = enableFormUrlEncoded;
             result.FormUrlEncodedKeyValues = keyValues;
@@ -805,7 +722,6 @@ namespace RestClient
             var result = (RestBuilder)this.MemberwiseClone();
             result.FormUrlEncodedKeyValues = new Dictionary<string, string>();
             kesValues(result.FormUrlEncodedKeyValues);
-            WriteLog(LogLevel.Payload, "Payload", result.FormUrlEncodedKeyValues);
             return result;
         }
 
@@ -817,7 +733,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder FormUrlEncoded(bool enableFormUrlEncoded, Action<Dictionary<string, string>> kesValues)
         {
-            WriteLog(LogLevel.Payload, "Payload", kesValues);
             var result = (RestBuilder)this.MemberwiseClone();
             result.IsEnabledFormUrlEncoded = enableFormUrlEncoded;
             result.FormUrlEncodedKeyValues = new Dictionary<string, string>();
@@ -836,7 +751,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder OnStart(Action<StartEventArgs> onStart)
         {
-            WriteLog(LogLevel.Handler, "OnStart(Action<StartEventArgs> onStart)");
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnStartAction = onStart;
             return result;
@@ -853,7 +767,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder OnPreviewContentRequestAsString(Action<PreviewContentAsStringEventArgs> onPreviewContent)
         {
-            WriteLog(LogLevel.Handler, "OnPreviewContentRequestAsString(Action<PreviewContentAsStringEventArgs> onPreviewContent)");
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnPreviewContentRequestAsStringAction = onPreviewContent;
             return result;
@@ -870,7 +783,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder OnUploadProgress(Action<ProgressEventArgs> onProgress)
         {
-            WriteLog(LogLevel.Handler, "OnUploadProgress(Action<ProgressEventArgs> onProgress)");
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnUploadProgressAction = onProgress;
             return result;
@@ -883,7 +795,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder OnDownloadProgress(Action<ProgressEventArgs> onProgress)
         {
-            WriteLog(LogLevel.Handler, "OnDownloadProgress(Action<ProgressEventArgs> onProgress)");
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnDownloadProgressAction = onProgress;
             return result;
@@ -901,7 +812,6 @@ namespace RestClient
         [Obsolete("Use: .OnPreCompleted((e)=> { var result = e.Result; }). OnPreResult method will be removed with 2.0.0 version.", true)]
         public RestBuilder OnPreResult(Action<RestResult> restResult)
         {
-            WriteLog(LogLevel.Handler, "OnPreResult(Action<RestResult> restResult)");
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnPreResultAction = restResult;
             return result;
@@ -914,7 +824,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder OnPreCompleted(Action<PreCompletedEventArgs> onPreCompleted)
         {
-            WriteLog(LogLevel.Handler, "OnPreCompleted(Action<PreCompletedEventArgs> onPreCompleted)");
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnPreCompletedAction = onPreCompleted;
             return result;
@@ -931,7 +840,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder OnPreviewContentResponseAsString(Action<PreviewContentAsStringEventArgs> onPreviewContent)
         {
-            WriteLog(LogLevel.Handler, "OnPreviewContentResponseAsString(Action<PreviewContentAsStringEventArgs> onPreviewContent)");
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnPreviewContentAsStringAction = onPreviewContent;
             return result;
@@ -952,7 +860,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder OnCompleted(Action<CompletedEventArgs> onCompleted)
         {
-            WriteLog(LogLevel.Handler, "OnCompleted(Action<CompletedEventArgs> onCompleted)");
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnCompletedAction = onCompleted;
             return result;
@@ -969,7 +876,6 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder OnException(Action<Exception> exception)
         {
-            WriteLog(LogLevel.Handler, "OnException(Action<Exception> exception)");
             var result = (RestBuilder)this.MemberwiseClone();
             result.OnExceptionAction = exception;
             return result;
@@ -1419,13 +1325,9 @@ namespace RestClient
 
             RestResult<string> response = null;
 
-            WriteLog($"Call {method.ToString().ToUpper()} with SendAsStringAsync is starting...");
-
             try
             {
                 string url = BuildFinalUrl();
-
-                WriteLog($"{method.ToString().ToUpper()} {url}");
 
                 StartEventArgs startEventArgs = new StartEventArgs()
                 {
@@ -1438,7 +1340,6 @@ namespace RestClient
 
                 if (startEventArgs.Cancel)
                 {
-                    WriteLog($"throw OperationCanceledException");
                     throw new OperationCanceledException();
                 }
 
@@ -1508,7 +1409,6 @@ namespace RestClient
             }
             catch (Exception ex)
             {
-                WriteLog($"Exception {ex.StackTrace}");
                 OnExceptionAction?.Invoke(ex);
                 response = RestResult<string>.CreateFromException(ex);
             }
@@ -1517,8 +1417,6 @@ namespace RestClient
 
             OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
             OnCompletedActionEA?.Invoke(new EventArgs());
-
-            WriteLog($"Call completed in {stopwatch.Elapsed.TotalMilliseconds} ms");
 
             return response;
         }
@@ -1535,13 +1433,9 @@ namespace RestClient
 
             RestResult<Stream> response = null;
 
-            WriteLog($"Call {method.ToString().ToUpper()} with SendAsStreamAsync is starting...");
-
             try
             {
                 string url = BuildFinalUrl();
-
-                WriteLog($"{method.ToString().ToUpper()} {url}");
 
                 StartEventArgs startEventArgs = new StartEventArgs()
                 {
@@ -1554,7 +1448,6 @@ namespace RestClient
 
                 if (startEventArgs.Cancel)
                 {
-                    WriteLog($"throw OperationCanceledException");
                     throw new OperationCanceledException();
                 }
 
@@ -1625,7 +1518,6 @@ namespace RestClient
             }
             catch (Exception ex)
             {
-                WriteLog($"Exception {ex.StackTrace}");
                 OnExceptionAction?.Invoke(ex);
                 response = RestResult<Stream>.CreateFromException(ex);
             }
@@ -1634,8 +1526,6 @@ namespace RestClient
 
             OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
             OnCompletedActionEA?.Invoke(new EventArgs());
-
-            WriteLog($"Call completed in {stopwatch.Elapsed.TotalMilliseconds} ms");
 
             return response;
         }
@@ -1652,13 +1542,9 @@ namespace RestClient
 
             RestResult<byte[]> response = null;
 
-            WriteLog($"Call {method.ToString().ToUpper()} with SendAsByteArrayAsync is starting...");
-
             try
             {
                 string url = BuildFinalUrl();
-
-                WriteLog($"{method.ToString().ToUpper()} {url}");
 
                 StartEventArgs startEventArgs = new StartEventArgs()
                 {
@@ -1671,8 +1557,7 @@ namespace RestClient
 
                 if (startEventArgs.Cancel)
                 {
-                    WriteLog($"throw OperationCanceledException");
-                    throw new OperationCanceledException();
+                     throw new OperationCanceledException();
                 }
 
                 using (HttpRequestMessage request = new HttpRequestMessage(method, url))
@@ -1739,8 +1624,7 @@ namespace RestClient
             }
             catch (Exception ex)
             {
-                WriteLog($"Exception {ex.StackTrace}");
-                OnExceptionAction?.Invoke(ex);
+                 OnExceptionAction?.Invoke(ex);
                 response = RestResult<byte[]>.CreateFromException(ex);
             }
 
@@ -1749,9 +1633,7 @@ namespace RestClient
             OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
             OnCompletedActionEA?.Invoke(new EventArgs());
 
-            WriteLog($"Call completed in {stopwatch.Elapsed.TotalMilliseconds} ms");
-
-            return response;
+               return response;
         }
 
         /// <summary>
@@ -1768,13 +1650,9 @@ namespace RestClient
 
             RestResult<T> response = null;
 
-            WriteLog($"Call {method.ToString().ToUpper()} with SendAsync<{typeof(T)}> is starting...");
-
             try
             {
                 string url = BuildFinalUrl();
-
-                WriteLog($"{method.ToString().ToUpper()} {url}");
 
                 StartEventArgs startEventArgs = new StartEventArgs()
                 {
@@ -1787,8 +1665,7 @@ namespace RestClient
 
                 if (startEventArgs.Cancel)
                 {
-                    WriteLog($"throw OperationCanceledException");
-                    throw new OperationCanceledException();
+                     throw new OperationCanceledException();
                 }
 
                 using (HttpRequestMessage request = new HttpRequestMessage(method, url))
@@ -1858,7 +1735,6 @@ namespace RestClient
             }
             catch (Exception ex)
             {
-                WriteLog($"Exception {ex.StackTrace}");
                 OnExceptionAction?.Invoke(ex);
                 response = RestResult<T>.CreateFromException(ex);
             }
@@ -1867,8 +1743,6 @@ namespace RestClient
 
             OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
             OnCompletedActionEA?.Invoke(new EventArgs());
-
-            WriteLog($"Call completed in {stopwatch.Elapsed.TotalMilliseconds} ms");
 
             return response;
         }
