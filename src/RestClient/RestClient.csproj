@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1; netstandard2.0; netstandard1.3; netcoreapp3.0; netcoreapp2.2; netcoreapp2.1; netcoreapp2.0; net45; net451; net452; net46; net461; net462; net47; net471; net472; net48</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1; netstandard2.0; netstandard1.3; netcoreapp3.1; netcoreapp3.0; netcoreapp2.2; netcoreapp2.1; netcoreapp2.0; net45; net451; net452; net46; net461; net462; net47; net471; net472; net48</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <NeutralLanguage>en</NeutralLanguage>
     <Authors>Federico Mazzanti</Authors>
@@ -15,9 +15,12 @@
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.7.1</Version>
+    <Version>1.7.2</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
-    <PackageReleaseNotes>1.7.1
+    <PackageReleaseNotes>1.7.2
+      - Target .NET Core 3.1 (netcoreapp3.1)
+      
+      1.7.1
       - Target .NET Core 3.0 (netcoreapp3.0)
       - Target .NET Core 2.2 (netcoreapp2.2)
       - Target .NET Core 2.1 (netcoreapp2.1)
@@ -116,6 +119,16 @@
     <PackageReference Include="System.Xml.XmlSerializer" Version="4.3.0" />
   </ItemGroup>
 
+  <!-- .NET Core 3.1 references, compilation flags and build options -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+    <DefineConstants>NETCOREAPP3_1;</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+    <PackageReference Include="System.Text.Json">
+      <Version>4.7.2</Version>
+    </PackageReference>
+  </ItemGroup>
+  
   <!-- .NET Core 3.0 references, compilation flags and build options -->
   <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
     <DefineConstants>NETCOREAPP3_0;</DefineConstants>
