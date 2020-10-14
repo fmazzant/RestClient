@@ -47,8 +47,11 @@ namespace RestClient.Serialization
         /// <param name="value">The custom string to deserialize.</param>
         /// <param name="typeOf">The System.Type of object being deserialized.</param>
         /// <returns>The deserialized object from the custom string.</returns>
-        object DeserializeObject(string value, Type typeOf);
-
+#if NEWTONSOFT
+        object DeserializeObject(string value, Type typeOf, Newtonsoft.Json.JsonSerializerSettings setting = null);
+#else
+        object DeserializeObject(string value, Type typeOf, System.Text.Json.JsonSerializerOptions options = null);
+#endif
         /// <summary>
         /// Serializes the specified object to a custom string
         /// </summary>
