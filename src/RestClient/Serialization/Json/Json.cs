@@ -46,25 +46,42 @@ namespace RestClient.Serialization.Json
         /// </summary>
         public string MediaTypeAsString => "application/json";
 
+#if NEWTONSOFT
         /// <summary>
         /// Deserializes the JSON string to the specified type.
         /// </summary>
         /// <param name="value">The JSON string to deserialize.</param>
         /// <param name="typeOf">The System.Type of object being deserialized.</param>
+        /// <param name="setting">The JSON Serializer Settings</param>
         /// <returns>The deserialized object from the JSON string.</returns>
-        public object DeserializeObject(string value, Type typeOf)
+        public object DeserializeObject(string value, Type typeOf, Newtonsoft.Json.JsonSerializerSettings setting = null)
         {
             if (string.IsNullOrEmpty(value))
             {
                 return null;
             }
-#if NEWTONSOFT
-            return Newtonsoft.Json.JsonConvert.DeserializeObject(value, typeOf);
+            return Newtonsoft.Json.JsonConvert.DeserializeObject(value, typeOf, setting);
+        }
 #else
-            return System.Text.Json.JsonSerializer.Deserialize(value, typeOf);
+        /// <summary>
+        /// Deserializes the JSON string to the specified type.
+        /// </summary>
+        /// <param name="value">The JSON string to deserialize.</param>
+        /// <param name="typeOf">The System.Type of object being deserialized.</param>
+        /// <param name="options">The JSON serializer options</param>
+        /// <returns>The deserialized object from the JSON string.</returns>
+        public object DeserializeObject(string value, Type typeOf, System.Text.Json.JsonSerializerOptions options = null)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return null;
+            }
+            return System.Text.Json.JsonSerializer.Deserialize(value, typeOf, options);
+        }
+
 #endif
 
-        }
+
 
         /// <summary>
         /// Serializes the specified object to a JSON string
