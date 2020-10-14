@@ -15,9 +15,12 @@
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.7.2</Version>
+    <Version>1.7.3</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
-    <PackageReleaseNotes>1.7.2
+    <PackageReleaseNotes>1.7.3
+      - json's setting during serialization and deserialization of an object
+
+1.7.2
       - Target .NET Core 3.1 (netcoreapp3.1)
       
       1.7.1
@@ -61,7 +64,7 @@
       - Added OnPreCompleted, OnCompleted and OnPreviewContentAsString
       - Refactoring some methods.
       - Added BufferSize and check on buffer size value
-    </PackageReleaseNotes>
+</PackageReleaseNotes>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
 
