@@ -291,7 +291,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Authentication(Func<AuthenticationHeaderValue> authentication)
         {
-             var result = (RestBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.onAuthentication = new Func<AuthenticationHeaderValue>(() => authentication());
             return result;
         }
@@ -311,7 +311,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Authentication(string scheme)
         {
-             var result = (RestBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.onAuthentication = new Func<AuthenticationHeaderValue>(() => new AuthenticationHeaderValue(scheme));
             return result;
         }
@@ -385,7 +385,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder BufferSize(int bufferSize)
         {
-             if (bufferSize <= 0)
+            if (bufferSize <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(bufferSize));
             }
@@ -408,7 +408,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Header(Action<HttpRequestHeaders> defaultRequestHeaders)
         {
-             var result = (RestBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.onDefaultRequestHeaders = defaultRequestHeaders;
             return result;
         }
@@ -452,7 +452,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Command(string command)
         {
-             if (command == null) { throw new ArgumentNullException(); }
+            if (command == null) { throw new ArgumentNullException(); }
             var result = (RestBuilder)this.MemberwiseClone();
             string prefix = !command.StartsWith("/") ? "/" : string.Empty;
             result.Commands.Add($"{prefix}{command}");
@@ -466,7 +466,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Command(uint command)
         {
-             var result = (RestBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.Commands.Add($"/{command}");
             return result;
         }
@@ -478,7 +478,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Command(int command)
         {
-             var result = (RestBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.Commands.Add($"/{command}");
             return result;
         }
@@ -506,7 +506,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder RefreshToken(bool refreshToken = true)
         {
-             var result = (RestBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.RefreshTokenExecution = refreshToken;
             return result;
         }
@@ -518,7 +518,7 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder RefreshTokenInvoke(Func<RestResult> refreshTokenApi)
         {
-             var result = (RestBuilder)this.MemberwiseClone();
+            var result = (RestBuilder)this.MemberwiseClone();
             result.RefreshTokenApi = refreshTokenApi;
             return result;
         }
@@ -539,14 +539,19 @@ namespace RestClient
 
         #region [ Serialization ]
 
+        object SerializingOptions { get; set; }
+        object DeserializingOptions { get; set; }
+
         /// <summary>
         /// Sets xml as serialization
         /// </summary>
         /// <returns></returns>
-        public RestBuilder Xml()
+        public RestBuilder Xml(System.Xml.XmlReaderSettings readerOptions = null, System.Xml.XmlWriterSettings writerOptions = null)
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Serializer = new XML();
+            result.SerializingOptions = readerOptions;
+            result.DeserializingOptions = writerOptions;
             return result;
         }
 
@@ -554,10 +559,16 @@ namespace RestClient
         /// Sets json as serialization
         /// </summary>
         /// <returns></returns>
-        public RestBuilder Json()
+#if NEWTONSOFT
+        public RestBuilder Json(Newtonsoft.Json.JsonSerializerSettings options = null)
+#else
+        public RestBuilder Json(System.Text.Json.JsonSerializerOptions options = null)
+#endif
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Serializer = new JSON();
+            result.SerializingOptions = options;
+            result.DeserializingOptions = options;
             return result;
         }
 
@@ -1557,7 +1568,7 @@ namespace RestClient
 
                 if (startEventArgs.Cancel)
                 {
-                     throw new OperationCanceledException();
+                    throw new OperationCanceledException();
                 }
 
                 using (HttpRequestMessage request = new HttpRequestMessage(method, url))
@@ -1624,7 +1635,7 @@ namespace RestClient
             }
             catch (Exception ex)
             {
-                 OnExceptionAction?.Invoke(ex);
+                OnExceptionAction?.Invoke(ex);
                 response = RestResult<byte[]>.CreateFromException(ex);
             }
 
@@ -1633,7 +1644,7 @@ namespace RestClient
             OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
             OnCompletedActionEA?.Invoke(new EventArgs());
 
-               return response;
+            return response;
         }
 
         /// <summary>
@@ -1665,7 +1676,7 @@ namespace RestClient
 
                 if (startEventArgs.Cancel)
                 {
-                     throw new OperationCanceledException();
+                    throw new OperationCanceledException();
                 }
 
                 using (HttpRequestMessage request = new HttpRequestMessage(method, url))
