@@ -31,6 +31,7 @@ namespace RestClient.Serialization.Xml
 {
     using System;
     using System.IO;
+    using System.Xml;
     using Serializer = System.Xml.Serialization;
 
     /// <summary>
@@ -54,14 +55,16 @@ namespace RestClient.Serialization.Xml
         /// <param name="value">The XML string to deserialize.</param>
         /// <param name="typeOf">The System.Type of object being deserialized.</param>
         /// <returns>The deserialized object from the XML string.</returns>
-        public object DeserializeObject(string value, Type typeOf)
+        public object DeserializeObject(string value, Type typeOf, object options = null)
         {
+            XmlReaderSettings xmlOptions = options as XmlReaderSettings ?? new XmlReaderSettings();
             if (string.IsNullOrEmpty(value))
             {
                 return null;
             }
-
-            return new Serializer.XmlSerializer(typeOf).Deserialize(new StringReader(value));
+            Serializer.XmlSerializer xml = new Serializer.XmlSerializer(typeOf);
+            StringReader reader = new StringReader(value);
+            return xml.Deserialize(reader);
         }
 
         /// <summary>
@@ -70,8 +73,9 @@ namespace RestClient.Serialization.Xml
         /// <param name="value">The object to serialize.</param>
         /// <param name="typeOf">The type of the value being serialized.</param>
         /// <returns>A XML string representation of the object.</returns>
-        public string SerializeObject(object value, Type typeOf)
+        public string SerializeObject(object value, Type typeOf, object options = null)
         {
+            XmlWriterSettings xmlOptions = options as XmlWriterSettings ?? new XmlWriterSettings();
             if (value == null)
             {
                 return string.Empty;

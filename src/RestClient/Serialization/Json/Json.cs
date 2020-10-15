@@ -54,13 +54,14 @@ namespace RestClient.Serialization.Json
         /// <param name="typeOf">The System.Type of object being deserialized.</param>
         /// <param name="setting">The JSON Serializer Settings</param>
         /// <returns>The deserialized object from the JSON string.</returns>
-        public object DeserializeObject(string value, Type typeOf, Newtonsoft.Json.JsonSerializerSettings setting = null)
+        public object DeserializeObject(string value, Type typeOf, object setting = null)
         {
+            Newtonsoft.Json.JsonSerializerSettings jsonSetting = setting as Newtonsoft.Json.JsonSerializerSettings;
             if (string.IsNullOrEmpty(value))
             {
                 return null;
             }
-            return Newtonsoft.Json.JsonConvert.DeserializeObject(value, typeOf, setting);
+            return Newtonsoft.Json.JsonConvert.DeserializeObject(value, typeOf, jsonSetting);
         }
 #else
         /// <summary>
@@ -70,36 +71,54 @@ namespace RestClient.Serialization.Json
         /// <param name="typeOf">The System.Type of object being deserialized.</param>
         /// <param name="options">The JSON serializer options</param>
         /// <returns>The deserialized object from the JSON string.</returns>
-        public object DeserializeObject(string value, Type typeOf, System.Text.Json.JsonSerializerOptions options = null)
+        public object DeserializeObject(string value, Type typeOf, object options = null)
         {
+            System.Text.Json.JsonSerializerOptions jsonOptions = options as System.Text.Json.JsonSerializerOptions;
             if (string.IsNullOrEmpty(value))
             {
                 return null;
             }
-            return System.Text.Json.JsonSerializer.Deserialize(value, typeOf, options);
+            return System.Text.Json.JsonSerializer.Deserialize(value, typeOf, jsonOptions);
         }
 
 #endif
 
-
-
+#if NEWTONSOFT
         /// <summary>
         /// Serializes the specified object to a JSON string
         /// </summary>
         /// <param name="value">The object to serialize.</param>
         /// <param name="typeOf">The type of the value being serialized.</param>
+        /// <param name="setting">The JSON serializer setting</param>
         /// <returns>A JSON string representation of the object.</returns>
-        public string SerializeObject(object value, Type typeOf)
+        public string SerializeObject(object value, Type typeOf, object setting = null)
         {
+            Newtonsoft.Json.JsonSerializerSettings jsonSetting = setting as Newtonsoft.Json.JsonSerializerSettings;
             if (value == null)
             {
                 return string.Empty;
             }
-#if NEWTONSOFT
-            return Newtonsoft.Json.JsonConvert.SerializeObject(value);
-#else
-            return System.Text.Json.JsonSerializer.Serialize(value);
-#endif
+            return Newtonsoft.Json.JsonConvert.SerializeObject(value, jsonSetting);
+
         }
+#else
+        /// <summary>
+        /// Serializes the specified object to a JSON string
+        /// </summary>
+        /// <param name="value">The object to serialize.</param>
+        /// <param name="typeOf">The type of the value being serialized.</param>
+        /// <param name="setting">The JSON serializer setting</param>
+        /// <returns>A JSON string representation of the object.</returns>
+        public string SerializeObject(object value, Type typeOf, object options = null)
+        {
+            System.Text.Json.JsonSerializerOptions jsonOptions = options as System.Text.Json.JsonSerializerOptions;
+            if (value == null)
+            {
+                return string.Empty;
+            }
+            return System.Text.Json.JsonSerializer.Serialize(value, jsonOptions);
+
+        }
+#endif
     }
 }
