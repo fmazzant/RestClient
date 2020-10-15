@@ -539,8 +539,8 @@ namespace RestClient
 
         #region [ Serialization ]
 
-        object SerializingOptions { get; set; }
-        object DeserializingOptions { get; set; }
+        object SerializeOptions { get; set; }
+        object DeserializeOptions { get; set; }
 
         /// <summary>
         /// Sets xml as serialization
@@ -550,8 +550,8 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Serializer = new XML();
-            result.SerializingOptions = readerOptions;
-            result.DeserializingOptions = writerOptions;
+            result.SerializeOptions = readerOptions;
+            result.DeserializeOptions = writerOptions;
             return result;
         }
 
@@ -567,8 +567,8 @@ namespace RestClient
         {
             var result = (RestBuilder)this.MemberwiseClone();
             result.Serializer = new JSON();
-            result.SerializingOptions = options;
-            result.DeserializingOptions = options;
+            result.SerializeOptions = options;
+            result.DeserializeOptions = options;
             return result;
         }
 
@@ -1736,7 +1736,7 @@ namespace RestClient
 
                             string serializedObject = await responseMessage.Content.ReadAsStringAsync();
                             OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = serializedObject });
-                            response.Content = (T)Serializer.DeserializeObject(serializedObject, typeof(T));
+                            response.Content = (T)Serializer.DeserializeObject(serializedObject, typeof(T), DeserializeOptions);
                         }
                     }
                 }
@@ -1791,7 +1791,7 @@ namespace RestClient
         {
             if (!IsEnabledFormUrlEncoded && PayloadContent != null)
             {
-                var serializedObject = Serializer.SerializeObject(PayloadContent, PayloadContent.GetType());
+                var serializedObject = Serializer.SerializeObject(PayloadContent, PayloadContent.GetType(), SerializeOptions);
                 OnPreviewContentRequestAsStringAction?.Invoke(new PreviewContentAsStringEventArgs
                 {
                     ContentAsString = serializedObject,
@@ -1801,7 +1801,7 @@ namespace RestClient
             }
             else if (IsEnabledFormUrlEncoded && FormUrlEncodedKeyValues != null)
             {
-                var serializedObject = Serializer.SerializeObject(FormUrlEncodedKeyValues, FormUrlEncodedKeyValues.GetType());
+                var serializedObject = Serializer.SerializeObject(FormUrlEncodedKeyValues, FormUrlEncodedKeyValues.GetType(), SerializeOptions);
                 OnPreviewContentRequestAsStringAction?.Invoke(new PreviewContentAsStringEventArgs
                 {
                     ContentAsString = serializedObject,
