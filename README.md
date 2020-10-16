@@ -171,12 +171,43 @@ var result = rest
     .Get<ResponseObject>();
 ```
 
+It is possible to pass an json serializer options to .Json() method, like this:
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .Json(new JsonSerializerOptions {
+        WriteIndented = true
+    })
+    .Get<ResponseObject>();
+```
+
+The above snippet code consideres using System.Text.Json library. If we using Netwnsoft like this:
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .Json(new JsonSerializerSettings {
+        Formatting = Formatting.Indented
+    })
+    .Get<ResponseObject>();
+```  
+
 RestClient uses .Xml() to serialize an object into xml.
 
 ```c#
 var result = rest
     .Url("[URL]")
     .Xml()
+    .Get<ResponseObject>();
+```
+
+It is possible to pass the settings to .Xml() method, like this:
+
+```c#
+var result = rest
+    .Url("[URL]")
+    .Xml(new XmlReaderSettings { Indent = true }, new XmlWriterSettings { IgnoreWhitespace = true })
     .Get<ResponseObject>();
 ```
 
