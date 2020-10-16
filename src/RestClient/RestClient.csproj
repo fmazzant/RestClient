@@ -15,10 +15,10 @@
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.7.3</Version>
+    <Version>1.7.3-rc1</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
     <PackageReleaseNotes>1.7.3
-      - json's setting during serialization and deserialization of an object
+      - json and xml  settings during serialization and deserialization of an object.
 
 1.7.2
       - Target .NET Core 3.1 (netcoreapp3.1)

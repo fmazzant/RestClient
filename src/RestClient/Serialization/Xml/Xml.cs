@@ -31,6 +31,7 @@ namespace RestClient.Serialization.Xml
 {
     using System;
     using System.IO;
+    using System.Text;
     using System.Xml;
     using Serializer = System.Xml.Serialization;
 
@@ -62,8 +63,10 @@ namespace RestClient.Serialization.Xml
             {
                 return null;
             }
+
             Serializer.XmlSerializer xml = new Serializer.XmlSerializer(typeOf);
             StringReader reader = new StringReader(value);
+
             return xml.Deserialize(reader);
         }
 
@@ -76,15 +79,25 @@ namespace RestClient.Serialization.Xml
         public string SerializeObject(object value, Type typeOf, object options = null)
         {
             XmlWriterSettings xmlOptions = options as XmlWriterSettings ?? new XmlWriterSettings();
+
             if (value == null)
             {
                 return string.Empty;
             }
 
             Serializer.XmlSerializer xml = new Serializer.XmlSerializer(typeOf);
-            StringWriter writer = new StringWriter();
-            xml.Serialize(writer, value);
-            return writer.ToString();
+            var builder = new StringBuilder();
+            using (var writer = XmlWriter.Create(builder, xmlOptions))
+            {
+                xml.Serialize(writer, value);
+            }
+            return builder.ToString();
+
+
+            //Serializer.XmlSerializer xml = new Serializer.XmlSerializer(typeOf);
+            //StringWriter writer = new StringWriter()
+            //xml.Serialize(writer, value);
+            //return writer.ToString();
         }
     }
 }
