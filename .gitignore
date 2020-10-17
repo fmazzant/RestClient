@@ -16,3 +16,6 @@
 /src/RestClient/obj
 src/.vs/RestClient/xs/project-cache/RestClient-Debug.json
 src/.vs/RestClient/xs/UserPrefs.xml
+/src/RestClient.Samples.ConsoleTest/bin/Debug/netcoreapp3.1
+/src/RestClient.Samples.ConsoleTest/obj
+/src/RestClient.Samples.ConsoleTest/bin/Release/netcoreapp3.1
