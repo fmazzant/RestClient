@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-namespace RestClient.Samples.NetworkLayer.Models
+﻿namespace RestClient.Samples.NetworkLayer.Models
 {
     public class Paging<T>
     {

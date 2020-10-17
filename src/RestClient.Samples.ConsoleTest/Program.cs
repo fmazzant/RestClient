@@ -1,8 +1,8 @@
-﻿using RestClient.Samples.NetworkLayer;
-using System;
-
-namespace RestClient.Samples.ConsoleTest
+﻿namespace RestClient.Samples.ConsoleTest
 {
+    using RestClient.Samples.NetworkLayer;
+    using System;
+
     class Program
     {
         static void Main(string[] args)
@@ -62,7 +62,7 @@ namespace RestClient.Samples.ConsoleTest
             Console.WriteLine("--- DELAYED RESPONSE ---");
             var delayedResponse = client.GetUsersWithDelay();
             Console.WriteLine($"delayedResponse.StatusCode:{(int)delayedResponse.StatusCode}");
-            
+
             Console.WriteLine("press enter to exit.");
             Console.ReadLine();
         }

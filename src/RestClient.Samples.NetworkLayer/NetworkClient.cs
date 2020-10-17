@@ -1,13 +1,10 @@
-﻿using RestClient.Generic;
-using RestClient.Samples.NetworkLayer.Models;
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RestClient.Samples.NetworkLayer
+﻿namespace RestClient.Samples.NetworkLayer
 {
+    using RestClient.Generic;
+    using RestClient.Samples.NetworkLayer.Models;
+    using System;
+    using System.Threading.Tasks;
+
     public class NetworkClient
     {
         protected RestBuilder Root() => Rest
