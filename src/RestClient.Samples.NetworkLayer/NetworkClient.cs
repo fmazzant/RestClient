@@ -35,22 +35,18 @@
             .Command(id)
             .GetAsync<Single<User>>();
         public RestResult<Single<User>> GetUserById(int id) => GetUserByIdAsync(id).Result;
-
         public async Task<RestResult> CreateUserAsync(string name, string job) => await RootUsers()
             .Payload<dynamic>(new { name, job })
             .PostAsync();
         public RestResult CreateUser(string name, string job) => CreateUserAsync(name, job).Result;
-
         public async Task<RestResult> PutUpdateUserAsync(string name, string job) => await RootUsers()
           .Payload<dynamic>(new { name, job })
           .PutAsync();
         public RestResult PutUpdateUser(string name, string job) => PutUpdateUserAsync(name, job).Result;
-
         public async Task<RestResult> PatchUpdateUserAsync(string name, string job) => await RootUsers()
            .Payload<dynamic>(new { name, job })
            .PatchAsync();
         public RestResult PatchUpdateUser(string name, string job) => PatchUpdateUserAsync(name, job).Result;
-
         public async Task<RestResult> DeleteUserAsync(int id) => await RootUsers()
            .Command(id)
            .DeleteAsync();
@@ -82,7 +78,6 @@
 
         #region [ REGISTER ]
         public RestBuilder RootRegister() => Root().Command("register");
-
         public async Task<RestResult> RegisterAsync(string email, string password) => await RootRegister()
            .Payload<dynamic>(new { email, password })
            .PostAsync();
@@ -91,7 +86,6 @@
 
         #region [ LOGIN ]
         public RestBuilder RootLogin() => Root().Command("login");
-
         public async Task<RestResult> LoginAsync(string email, string password) => await RootRegister()
            .Payload<dynamic>(new { email, password })
            .PostAsync();
