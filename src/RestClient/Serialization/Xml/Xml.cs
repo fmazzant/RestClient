@@ -65,9 +65,11 @@ namespace RestClient.Serialization.Xml
             }
 
             Serializer.XmlSerializer xml = new Serializer.XmlSerializer(typeOf);
-            StringReader reader = new StringReader(value);
 
-            return xml.Deserialize(reader);
+            using (var reader = XmlReader.Create(new StringReader(value), xmlOptions))
+            {
+                return xml.Deserialize(reader);
+            }
         }
 
         /// <summary>
@@ -92,12 +94,6 @@ namespace RestClient.Serialization.Xml
                 xml.Serialize(writer, value);
             }
             return builder.ToString();
-
-
-            //Serializer.XmlSerializer xml = new Serializer.XmlSerializer(typeOf);
-            //StringWriter writer = new StringWriter()
-            //xml.Serialize(writer, value);
-            //return writer.ToString();
         }
     }
 }
