@@ -18,7 +18,7 @@
     <Version>1.7.3</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
     <PackageReleaseNotes>1.7.3
-      - json and xml  settings during serialization and deserialization of an object.
+      - json and xml settings during serialization and deserialization of an object.
 
 1.7.2
       - Target .NET Core 3.1 (netcoreapp3.1)
