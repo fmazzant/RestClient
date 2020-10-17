@@ -220,12 +220,12 @@ public class MyCustomSerializer : ISerializerContent
 {
     public string MediaTypeAsString => throw new NotImplementedException();
 
-    public object DeserializeObject(string value, Type typeOf)
+    public object DeserializeObject(string value, Type typeOf, object options = null)
     {
         throw new NotImplementedException();
     }
 
-    public string SerializeObject(object value, Type typeOf)
+    public string SerializeObject(object value, Type typeOf, object options = null)
     {
         throw new NotImplementedException();
     }
