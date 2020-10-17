@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>a8f8896c-c212-4dfb-ab5a-9d0498002004</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>RestClient.Samples.NetworkLayer</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Models\Ad.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\Paging.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\Resource.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\Single.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\User.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NetworkClient.cs" />
+  </ItemGroup>
+</Project>
