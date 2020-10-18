@@ -7,7 +7,7 @@
     {
         static void Main(string[] args)
         {
-            NetworkClient client = new NetworkClient();
+            NetworkService client = new NetworkService();
 
             Console.WriteLine("--- USERS ---");
 
