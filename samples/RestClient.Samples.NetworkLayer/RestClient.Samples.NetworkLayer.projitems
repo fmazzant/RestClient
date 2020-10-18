@@ -14,6 +14,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\Resource.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Single.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\User.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)NetworkClient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NetworkService.cs" />
   </ItemGroup>
 </Project>

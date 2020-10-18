@@ -5,10 +5,10 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\RestClient\RestClient.csproj" />
-  </ItemGroup>
-
   <Import Project="..\RestClient.Samples.NetworkLayer\RestClient.Samples.NetworkLayer.projitems" Label="Shared" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\RestClient\RestClient.csproj" />
+  </ItemGroup>
 
 </Project>

@@ -5,7 +5,7 @@
     using System;
     using System.Threading.Tasks;
 
-    public class NetworkClient
+    public class NetworkService
     {
         protected RestBuilder Root() => Rest
             .Build((p) =>
@@ -14,7 +14,7 @@
             })
             .CertificateValidation((obj, certificate, clain, errors) => true); //for development mode
 
-        public NetworkClient()
+        public NetworkService()
         {
 
         }
