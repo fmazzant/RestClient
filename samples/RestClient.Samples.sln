@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30204.135
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{8382AEF5-EA82-4AFD-BD41-AE989533E2B4}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "RestClient.Samples.NetworkLayer", "RestClient.Samples.NetworkLayer\RestClient.Samples.NetworkLayer.shproj", "{A8F8896C-C212-4DFB-AB5A-9D0498002004}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RestClient.Samples.ConsoleTest", "RestClient.Samples.ConsoleTest\RestClient.Samples.ConsoleTest.csproj", "{845C281D-2EA3-453D-A830-9A34E3FA35B3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RestClient", "..\src\RestClient\RestClient.csproj", "{5FCEDCDC-FA97-439F-95B3-769CCBE2644C}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		RestClient.Samples.NetworkLayer\RestClient.Samples.NetworkLayer.projitems*{845c281d-2ea3-453d-a830-9a34e3fa35b3}*SharedItemsImports = 5
+		RestClient.Samples.NetworkLayer\RestClient.Samples.NetworkLayer.projitems*{a8f8896c-c212-4dfb-ab5a-9d0498002004}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{845C281D-2EA3-453D-A830-9A34E3FA35B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{845C281D-2EA3-453D-A830-9A34E3FA35B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{845C281D-2EA3-453D-A830-9A34E3FA35B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{845C281D-2EA3-453D-A830-9A34E3FA35B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FCEDCDC-FA97-439F-95B3-769CCBE2644C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FCEDCDC-FA97-439F-95B3-769CCBE2644C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FCEDCDC-FA97-439F-95B3-769CCBE2644C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FCEDCDC-FA97-439F-95B3-769CCBE2644C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A8F8896C-C212-4DFB-AB5A-9D0498002004} = {8382AEF5-EA82-4AFD-BD41-AE989533E2B4}
+		{845C281D-2EA3-453D-A830-9A34E3FA35B3} = {8382AEF5-EA82-4AFD-BD41-AE989533E2B4}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A39C14F4-EB86-4A2C-ABEB-1EFAA0DD78FB}
+	EndGlobalSection
+EndGlobal
