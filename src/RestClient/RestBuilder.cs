@@ -599,11 +599,11 @@ namespace RestClient
             var result = (RestBuilder)this.MemberwiseClone();
             if (result.Parameters.ContainsKey(key))
             {
-                result.Parameters[key] = value.ToString();
+                result.Parameters[key] = $"{value}";
             }
             else
             {
-                result.Parameters.Add(key, value.ToString());
+                result.Parameters.Add(key, $"{value}");
             }
             return result;
         }
@@ -620,7 +620,14 @@ namespace RestClient
             result.Parameters.Add(parameter.Key, parameter.Value.ToString());
             foreach (RestParameter p in others)
             {
-                result.Parameters.Add(p.Key, p.Value.ToString());
+                if (result.Parameters.ContainsKey(p.Key))
+                {
+                    result.Parameters[p.Key] = $"{p.Value}";
+                }
+                else
+                {
+                    result.Parameters.Add(p.Key, $"{p.Value}");
+                }
             }
             return result;
         }
@@ -637,7 +644,14 @@ namespace RestClient
             parameters(list);
             foreach (RestParameter p in list)
             {
-                result.Parameters.Add(p.Key, p.Value.ToString());
+                if (result.Parameters.ContainsKey(p.Key))
+                {
+                    result.Parameters[p.Key] = $"{p.Value}";
+                }
+                else
+                {
+                    result.Parameters.Add(p.Key, $"{p.Value}");
+                }
             }
             return result;
         }

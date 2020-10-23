@@ -9,6 +9,8 @@
         {
             NetworkService client = new NetworkService();
 
+            var t = client.RootUsers().Parameter("Key", null).Get();
+
             Console.WriteLine("--- USERS ---");
 
             var usersList = client.GetUsersWithPaging(2);
