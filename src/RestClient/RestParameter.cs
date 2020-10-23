@@ -43,5 +43,20 @@ namespace RestClient
         /// Value parameter
         /// </summary>
         public object Value { get; set; }
+
+        /// <summary>
+        /// true if the Key has a value; false if the Key has no value.
+        /// </summary>
+        public bool HasKey => !(Key is null);
+
+        /// <summary>
+        /// true if the Value has a value; false if the Value has no value.
+        /// </summary>
+        public bool HasValue => !(Value is null);
+
+        /// <summary>
+        /// true if the Key and Value have value; if either has null value. 
+        /// </summary>
+        public bool IsValid => HasKey && HasValue;
     }
 }
