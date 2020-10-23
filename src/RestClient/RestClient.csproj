@@ -15,11 +15,14 @@
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.7.4</Version>
+    <Version>1.7.5</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
-    <PackageReleaseNotes>1.7.4
-      - hotfix on prameters.
+    <PackageReleaseNotes>1.7.5
+      - hotfix
  
+1.7.4
+      - hotfix on parameters.
+
 1.7.3
       - json and xml settings during serialization and deserialization of an object.
 
