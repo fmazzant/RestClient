@@ -15,9 +15,12 @@
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.7.5</Version>
+    <Version>1.7.6</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
-    <PackageReleaseNotes>1.7.5
+    <PackageReleaseNotes>1.7.6
+      - hotfix catch exeception
+
+1.7.5
       - hotfix
  
 1.7.4

@@ -1431,17 +1431,17 @@ namespace RestClient
 
                 OnPreResultAction?.Invoke(response);
                 OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
+
+                stopwatch.Stop();
+
+                OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
+                OnCompletedActionEA?.Invoke(new EventArgs());
             }
             catch (Exception ex)
             {
                 OnExceptionAction?.Invoke(ex);
                 response = RestResult<string>.CreateFromException(ex);
             }
-
-            stopwatch.Stop();
-
-            OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
-            OnCompletedActionEA?.Invoke(new EventArgs());
 
             return response;
         }
@@ -1540,17 +1540,17 @@ namespace RestClient
 
                 OnPreResultAction?.Invoke(response);
                 OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
+
+                stopwatch.Stop();
+
+                OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
+                OnCompletedActionEA?.Invoke(new EventArgs());
             }
             catch (Exception ex)
             {
                 OnExceptionAction?.Invoke(ex);
                 response = RestResult<Stream>.CreateFromException(ex);
             }
-
-            stopwatch.Stop();
-
-            OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
-            OnCompletedActionEA?.Invoke(new EventArgs());
 
             return response;
         }
@@ -1646,17 +1646,17 @@ namespace RestClient
 
                 OnPreResultAction?.Invoke(response);
                 OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
+
+                stopwatch.Stop();
+
+                OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
+                OnCompletedActionEA?.Invoke(new EventArgs());
             }
             catch (Exception ex)
             {
                 OnExceptionAction?.Invoke(ex);
                 response = RestResult<byte[]>.CreateFromException(ex);
             }
-
-            stopwatch.Stop();
-
-            OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
-            OnCompletedActionEA?.Invoke(new EventArgs());
 
             return response;
         }
@@ -1757,17 +1757,17 @@ namespace RestClient
 
                 OnPreResultAction?.Invoke(response);
                 OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
+
+                stopwatch.Stop();
+
+                OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
+                OnCompletedActionEA?.Invoke(new EventArgs());
             }
             catch (Exception ex)
             {
                 OnExceptionAction?.Invoke(ex);
                 response = RestResult<T>.CreateFromException(ex);
             }
-
-            stopwatch.Stop();
-
-            OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
-            OnCompletedActionEA?.Invoke(new EventArgs());
 
             return response;
         }
