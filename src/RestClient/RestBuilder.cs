@@ -180,6 +180,11 @@ namespace RestClient
         bool IsAfterRefreshTokenCalled = false;
 
         /// <summary>
+        /// Represents the class to send http request and receive the respose.
+        /// </summary>
+        Action<HttpClient> OnConfigureHttpClientAction = null;
+
+        /// <summary>
         /// Initializes a new instance
         /// </summary>
         internal RestBuilder()
@@ -189,6 +194,22 @@ namespace RestClient
                 => true;
 #endif
         }
+
+        #region [ HttpClient ]
+
+        /// <summary>
+        /// Configure HttpClient before send a request.
+        /// </summary>
+        /// <param name="onHttpClient"></param>
+        /// <returns></returns>
+        public RestBuilder OnConfigureHttpClient(Action<HttpClient> onHttpClient)
+        {
+            var result = (RestBuilder)this.MemberwiseClone();
+            result.OnConfigureHttpClientAction = onHttpClient;
+            return result;
+        }
+
+        #endregion
 
         #region [ Certificate Validation ]
 
@@ -1390,6 +1411,8 @@ namespace RestClient
                             Timeout = Properties.Timeout,
                         })
                         {
+                            this.OnConfigureHttpClientAction?.Invoke(client);
+
                             if (enabledGZipCompression)
                             {
                                 client.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
@@ -1498,6 +1521,8 @@ namespace RestClient
                             Timeout = Properties.Timeout,
                         })
                         {
+                            this.OnConfigureHttpClientAction?.Invoke(client);
+
                             if (enabledGZipCompression)
                             {
                                 client.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
@@ -1607,6 +1632,8 @@ namespace RestClient
                             Timeout = Properties.Timeout,
                         })
                         {
+                            this.OnConfigureHttpClientAction?.Invoke(client);
+
                             if (enabledGZipCompression)
                             {
                                 client.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
@@ -1715,6 +1742,8 @@ namespace RestClient
                             Timeout = Properties.Timeout,
                         })
                         {
+                            this.OnConfigureHttpClientAction?.Invoke(client);
+
                             if (enabledGZipCompression)
                             {
                                 client.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
