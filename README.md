@@ -312,11 +312,13 @@ The data sent to the server with POST is stored in the request payload of the HT
 ```c#
 var result = rest
     .Url("[URL]")
+    .Command("/action")
     .Payload(new Object{})
     .Post<ResponseObject>();
 
 var result = await rest
     .Url("[URL]")
+    .Command("/action")
     .Payload(new Object{})
     .PostAsync<ResponseObject>();
 ```
@@ -336,6 +338,7 @@ The difference between POST and PUT is that PUT requests are idempotent. That is
 ```c#
 var result = rest
     .Url("[URL]")
+    .Command("/action")
     .Payload(new Object{})
     .Put<ResponseObject>();
 
@@ -352,11 +355,13 @@ The DELETE method deletes the specified resource.
 ```c#
 var result = rest
     .Url("[URL]")
+    .Command("/action")
     .Payload(new Object{})
     .Delete<ResponseObject>();
 
 var result = await rest
     .Url("[URL]")
+    .Command("/action")
     .Payload(new Object{})
     .DeleteAsync<ResponseObject>();
 ```
@@ -418,11 +423,13 @@ HttpMethod PATCH = new HttpMethod("PATCH");
 
 var result = rest
     .Url("[URL]")
+    .Command("/action")
     .Payload(new Object{})
     .CustomCall<ResponseObject>(PATCH);
 
 var result = await rest
     .Url("[URL]")
+    .Command("/action")
     .Payload(new Object{})
     .CustomCallAsync<ResponseObject>(PATCH);
 ```
@@ -434,6 +441,7 @@ RestClient uses Playload<T>(obj) method to set an object on request:
 ```c#
 var result = rest
     .Url("[URL]")
+    .Command("/action")
     .Payload(new RequestObject{})
     .Post<ResponseObject>();
 ```
@@ -441,6 +449,7 @@ var result = rest
 ```c#
 var result = rest
     .Url("[URL]")
+    .Command("/action")
     .Payload(new RequestObject{})
     .Put<ResponseObject>();
 ```
@@ -452,6 +461,7 @@ When necessary we can use the request as a form-url-encoded. To use it we need t
 ```c#
 var result = rest
     .Url("[URL]")
+    .Command("/action")
     .EnableFormUrlEncoded(true)
 ```
 
@@ -464,6 +474,7 @@ and then we can pass the parameters as a dictionary:
 
 var result = rest
     .Url("[URL]")
+    .Command("/action")
     .EnableFormUrlEncoded(true)
     .FormUrlEncoded(params)
     .Post();
@@ -474,6 +485,7 @@ It is possible to pass the parameters inside the handler and enabling the form-u
 ```c#
 var result = rest
     .Url("[URL]")
+    .Command("/action")
     .FormUrlEncoded(true, (p) =>
     {
         p.Add("key1", "value1");
@@ -489,6 +501,7 @@ OnUploadProgress occurs when the request is running and the data is going out. W
 ```c#
 var result = rest
     .Url("[URL]")
+    .Command("/action")
     .OnUploadProgress(p =>
     {
       DoSomethings(p.ProgressPercentage); 
@@ -504,6 +517,7 @@ OnDownloadProgress occurs when the response is running and the data is coming in
 ```c#
 var result = rest
     .Url("[URL]")
+    .Command("/action")
     .OnDownloadProgress(p =>
     {
       DoSomethings(p.ProgressPercentage); 
@@ -539,6 +553,7 @@ OnStart is an event that triggers when the request starts.
 ```c#
 var result = rest
     .Url("[URL]")
+    .Command("/action")
     .OnStart((e) => { 
         DoSomethings(e); 
     })
@@ -553,6 +568,7 @@ OnPreviewContentRequestAsString is an event that triggers when the request is re
 ```c#
 var result = rest
     .Url("[URL]")
+    .Command("/action")
     .OnPreviewContentRequestAsString((e) => { 
         DoSomethings(e); 
     })
@@ -567,6 +583,7 @@ OnPreviewContentResponseAsString is an event that triggers when the response is 
 ```c#
 var result = rest
     .Url("[URL]")
+    .Command("/action")
     .OnPreviewContentResponseAsString((e) => { 
         DoSomethings(e); 
     })
@@ -582,6 +599,7 @@ When OnPreResult is raises we can todo somethings, for example  get and use the 
 ```c#
 var result = rest
     .Url("[URL]")
+    .Command("/action")
     .OnPreCompleted((r) => { 
         DoSomethings(r.Result); 
     })
@@ -596,6 +614,7 @@ OnException occurs when the request raises an exception.
 ```c#
 var result = rest
     .Url("[URL]")
+    .Command("/action")
     .OnException((e) => { 
       DoSomethings(e); 
     })
@@ -610,6 +629,7 @@ OnCompleted occurs when the request is completed.
 ```c#
 var result = rest
     .Url("[URL]")
+    .Command("/action")
     .OnCompleted((e) => { 
         DoSomethings(e); 
     })
