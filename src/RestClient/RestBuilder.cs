@@ -684,7 +684,7 @@ namespace RestClient
         /// <summary>
         /// Sets url
         /// </summary>
-        /// <param name="url"></param>
+        /// <param name="url">The URL represents a base url</param>
         /// <returns></returns>
         public RestBuilder Url(string url)
         {
@@ -694,7 +694,7 @@ namespace RestClient
         /// <summary>
         /// Sets Uri
         /// </summary>
-        /// <param name="uri"></param>
+        /// <param name="uri">The URI represents a base url</param>
         /// <returns></returns>
         public RestBuilder Url(Uri uri)
         {
