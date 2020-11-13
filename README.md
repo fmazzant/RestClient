@@ -28,6 +28,8 @@ or we can use GetAsync() method:
 var result = await rest.Url("[URL]").GetAsync();
 ```
 
+Usually [URL] defines the base URL of webapi.
+
 ### RestProperties
 
 To use RestProperties to configure yuor rest root point. To create a simple configuration, just like this:
