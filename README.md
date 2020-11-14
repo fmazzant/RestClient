@@ -30,8 +30,6 @@ var result = await rest.Url("[URL]").GetAsync();
 
 In all readme document usually [URL] defines the base URL of the WebAPI. 
 
-Example: 'https://mywebapi.mydomain.com'.
-
 We can define a Root() endpoint and use it to build the request.
 
 ```c#
