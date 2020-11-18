@@ -15,23 +15,26 @@
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.7.6</Version>
+    <Version>1.7.7</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
-    <PackageReleaseNotes>1.7.6
+    <PackageReleaseNotes>1.7.7
+      - managing fluent httpclient
+
+      1.7.6
       - hotfix catch exeception
 
-1.7.5
+      1.7.5
       - hotfix
- 
-1.7.4
+
+      1.7.4
       - hotfix on parameters.
 
-1.7.3
+      1.7.3
       - json and xml settings during serialization and deserialization of an object.
 
-1.7.2
+      1.7.2
       - Target .NET Core 3.1 (netcoreapp3.1)
-      
+
       1.7.1
       - Target .NET Core 3.0 (netcoreapp3.0)
       - Target .NET Core 2.2 (netcoreapp2.2)
@@ -73,7 +76,7 @@
       - Added OnPreCompleted, OnCompleted and OnPreviewContentAsString
       - Refactoring some methods.
       - Added BufferSize and check on buffer size value
-</PackageReleaseNotes>
+    </PackageReleaseNotes>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
 
@@ -140,7 +143,7 @@
       <Version>4.7.2</Version>
     </PackageReference>
   </ItemGroup>
-  
+
   <!-- .NET Core 3.0 references, compilation flags and build options -->
   <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
     <DefineConstants>NETCOREAPP3_0;</DefineConstants>
