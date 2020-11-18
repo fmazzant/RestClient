@@ -15,10 +15,10 @@
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.7.6</Version>
+    <Version>1.8.0</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
     <PackageReleaseNotes>1.8.0
-      - Target .NET 5.0
+      - Target .NET 5.0 (net5.0)
       
 1.7.6
       - hotfix catch exeception
@@ -102,6 +102,16 @@
     <None Include="..\..\README.md" Link="README.md" />
   </ItemGroup>
 
+  <!-- .NET 5.0 references, compilation flags and build options -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net5.0'">
+    <DefineConstants>NET5_0;</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
+    <PackageReference Include="System.Text.Json">
+      <Version>4.7.2</Version>
+    </PackageReference>
+  </ItemGroup>
+  
   <!-- .NET Standard 2.1 references, compilation flags and build options -->
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
     <DefineConstants>NETSTANDARD2_1;</DefineConstants>
