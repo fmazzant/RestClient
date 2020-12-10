@@ -28,7 +28,7 @@ or we can use GetAsync() method:
 var result = await rest.Url("[URL]").GetAsync();
 ```
 
-In all readme document usually [URL] defines the base URL of the WebAPI. 
+Whenever you find the word "[URL]" in this document it reffers to the base URL definition of the webAPI.
 
 We can define a Root() endpoint and use it to build the request.
 
