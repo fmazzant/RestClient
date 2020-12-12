@@ -468,8 +468,7 @@ var result = await rest
 RestClient uses Playload<T>(obj) method to set an object on request: 
 
 ```c#
-var rest = Rest.Build();
-var result = rest
+var result = Rest.Build()
     .Url("[URL]")
     .Command("/action")
     .Payload(new RequestObject{})
@@ -477,7 +476,6 @@ var result = rest
 ```
 
 ```c#
-var rest = Rest.Build();
 var result = Rest.Build()
     .Url("[URL]")
     .Command("/action")
