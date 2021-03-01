@@ -20,26 +20,28 @@ var rest = Rest.Build();
 To create a simple get call, just do like this:
 
 ```c#
+var rest = Rest.Build();
 var result = rest.Url("[URL]").Get();
 ```
 or we can use GetAsync() method:
 
 ```c#
+var rest = Rest.Build();
 var result = await rest.Url("[URL]").GetAsync();
 ```
 
-In all readme document usually [URL] defines the base URL of the WebAPI. 
+Whenever you find the word "[URL]" in this document it reffers to the base URL definition of the webAPI.
 
 We can define a Root() endpoint and use it to build the request.
 
 ```c#
-public RestBuilder Root() 
-    => rest.Url("https://mywebapi.mydomain.com");
+public RestBuilder Root() => rest.Url("https://mywebapi.mydomain.com");
 ```
 
 and then, we can use it, like this:
 
 ```c#
+public RestBuilder Root() => Rest.Build().Url("https://mywebapi.mydomain.com");
 var result = Root()
     .Command("/my-action")
     .Payload("mystring")
@@ -85,7 +87,7 @@ List<string> validCerts = new List<string>() {
     "CERT STRING"
 };
 
-var result = rest
+var result = Rest.Build()
     .CertificateValidation((sender, certificate, chain, errors) =>
     {
       // for development, trust all certificates
@@ -107,7 +109,7 @@ You can do so by including the bearer token's access_token value in the HTTP req
 If an authenticated user has a bearer token's access_token or refresh_token that is expired, then a '401 - Unauthorized (invalid or expired refresh token)' error is returned.
 
 ```c#
-var result = rest
+var result = Rest.Build()
     .Authentication(() => new AuthenticationHeaderValue("Bearer", "[Token]"))
     .Url("[URL]")
     .Get();
@@ -122,7 +124,7 @@ To refresh a token, use "RefreshTokenInvoke" automatically.
 
 ```c#
 var url = "[URL]";
-var result = rest
+var result = Rest.Build()
     .Authentication(() => new AuthenticationHeaderValue("Bearer", "[Token]"))
     .RefreshToken(true)
     .RefreshTokenInvoke(async () =>
@@ -150,7 +152,7 @@ Classes that implement the ICredentials interface, such as the CredentialCache c
 This class does not support public key-based authentication methods such as Secure Sockets Layer (SSL) client authentication.
 
 ```c#
-var result = rest
+var result = Rest.Build()
     .NetworkCredential("myUsername","myPassword")
     .Url("[URL]")
     .Get();
@@ -168,7 +170,7 @@ var result = rest
 The Headers collection contains the protocol headers associated with the request. The Header((h)=>{}) method allows you to add the list of keys.
 
 ```c#
-var result = rest
+var result = Rest.Build()
     .Header((h) => {
         if(!h.Contains("auth-custom"))
             h.Add("auth-custom", "value");
@@ -183,7 +185,7 @@ Two types of serialization are supported by RestClient: Xml and Json, but it is 
 RestClient uses .Json() to serialize an object into json.
 
 ```c#
-var result = rest
+var result = Rest.Build()
     .Url("[URL]")
     .Json()
     .Get<ResponseObject>();
@@ -192,7 +194,7 @@ var result = rest
 It is possible to pass an json serializer options to .Json() method, like this:
 
 ```c#
-var result = rest
+var result = Rest.Build()
     .Url("[URL]")
     .Json(new JsonSerializerOptions {
         WriteIndented = true
@@ -203,7 +205,7 @@ var result = rest
 The above snippet code consideres using System.Text.Json library. If we using Netwnsoft like this:
 
 ```c#
-var result = rest
+var result = Rest.Build()
     .Url("[URL]")
     .Json(new JsonSerializerSettings {
         Formatting = Formatting.Indented
@@ -223,7 +225,7 @@ var result = rest
 It is possible to pass the settings to .Xml() method, like this:
 
 ```c#
-var result = rest
+var result = Rest.Build()
     .Url("[URL]")
     .Xml(new XmlReaderSettings { Indent = true }, new XmlWriterSettings { IgnoreWhitespace = true })
     .Get<ResponseObject>();
@@ -252,7 +254,7 @@ public class MyCustomSerializer : ISerializerContent
 Now, we can use MyCustomSerializer like this:
 
 ```c#
-var result = rest
+var result = Rest.Build()
     .Url("[URL]")
     .CustomSerializer(new MyCustomSerializer { })
     .Get<ResponseObject>();
@@ -263,7 +265,7 @@ var result = rest
 BufferSize can be use to set the buffer size during upload and download stream. Default value is 80Kb
 
 ```c#
-var result = rest
+var result = Rest.Build()
     .Url("[URL]")
     .BufferSize(4096 * 5 * 5) //100Kb
     .Get();
@@ -274,7 +276,7 @@ var result = rest
 Enables gzip compression during communication with a specified resource:
 
 ```c#
-var result = rest
+var result = Rest.Build()
     .Url("[URL]")
     .EnableGZipCompression()
     .Get();
@@ -287,6 +289,8 @@ The library uncompresses automatically the response.
 GET is one of the most common HTTP methods and GET is used to request data from a specified resource 
 
 ```c#
+var rest = Rest.Build();
+
 var result = rest
     .Url("[URL]")
     .Get();
@@ -312,7 +316,7 @@ Note that the query string (name/value pairs) is sent in the URL of a GET reques
 In some cases we need to use arguments as query string. We can use the method Parameter(key, value) to resolve it like this:
 
 ```c#
-var result = rest
+var result = Rest.Build()
     .Url("[URL]")
     .Command("/path")
     .Parameter("id","10")
@@ -328,6 +332,8 @@ POST is used to send data to a server for create/update a resource.
 The data sent to the server with POST is stored in the request payload of the HTTP request:
 
 ```c#
+var rest = Rest.Build();
+
 var result = rest
     .Url("[URL]")
     .Command("/action")
@@ -354,6 +360,8 @@ PUT is used to send data to a server for create/update a resource.
 The difference between POST and PUT is that PUT requests are idempotent. That is, calling the same PUT request multiple times will always produce the same result. In contrast, calling a POST request repeatedly have side effects of creating the same resource multiple times.
 
 ```c#
+var rest = Rest.Build();
+
 var result = rest
     .Url("[URL]")
     .Command("/action")
@@ -371,13 +379,13 @@ var result = await rest
 The DELETE method deletes the specified resource.
 
 ```c#
-var result = rest
+var result = Rest.Build()
     .Url("[URL]")
     .Command("/action")
     .Payload(new Object{})
     .Delete<ResponseObject>();
 
-var result = await rest
+var result = await Rest.Build()
     .Url("[URL]")
     .Command("/action")
     .Payload(new Object{})
@@ -389,7 +397,7 @@ var result = await rest
 The DOWNLOAD method download the specified resource.
 
 ```c#
-var result = rest
+var result = Rest.Build()
     .Download("[URL]");
 
 var result = await rest
@@ -398,6 +406,8 @@ var result = await rest
 Is possible display the download status with OnDownloadProgress.
 
 ```c#
+var rest = Rest.Build();
+
 var result = await rest
     .OnDownloadProgress((d) => Console.WriteLine($"{d.CurrentBytes}/{d.TotalBytes}"))
     .DownloadAsync("[URL]");
@@ -438,6 +448,7 @@ The CUSTOM method customizing the specified resource.
 
 ```c#
 HttpMethod PATCH = new HttpMethod("PATCH");
+var rest = Rest.Build();
 
 var result = rest
     .Url("[URL]")
@@ -457,7 +468,7 @@ var result = await rest
 RestClient uses Playload<T>(obj) method to set an object on request: 
 
 ```c#
-var result = rest
+var result = Rest.Build()
     .Url("[URL]")
     .Command("/action")
     .Payload(new RequestObject{})
@@ -465,7 +476,7 @@ var result = rest
 ```
 
 ```c#
-var result = rest
+var result = Rest.Build()
     .Url("[URL]")
     .Command("/action")
     .Payload(new RequestObject{})
@@ -477,7 +488,7 @@ var result = rest
 When necessary we can use the request as a form-url-encoded. To use it we need to enabled it, like this:
 
 ```c#
-var result = rest
+var result = Rest.Build()
     .Url("[URL]")
     .Command("/action")
     .EnableFormUrlEncoded(true)
@@ -490,7 +501,7 @@ and then we can pass the parameters as a dictionary:
  params.Add("key1", "value1");
  params.Add("key2", "value2");
 
-var result = rest
+var result = Rest.Build()
     .Url("[URL]")
     .Command("/action")
     .EnableFormUrlEncoded(true)
@@ -501,7 +512,7 @@ var result = rest
 It is possible to pass the parameters inside the handler and enabling the form-url-encoded:
 
 ```c#
-var result = rest
+var result = Rest.Build()
     .Url("[URL]")
     .Command("/action")
     .FormUrlEncoded(true, (p) =>
@@ -517,7 +528,7 @@ var result = rest
 OnUploadProgress occurs when the request is running and the data is going out. We can get a percentage of the data being uploaded like this:
 
 ```c#
-var result = rest
+var result = Rest.Build()
     .Url("[URL]")
     .Command("/action")
     .OnUploadProgress(p =>
@@ -533,7 +544,7 @@ var result = rest
 OnDownloadProgress occurs when the response is running and the data is coming in. We can get a percentage of the data being downloading like this:
 
 ```c#
-var result = rest
+var result = Rest.Build()
     .Url("[URL]")
     .Command("/action")
     .OnDownloadProgress(p =>
@@ -551,14 +562,14 @@ To set an infinite timeout, set the property value to InfiniteTimeSpan.
 A Domain Name System (DNS) query may take up to 15 seconds to return or time out. If your request contains a host name that requires resolution and you set Timeout to a value less than 15 seconds, it may take 15 seconds or more before an Exception is thrown to indicate a timeout on your request.
 
 ```c#
-var result = rest
+var result = Rest.Build()
     .Url("[URL]")
     .Timeout(3200) //milliseconds
     .Get<ResponseObject>();
 ```
 
 ```c#
-var result = rest
+var result = Rest.Build()
     .Url("[URL]")
     .Timeout(TimeSpan.FromMinutes(10)) 
     .Get<ResponseObject>();
@@ -569,7 +580,7 @@ var result = rest
 OnStart is an event that triggers when the request starts.
 
 ```c#
-var result = rest
+var result = Rest.Build()
     .Url("[URL]")
     .Command("/action")
     .OnStart((e) => { 
@@ -584,7 +595,7 @@ var result = rest
 OnPreviewContentRequestAsString is an event that triggers when the request is ready and it isn't no sent yet.
 
 ```c#
-var result = rest
+var result = Rest.Build()
     .Url("[URL]")
     .Command("/action")
     .OnPreviewContentRequestAsString((e) => { 
@@ -599,7 +610,7 @@ var result = rest
 OnPreviewContentResponseAsString is an event that triggers when the response is received and it isn't no deserialized yet.
 
 ```c#
-var result = rest
+var result = Rest.Build()
     .Url("[URL]")
     .Command("/action")
     .OnPreviewContentResponseAsString((e) => { 
@@ -615,7 +626,7 @@ OnPreResult occurs when the request is completing but  still hasn't completed ye
 When OnPreResult is raises we can todo somethings, for example  get and use the result of request.
 
 ```c#
-var result = rest
+var result = Rest.Build()
     .Url("[URL]")
     .Command("/action")
     .OnPreCompleted((r) => { 
@@ -630,7 +641,7 @@ var result = rest
 OnException occurs when the request raises an exception. 
 
 ```c#
-var result = rest
+var result = Rest.Build()
     .Url("[URL]")
     .Command("/action")
     .OnException((e) => { 
@@ -645,7 +656,7 @@ var result = rest
 OnCompleted occurs when the request is completed. 
 
 ```c#
-var result = rest
+var result = Rest.Build()
     .Url("[URL]")
     .Command("/action")
     .OnCompleted((e) => { 
@@ -661,7 +672,7 @@ RestClient allows to create a flexible and robust network layer and it is very e
 Below you find a complete code demostration a complete code example. 
 
 ```c#
-
+public class NetworkService {
     //building context
 
     public RestBuilder Root() 
@@ -719,5 +730,6 @@ Below you find a complete code demostration a complete code example.
             .Command("/EventDetail")
             .Payload(request)
             .PostAsync<EventDetailResponse>();
+}
 ```
 
