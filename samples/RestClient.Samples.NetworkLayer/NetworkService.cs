@@ -41,6 +41,10 @@ namespace RestClient.Samples.NetworkLayer
             {
                 p.EndPoint = new Uri("https://reqres.in/api");
             })
+            .OnConfigureHttpClient((c) =>
+            {
+                c.Timeout = TimeSpan.FromSeconds(10);
+            })
             .CertificateValidation((obj, certificate, clain, errors) => true); //for development mode
 
         public NetworkService()
