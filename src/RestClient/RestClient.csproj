@@ -19,8 +19,8 @@
     <AssemblyName>Mafe.RestClient</AssemblyName>
     <PackageReleaseNotes>1.8.0
       - Target .NET 5.0 (net5.0)
-      
-1.7.7
+
+      1.7.7
       - managing fluent httpclient
 
       1.7.6
