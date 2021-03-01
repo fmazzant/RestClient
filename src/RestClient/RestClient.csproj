@@ -15,7 +15,7 @@
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.8.0</Version>
+    <Version>1.8.0-rc1</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
     <PackageReleaseNotes>1.8.0
       - Target .NET 5.0 (net5.0)
