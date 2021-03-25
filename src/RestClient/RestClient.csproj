@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0; netstandard2.1; netstandard2.0; netstandard1.3; netcoreapp3.1; netcoreapp3.0; netcoreapp2.2; netcoreapp2.1; netcoreapp2.0; net45; net451; net452; net46; net461; net462; net47; net471; net472; net48</TargetFrameworks>
+    <TargetFrameworks>net5.0; netstandard2.1; netstandard2.0; netstandard1.3; netcoreapp3.1; netcoreapp2.1; net45; net451; net452; net46; net461; net462; net47; net471; net472; net48</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <NeutralLanguage>en</NeutralLanguage>
     <Authors>Federico Mazzanti</Authors>
@@ -15,10 +15,11 @@
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.8.0-rc1</Version>
+    <Version>1.8.0</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
     <PackageReleaseNotes>1.8.0
       - Target .NET 5.0 (net5.0)
+      - Removed unsupported target frameworks
 
       1.7.7
       - managing fluent httpclient
@@ -157,41 +158,11 @@
     </PackageReference>
   </ItemGroup>
 
-  <!-- .NET Core 3.0 references, compilation flags and build options -->
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
-    <DefineConstants>NETCOREAPP3_0;</DefineConstants>
-  </PropertyGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
-    <PackageReference Include="System.Text.Json">
-      <Version>4.7.2</Version>
-    </PackageReference>
-  </ItemGroup>
-
-  <!-- .NET Core 2.2 references, compilation flags and build options -->
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp2.2'">
-    <DefineConstants>NETCOREAPP2_2;</DefineConstants>
-  </PropertyGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.2'">
-    <PackageReference Include="System.Text.Json">
-      <Version>4.7.2</Version>
-    </PackageReference>
-  </ItemGroup>
-
   <!-- .NET Core 2.1 references, compilation flags and build options -->
   <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
     <DefineConstants>NETCOREAPP2_1;</DefineConstants>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
-    <PackageReference Include="System.Text.Json">
-      <Version>4.7.2</Version>
-    </PackageReference>
-  </ItemGroup>
-
-  <!-- .NET Core 2.0 references, compilation flags and build options -->
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
-    <DefineConstants>NETCOREAPP2_0;</DefineConstants>
-  </PropertyGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
     <PackageReference Include="System.Text.Json">
       <Version>4.7.2</Version>
     </PackageReference>
