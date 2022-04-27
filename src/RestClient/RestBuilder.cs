@@ -966,7 +966,7 @@ namespace RestClient
         /// </summary>
         /// <returns></returns>
         public RestResult<string> Get()
-            => GetAsync().Result;
+            => GetAsync().GetAwaiter().GetResult();
 
         /// <summary>
         /// Send a GET request to the specified Uri as an synchronous operation
@@ -990,21 +990,21 @@ namespace RestClient
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public RestResult<T> Get<T>() where T : new()
-            => this.GetAsync<T>().Result;
+            => this.GetAsync<T>().GetAwaiter().GetResult();
 
         /// <summary>
         /// Send a GET request to the specified Uri as an synchronous operation
         /// </summary>
         /// <returns></returns>
         public RestResult<byte[]> GetAsByteArray()
-            => GetAsByteArrayAsync().Result;
+            => GetAsByteArrayAsync().GetAwaiter().GetResult();
 
         /// <summary>
         /// Send a GET request to the specified Uri as an synchronous operation
         /// </summary>
         /// <returns></returns>
         public RestResult<Stream> GetAsStream()
-            => GetAsStreamAsync().Result;
+            => GetAsStreamAsync().GetAwaiter().GetResult();
         #endregion
 
         #region [ Post ]
@@ -1043,7 +1043,7 @@ namespace RestClient
         /// </summary>
         /// <returns></returns>
         public RestResult<string> Post()
-            => PostAsync().Result;
+            => PostAsync().GetAwaiter().GetResult();
 
         /// <summary>
         /// Send a POST request to the specified Uri as a synchronous operation
@@ -1051,21 +1051,21 @@ namespace RestClient
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public RestResult<T> Post<T>() where T : new()
-            => PostAsync<T>().Result;
+            => PostAsync<T>().GetAwaiter().GetResult();
 
         /// <summary>
         /// Send a POST request to the specified Uri as a synchronous operation
         /// </summary>
         /// <returns></returns>
         public RestResult<byte[]> PostAsByteArray()
-            => PostAsByteArrayAsync().Result;
+            => PostAsByteArrayAsync().GetAwaiter().GetResult();
 
         /// <summary>
         /// Send a POST request to the specified Uri as a synchronous operation
         /// </summary>
         /// <returns></returns>
         public RestResult<Stream> PostAsStream()
-            => PostAsStreamAsync().Result;
+            => PostAsStreamAsync().GetAwaiter().GetResult();
         #endregion
 
         #region [ Put ]
@@ -1104,7 +1104,7 @@ namespace RestClient
         /// </summary>
         /// <returns></returns>
         public RestResult<string> Put()
-            => PutAsync().Result;
+            => PutAsync().GetAwaiter().GetResult();
 
         /// <summary>
         /// Send a PUT request to the specified Uri as a synchronous operation.
@@ -1112,21 +1112,21 @@ namespace RestClient
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public RestResult<T> Put<T>() where T : new()
-            => PutAsync<T>().Result;
+            => PutAsync<T>().GetAwaiter().GetResult();
 
         /// <summary>
         /// Send a PUT request to the specified Uri as a synchronous operation.
         /// </summary>
         /// <returns></returns>
         public RestResult<byte[]> PutAsByteArray()
-            => PutAsByteArrayAsync().Result;
+            => PutAsByteArrayAsync().GetAwaiter().GetResult();
 
         /// <summary>
         /// Send a PUT request to the specified Uri as a synchronous operation.
         /// </summary>
         /// <returns></returns>
         public RestResult<Stream> PutAsStream()
-            => PutAsStreamAsync().Result;
+            => PutAsStreamAsync().GetAwaiter().GetResult();
         #endregion
 
         #region [ Delete ]
@@ -1165,7 +1165,7 @@ namespace RestClient
         /// </summary>
         /// <returns></returns>
         public RestResult<string> Delete()
-            => DeleteAsync().Result;
+            => DeleteAsync().GetAwaiter().GetResult();
 
         /// <summary>
         /// Send a DELETE request to the specified Uri as a synchronous operation.
@@ -1173,21 +1173,21 @@ namespace RestClient
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public RestResult<T> Delete<T>() where T : new()
-            => DeleteAsync<T>().Result;
+            => DeleteAsync<T>().GetAwaiter().GetResult();
 
         /// <summary>
         /// Send a DELETE request to the specified Uri as a synchronous operation.
         /// </summary>
         /// <returns></returns>
         public RestResult<byte[]> DeleteAsByteArray()
-            => DeleteAsByteArrayAsync().Result;
+            => DeleteAsByteArrayAsync().GetAwaiter().GetResult();
 
         /// <summary>
         /// Send a DELETE request to the specified Uri as a synchronous operation.
         /// </summary>
         /// <returns></returns>
         public RestResult<Stream> DeleteAsStream()
-            => DeleteAsStreamAsync().Result;
+            => DeleteAsStreamAsync().GetAwaiter().GetResult();
         #endregion
 
         #region [ Patch ]
@@ -1227,7 +1227,7 @@ namespace RestClient
         /// </summary>
         /// <returns></returns>
         public RestResult<string> Patch()
-            => PatchAsync().Result;
+            => PatchAsync().GetAwaiter().GetResult();
 
         /// <summary>
         /// Send a PATCH request to the specified Uri as a synchronous operation
@@ -1235,21 +1235,21 @@ namespace RestClient
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public RestResult<T> Patch<T>() where T : new()
-            => PatchAsync<T>().Result;
+            => PatchAsync<T>().GetAwaiter().GetResult();
 
         /// <summary>
         /// Send a PATCH request to the specified Uri as a synchronous operation
         /// </summary>
         /// <returns></returns>
         public RestResult<byte[]> PatchAsByteArray()
-            => PatchAsByteArrayAsync().Result;
+            => PatchAsByteArrayAsync().GetAwaiter().GetResult();
 
         /// <summary>
         /// Send a PATCH request to the specified Uri as a synchronous operation
         /// </summary>
         /// <returns></returns>
         public RestResult<Stream> PatchAsStream()
-            => PatchAsStreamAsync().Result;
+            => PatchAsStreamAsync().GetAwaiter().GetResult();
 
         #endregion
 
@@ -1289,7 +1289,7 @@ namespace RestClient
         /// </summary>
         /// <returns></returns>
         public RestResult<string> CustomCall(HttpMethod method)
-            => CustomCallAsync(method).Result;
+            => CustomCallAsync(method).GetAwaiter().GetResult();
 
         /// <summary>
         /// Send a CUSTOM CALL request to the specified Uri as a synchronous operation
@@ -1297,21 +1297,21 @@ namespace RestClient
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public RestResult<T> CustomCall<T>(HttpMethod method) where T : new()
-            => CustomCallAsync<T>(method).Result;
+            => CustomCallAsync<T>(method).GetAwaiter().GetResult();
 
         /// <summary>
         /// Send a CUSTOM CALL request to the specified Uri as a synchronous operation
         /// </summary>
         /// <returns></returns>
         public RestResult<byte[]> CustomCallAsByteArray(HttpMethod method)
-            => CustomCallAsByteArrayAsync(method).Result;
+            => CustomCallAsByteArrayAsync(method).GetAwaiter().GetResult();
 
         /// <summary>
         /// Send a CUSTOM CALL request to the specified Uri as a synchronous operation
         /// </summary>
         /// <returns></returns>
         public RestResult<Stream> CustomCallAsStream(HttpMethod method)
-            => CustomCallAsStreamAsync(method).Result;
+            => CustomCallAsStreamAsync(method).GetAwaiter().GetResult();
 
         #endregion
 
@@ -1342,7 +1342,7 @@ namespace RestClient
         /// <param name="token"></param>
         /// <returns></returns>
         public RestResult<byte[]> Download(string url)
-            => DownloadAsync(url).Result;
+            => DownloadAsync(url).GetAwaiter().GetResult();
 
         /// <summary>
         /// Send a GET request to download file from the specified Uri as a synchronous operation
@@ -1351,7 +1351,7 @@ namespace RestClient
         /// <param name="token"></param>
         /// <returns></returns>
         public RestResult<byte[]> Download(Uri url)
-            => DownloadAsync(url).Result;
+            => DownloadAsync(url).GetAwaiter().GetResult();
 
         #endregion
 
