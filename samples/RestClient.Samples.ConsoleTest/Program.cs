@@ -32,7 +32,7 @@ namespace RestClient.Samples.ConsoleTest
     using RestClient.Samples.NetworkLayer;
     using System;
 
-    class Program
+    static class Program
     {
         static void Main(string[] args)
         {
