@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0; netstandard2.1; netstandard2.0; netstandard1.3; netcoreapp3.1; net45; net451; net452; net46; net461; net462; net47; net471; net472; net48</TargetFrameworks>
+    <TargetFrameworks>net5.0; netstandard2.1; netstandard2.0; netstandard1.3; netcoreapp3.1; net45; net452; net46; net461; net462; net47; net471; net472; net48</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <NeutralLanguage>en</NeutralLanguage>
     <Authors>Federico Mazzanti</Authors>
