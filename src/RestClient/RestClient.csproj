@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0; netstandard2.1; netstandard2.0; netstandard1.3; netcoreapp3.1; net452; net46; net461; net462; net47; net471; net472; net48</TargetFrameworks>
+    <TargetFrameworks>net6.0; net5.0; netstandard2.1; netstandard2.0; netstandard1.3; netcoreapp3.1; net452; net46; net461; net462; net47; net471; net472; net48</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <NeutralLanguage>en</NeutralLanguage>
     <Authors>Federico Mazzanti</Authors>
@@ -15,12 +15,17 @@
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.8.1</Version>
+    <Version>1.9.0</Version>
     <AssemblyName>Mafe.RestClient</AssemblyName>
-    <PackageReleaseNotes>1.8.1
+    <PackageReleaseNotes>
+      1.9.0
+      - Target .NET 6.0 (net6.0)
+      - Upgrade all dependecies
+
+      1.8.1
       - Removing .Result
       - Removed unsupported target frameworks
-      
+
       1.8.0
       - Target .NET 5.0 (net5.0)
       - Removed unsupported target frameworks
@@ -110,6 +115,16 @@
     <None Include="..\..\README.md" Link="README.md" />
   </ItemGroup>
 
+  <!-- .NET 6.0 references, compilation flags and build options -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <DefineConstants>NET6_0;</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <PackageReference Include="System.Text.Json">
+      <Version>6.0.3</Version>
+    </PackageReference>
+  </ItemGroup>
+
   <!-- .NET 5.0 references, compilation flags and build options -->
   <PropertyGroup Condition="'$(TargetFramework)' == 'net5.0'">
     <DefineConstants>NET5_0;</DefineConstants>
@@ -119,7 +134,7 @@
       <Version>4.7.2</Version>
     </PackageReference>
   </ItemGroup>
-  
+
   <!-- .NET Standard 2.1 references, compilation flags and build options -->
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
     <DefineConstants>NETSTANDARD2_1;</DefineConstants>
@@ -260,6 +275,9 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
 </Project>
