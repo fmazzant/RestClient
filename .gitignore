@@ -23,3 +23,4 @@ src/.vs/RestClient/xs/UserPrefs.xml
 /samples/RestClient.Samples.ConsoleTest/bin/Debug/netcoreapp3.1
 /samples/.vs/RestClient.Samples/DesignTimeBuild/.dtbcache.v2
 /samples/RestClient.Samples.ConsoleTest/bin/Debug/net5.0
+*.v1
