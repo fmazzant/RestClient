@@ -16,6 +16,7 @@
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
     <Version>1.9.1</Version>
     <AssemblyName>Mafe.$(MSBuildProjectName)</AssemblyName>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageReleaseNotes>
       1.9.1
       - Improper Handling of Exceptional Conditions in Newtonsoft.Json #1
