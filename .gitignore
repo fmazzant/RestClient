@@ -24,3 +24,4 @@ src/.vs/RestClient/xs/UserPrefs.xml
 /samples/.vs/RestClient.Samples/DesignTimeBuild/.dtbcache.v2
 /samples/RestClient.Samples.ConsoleTest/bin/Debug/net5.0
 *.v1
+/samples/.vs/RestClient.Samples/FileContentIndex
