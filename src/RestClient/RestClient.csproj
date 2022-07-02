@@ -14,16 +14,18 @@
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.9.1</Version>
+    <Version>1.9.2</Version>
     <AssemblyName>Mafe.$(MSBuildProjectName)</AssemblyName>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageReleaseNotes>
+    <PackageReleaseNotes>1.9.2
+      - Upgrade all dependences
+
       1.9.1
       - Improper Handling of Exceptional Conditions in Newtonsoft.Json #1
 
       1.9.0
       - Target .NET 6.0 (net6.0)
-      - Upgrade all dependecies
+      - Upgrade all dependences
 
       1.8.1
       - Removing .Result
