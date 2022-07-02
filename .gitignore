@@ -26,3 +26,4 @@ src/.vs/RestClient/xs/UserPrefs.xml
 *.v1
 /samples/.vs/RestClient.Samples/FileContentIndex
 /samples/.vs/ProjectEvaluation
+/samples/RestClient.Samples.ConsoleTest/bin/Release/net5.0
