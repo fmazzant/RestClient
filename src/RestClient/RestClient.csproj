@@ -16,7 +16,7 @@
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
     <Version>1.9.2</Version>
     <AssemblyName>Mafe.$(MSBuildProjectName)</AssemblyName>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageReleaseNotes>1.9.2
       - Upgrade all dependences
 
