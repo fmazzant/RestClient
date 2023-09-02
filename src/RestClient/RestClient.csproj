@@ -14,9 +14,12 @@
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.9.3</Version>
+    <Version>1.9.4-rc1</Version>
     <AssemblyName>Mafe.$(MSBuildProjectName)</AssemblyName>
     <PackageReleaseNotes>
+      1.9.4
+      - Upgrade all dependences
+      
       1.9.3
       - Target .NET 7.0 (net7.0)
       - Upgrade all dependences
