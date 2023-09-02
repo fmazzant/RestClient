@@ -28,3 +28,4 @@ src/.vs/RestClient/xs/UserPrefs.xml
 /samples/.vs/ProjectEvaluation
 /samples/RestClient.Samples.ConsoleTest/bin/Release/net5.0
 /samples/.vs/RestClient.Samples/v17/.futdcache.v2
+/samples/RestClient.Samples.ConsoleTest/bin/Release/net6.0
