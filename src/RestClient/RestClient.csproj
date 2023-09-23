@@ -14,7 +14,7 @@
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.9.4-rc1</Version>
+    <Version>1.9.4</Version>
     <AssemblyName>Mafe.$(MSBuildProjectName)</AssemblyName>
     <PackageReleaseNotes>
       1.9.4
