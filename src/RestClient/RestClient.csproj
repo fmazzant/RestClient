@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0; net6.0; netstandard2.1; netstandard2.0; netstandard1.3; netcoreapp3.1; net452; net46; net461; net462; net47; net471; net472; net48</TargetFrameworks>
+    <TargetFrameworks>net8.0; net7.0; net6.0; netstandard2.1; netstandard2.0; netstandard1.3; netcoreapp3.1; net452; net46; net461; net462; net47; net471; net472; net48</TargetFrameworks>
     <NeutralLanguage>en</NeutralLanguage>
     <Authors>Federico Mazzanti</Authors>
     <Description>RestClient is a library for .net that can help you to consume REST services.</Description>
@@ -14,12 +14,13 @@
     <PackageId>Mafe.RestClient</PackageId>
     <Product>RestClient</Product>
     <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>1.9.4-rc1</Version>
+    <Version>1.9.5-rc1</Version>
     <AssemblyName>Mafe.$(MSBuildProjectName)</AssemblyName>
     <PackageReleaseNotes>
-      1.9.4
+      1.9.5
+      - Target .NET 8.0 (net8.0)
       - Upgrade all dependences
-      
+
       1.9.3
       - Target .NET 7.0 (net7.0)
       - Upgrade all dependences
