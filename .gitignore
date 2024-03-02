@@ -31,3 +31,5 @@ src/.vs/RestClient/xs/UserPrefs.xml
 /samples/RestClient.Samples.ConsoleTest/bin/Release/net6.0
 /samples/RestClient.Samples.ConsoleTest/bin/Debug/net6.0
 /samples/RestClient.Samples.ConsoleTest/bin/Debug/net8.0
+/samples/.vs/RestClient.Samples/v17
+/src/.vs/RestClient/FileContentIndex
