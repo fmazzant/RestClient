@@ -1,0 +1,52 @@
+<Project>
+
+  <!-- Common settings for all the packages in src/ -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <NeutralLanguage>en</NeutralLanguage>
+    <Version>2.0.0</Version>
+    <Authors>Federico Mazzanti</Authors>
+    <Copyright>Copyright (c) 2020-2026 Federico Mazzanti</Copyright>
+    <Company />
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/fmazzant/RestClient</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591;RS0026;RS0027</NoWarn>
+    <Deterministic>true</Deterministic>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+    <!-- Checks that the API is consistent across the target frameworks.
+         After 2.0.0 is published add <PackageValidationBaselineVersion>2.0.0</PackageValidationBaselineVersion>
+         to detect breaking changes against the released package. -->
+    <EnablePackageValidation>true</EnablePackageValidation>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\LICENSE" Pack="true" PackagePath="" Visible="false" />
+    <None Include="$(MSBuildThisFileDirectory)..\README.md" Pack="true" PackagePath="" Visible="false" />
+  </ItemGroup>
+
+  <!-- Every change to the public API must be recorded in PublicAPI.Unshipped.txt -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="5.6.0" PrivateAssets="all" />
+    <AdditionalFiles Include="PublicAPI.Shipped.txt" />
+    <AdditionalFiles Include="PublicAPI.Unshipped.txt" />
+  </ItemGroup>
+
+</Project>

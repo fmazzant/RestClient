@@ -42,41 +42,34 @@ namespace RestClient
         /// <summary>
         /// Gets content
         /// </summary>
-        object Content { get; }
+        object? Content { get; }
     }
 
     /// <summary>
     /// Provides custom formatting for generic action result with type.
     /// </summary>
     /// <typeparam name="T">The type of the content.</typeparam>
-    public interface IRestResult<T>
+    public interface IRestResult<out T>
     {
         /// <summary>
         /// Gets content typed
         /// </summary>
-        T Content { get; }
+        T? Content { get; }
     }
 
     /// <summary>
-    /// Provides a generic actionresult of a post/get/put/delete call request. This is an abstract class.
+    /// The result of a request. Requests never throw: network errors, timeouts and cancellations are reported by the result.
+    /// Dispose the result to release the HTTP response (mandatory for Stream results, which keep the connection open).
     /// </summary>
     public abstract class RestResult : IDisposable, IRestResult
     {
         #region [ Constructors ]
 
-        /// <summary>
-        /// Initializes a new instance of the RestClient.RestResult class.
-        /// </summary>
-        /// <param name="response">The HTTP response.</param>
         private protected RestResult(HttpResponseMessage response)
         {
             this.Response = response;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the RestClient.RestResult class.
-        /// </summary>
-        /// <param name="exception">The exception raised during the request.</param>
         private protected RestResult(Exception exception)
         {
             this.Exception = exception;
@@ -89,18 +82,18 @@ namespace RestClient
         /// <summary>
         /// Gets HTTP response. It is null when the request failed before receiving a response.
         /// </summary>
-        public HttpResponseMessage Response { get; }
+        public HttpResponseMessage? Response { get; }
 
         /// <summary>
         /// Gets the exception raised during the request or during the deserialization of the response.
         /// When the exception is raised by the deserialization, Response is still available.
         /// </summary>
-        public Exception Exception { get; internal set; }
+        public Exception? Exception { get; internal set; }
 
         /// <summary>
         /// Gets HTTP response's headers
         /// </summary>
-        public HttpResponseHeaders Headers => Response?.Headers;
+        public HttpResponseHeaders? Headers => Response?.Headers;
 
         /// <summary>
         /// Gets true if the HTTP response was received with a success status code and no exception was raised
@@ -115,7 +108,7 @@ namespace RestClient
         /// <summary>
         /// Gets HTTP response's reason phrase, or the exception message when no response has been received.
         /// </summary>
-        public string ReasonPhrase => Response != null ? Response.ReasonPhrase : Exception?.Message;
+        public string? ReasonPhrase => Response != null ? Response.ReasonPhrase : Exception?.Message;
 
         /// <summary>
         /// Get true if the request has been cancelled (by CancellationToken or by OnStart)
@@ -130,17 +123,27 @@ namespace RestClient
         /// <summary>
         /// Gets HTTP response's version. It is null when no response has been received.
         /// </summary>
-        public Version Version => Response?.Version;
+        public Version? Version => Response?.Version;
+
+        /// <summary>
+        /// Gets the number of retries executed by the retry policy (0 when the first attempt succeeded).
+        /// </summary>
+        public int RetryCount { get; internal set; }
 
         /// <summary>
         /// Gets HTTP response's content
         /// </summary>
-        public object Content => ContentAsObject;
+        public object? Content => ContentAsObject;
 
         /// <summary>
         /// Gets HTTP response's content as object
         /// </summary>
-        private protected abstract object ContentAsObject { get; }
+        private protected abstract object? ContentAsObject { get; }
+
+        /// <summary>
+        /// Resources released with the result (the HttpClient of a streamed response)
+        /// </summary>
+        internal IDisposable? Owner { get; set; }
 
         #endregion
 
@@ -174,9 +177,6 @@ namespace RestClient
 
         #region [ IDisposable ]
 
-        /// <summary>
-        /// True when the object was disposed.
-        /// </summary>
         private bool disposed = false;
 
         /// <summary>
@@ -200,6 +200,7 @@ namespace RestClient
                 {
                     (ContentAsObject as IDisposable)?.Dispose();
                     Response?.Dispose();
+                    Owner?.Dispose();
                 }
                 disposed = true;
             }
@@ -208,49 +209,32 @@ namespace RestClient
         #endregion
     }
 
-    namespace Generic
+    /// <summary>
+    /// The result of a request with a content of type T.
+    /// </summary>
+    /// <typeparam name="T">The type of the content.</typeparam>
+    public sealed class RestResult<T> : RestResult, IRestResult<T>
     {
+        internal RestResult(HttpResponseMessage response) : base(response) { }
+
+        internal RestResult(Exception exception) : base(exception) { }
+
         /// <summary>
-        /// Provides a specific T type action result of a post/get/put/delete call request.
+        /// Gets HTTP response's content. It is the default value of T when the request failed
+        /// or the response could not be read (see Exception).
         /// </summary>
-        /// <typeparam name="T">The type of the content.</typeparam>
-        public class RestResult<T> : RestResult, IRestResult<T>
+        public new T? Content { get; internal set; }
+
+        private protected override object? ContentAsObject => Content;
+
+        /// <summary>
+        /// Throws an exception if the request failed or the status code is not a success status code.
+        /// </summary>
+        /// <returns>The current instance</returns>
+        public new RestResult<T> EnsureSuccessStatusCode()
         {
-            #region [ Constructors ]
-
-            /// <summary>
-            /// Initializes a new instance of the RestClient.Generic.RestResult class.
-            /// </summary>
-            /// <param name="response">The HTTP response.</param>
-            internal RestResult(HttpResponseMessage response) : base(response) { }
-
-            /// <summary>
-            /// Initializes a new instance of the RestClient.Generic.RestResult class.
-            /// </summary>
-            /// <param name="exception">The exception raised during the request.</param>
-            internal RestResult(Exception exception) : base(exception) { }
-
-            #endregion
-
-            /// <summary>
-            /// Gets HTTP response's generic T object content
-            /// </summary>
-            public new T Content { get; internal set; }
-
-            /// <summary>
-            /// Gets HTTP response's content as object
-            /// </summary>
-            private protected override object ContentAsObject => Content;
-
-            /// <summary>
-            /// Throws an exception if the request failed or the status code is not a success status code.
-            /// </summary>
-            /// <returns>The current instance</returns>
-            public new RestResult<T> EnsureSuccessStatusCode()
-            {
-                base.EnsureSuccessStatusCode();
-                return this;
-            }
+            base.EnsureSuccessStatusCode();
+            return this;
         }
     }
 }

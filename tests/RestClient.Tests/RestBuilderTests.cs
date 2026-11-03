@@ -1,20 +1,26 @@
 namespace RestClient.Tests
 {
-    using RestClient.Generic;
     using System.Globalization;
     using System.Net;
     using System.Net.Http;
     using System.Net.Http.Headers;
     using System.Text;
+    using System.Text.Json.Serialization;
+
+    public class User
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+    }
+
+    [JsonSerializable(typeof(User))]
+    [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
+    public partial class TestJsonContext : JsonSerializerContext
+    {
+    }
 
     public class RestBuilderTests
     {
-        public class User
-        {
-            public int Id { get; set; }
-            public string Name { get; set; }
-        }
-
         private static RestBuilder Root(FakeHttpMessageHandler handler)
             => Rest.Build(handler.CreateClient()).Url("https://api.example.com/v1/");
 
@@ -34,7 +40,7 @@ namespace RestClient.Tests
         }
 
         [Fact]
-        public async Task Timeout_changes_do_not_leak_to_the_parent_builder()
+        public void Properties_changes_do_not_leak()
         {
             var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
             var root = Root(handler);
@@ -42,7 +48,9 @@ namespace RestClient.Tests
 
             Assert.Equal(RestProperties.DefaultTimeout, root.Properties.Timeout);
             Assert.Equal(TimeSpan.FromSeconds(1), child.Properties.Timeout);
-            await Task.CompletedTask;
+
+            root.Properties.Timeout = TimeSpan.FromSeconds(5);
+            Assert.Equal(RestProperties.DefaultTimeout, root.Properties.Timeout);
         }
 
         [Fact]
@@ -60,7 +68,7 @@ namespace RestClient.Tests
                     .Parameter(new RestParameter("q", "override"))
                     .GetAsync();
 
-                Assert.Equal("?q=override&price=1.5&active=true", handler.Requests[0].RequestUri.Query);
+                Assert.Equal("?price=1.5&active=true&q=override", handler.Requests[0].RequestUri.Query);
 
                 await Root(handler).Parameter("q", "a b&c=d").GetAsync();
                 Assert.Equal("?q=a%20b%26c%3Dd", handler.Requests[1].RequestUri.Query);
@@ -69,6 +77,20 @@ namespace RestClient.Tests
             {
                 CultureInfo.CurrentCulture = previous;
             }
+        }
+
+        [Fact]
+        public async Task Query_string_supports_repeated_keys()
+        {
+            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
+
+            await Root(handler).Parameter("id", new[] { 1, 2, 3 }).Parameter("x", "y").GetAsync();
+            await Root(handler).Parameter(p => { p.Add(new RestParameter("tag", "a")); p.Add(new RestParameter("tag", "b")); }).GetAsync();
+            await Root(handler).Parameter("id", new[] { 1, 2 }).Parameter("id", 9).GetAsync();
+
+            Assert.Equal("?id=1&id=2&id=3&x=y", handler.Requests[0].RequestUri.Query);
+            Assert.Equal("?tag=a&tag=b", handler.Requests[1].RequestUri.Query);
+            Assert.Equal("?id=9", handler.Requests[2].RequestUri.Query);
         }
 
         [Fact]
@@ -88,25 +110,62 @@ namespace RestClient.Tests
         }
 
         [Fact]
-        public async Task Generic_methods_support_types_without_parameterless_constructor()
+        public async Task Json_source_generated_context()
+        {
+            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK, "{\"id\":7,\"name\":\"Anna\"}");
+
+            RestResult<User> result = await Root(handler)
+                .Json(TestJsonContext.Default)
+                .Payload(new User { Id = 1, Name = "Mario" })
+                .PostAsync<User>();
+
+            Assert.Equal("Anna", result.Content.Name);
+            Assert.Equal("{\"id\":1,\"name\":\"Mario\"}", handler.RequestBodies[0]);
+        }
+
+        [Fact]
+        public async Task Generic_methods_support_any_type()
         {
             var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK, "[1,2,3]");
-            RestResult<IReadOnlyList<int>> result = await Root(handler).GetAsync<IReadOnlyList<int>>();
-            Assert.Equal(new[] { 1, 2, 3 }, result.Content);
+
+            RestResult<IReadOnlyList<int>> list = await Root(handler).GetAsync<IReadOnlyList<int>>();
+            RestResult<string> text = await Root(handler).GetAsync<string>();
+            RestResult<byte[]> bytes = await Root(handler).SendAsync<byte[]>(new HttpMethod("REPORT"));
+
+            Assert.Equal(new[] { 1, 2, 3 }, list.Content);
+            Assert.Equal("[1,2,3]", text.Content);
+            Assert.Equal(Encoding.UTF8.GetBytes("[1,2,3]"), bytes.Content);
+            Assert.Equal("REPORT", handler.Requests[2].Method.Method);
+        }
+
+        [Fact]
+        public async Task Empty_body_is_a_null_content()
+        {
+            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.NoContent, "");
+            RestResult<User> result = await Root(handler).GetAsync<User>();
+
+            Assert.True(result.IsSuccessStatusCode);
+            Assert.Null(result.Content);
+            Assert.Null(result.Exception);
         }
 
         [Fact]
         public async Task Deserialization_error_keeps_the_http_response()
         {
             var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.NotFound, "<html>not found</html>", "text/html");
+            var successHandler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK, "{ not json");
 
-            RestResult<User> result = await Root(handler).GetAsync<User>();
+            RestResult<User> notFound = await Root(handler).GetAsync<User>();
+            RestResult<User> invalid = await Root(successHandler).GetAsync<User>();
 
-            Assert.Equal(HttpStatusCode.NotFound, result.StatusCode);
-            Assert.NotNull(result.Response);
-            Assert.NotNull(result.Exception);
-            Assert.False(result.IsSuccessStatusCode);
-            Assert.Null(result.Content);
+            Assert.Equal(HttpStatusCode.NotFound, notFound.StatusCode);
+            Assert.NotNull(notFound.Response);
+            Assert.NotNull(notFound.Exception);
+            Assert.Equal("<html>not found</html>", await notFound.Response.Content.ReadAsStringAsync());
+
+            Assert.Equal(HttpStatusCode.OK, invalid.StatusCode);
+            Assert.NotNull(invalid.Exception);
+            Assert.False(invalid.IsSuccessStatusCode);
         }
 
         [Fact]
@@ -184,49 +243,14 @@ namespace RestClient.Tests
         }
 
         [Fact]
-        public async Task Refresh_token_retries_once_with_the_new_token()
+        public async Task Head_and_options()
         {
-            string token = "expired";
-            var handler = new FakeHttpMessageHandler((r, i) =>
-                new HttpResponseMessage(r.Headers.Authorization.Parameter == "valid" ? HttpStatusCode.OK : HttpStatusCode.Unauthorized)
-                {
-                    Content = new StringContent("ok")
-                });
-            var refreshHandler = FakeHttpMessageHandler.Returns(HttpStatusCode.Created);
-            int refreshCalls = 0;
+            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
+            await Root(handler).HeadAsync();
+            Root(handler).Options();
 
-            var api = Root(handler)
-                .Authentication(() => new AuthenticationHeaderValue("Bearer", token))
-                .RefreshTokenInvoke(async () =>
-                {
-                    refreshCalls++;
-                    token = "valid";
-                    return await Root(refreshHandler).PostAsync();
-                });
-
-            RestResult<string> first = await api.GetAsync();
-            Assert.Equal(HttpStatusCode.OK, first.StatusCode);
-            Assert.Equal(2, handler.Requests.Count);
-
-            // the builder keeps working for the next requests
-            token = "expired-again";
-            RestResult<string> second = await api.GetAsync();
-            Assert.Equal(HttpStatusCode.OK, second.StatusCode);
-            Assert.Equal(2, refreshCalls);
-        }
-
-        [Fact]
-        public async Task Refresh_token_is_not_retried_when_refresh_fails()
-        {
-            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.Unauthorized);
-            var refreshHandler = FakeHttpMessageHandler.Returns(HttpStatusCode.BadRequest);
-
-            RestResult<string> result = await Root(handler)
-                .RefreshTokenInvoke(() => Root(refreshHandler).Post())
-                .GetAsync();
-
-            Assert.Equal(HttpStatusCode.Unauthorized, result.StatusCode);
-            Assert.Single(handler.Requests);
+            Assert.Equal(HttpMethod.Head, handler.Requests[0].Method);
+            Assert.Equal(HttpMethod.Options, handler.Requests[1].Method);
         }
 
         [Fact]
@@ -243,6 +267,35 @@ namespace RestClient.Tests
             Assert.Equal("application/x-www-form-urlencoded", handler.Requests[0].Content.Headers.ContentType.MediaType);
             Assert.Equal("user+name=mario&pwd=a%26b", handler.RequestBodies[0]);
             Assert.Equal("user%20name=mario&pwd=a%26b", preview);
+        }
+
+        [Fact]
+        public async Task Multipart_form_data_content_can_be_retried()
+        {
+            int calls = 0;
+            var handler = new FakeHttpMessageHandler((r, i) =>
+                new HttpResponseMessage(++calls == 1 ? HttpStatusCode.ServiceUnavailable : HttpStatusCode.OK));
+            using var file = new MemoryStream(Encoding.UTF8.GetBytes("file-content"));
+
+            RestResult<string> result = await Root(handler)
+                .Retry(1, TimeSpan.Zero, retryNonIdempotentMethods: true)
+                .Multipart(m => m
+                    .Add("title", "hello")
+                    .AddFile("doc", file, "doc.txt", "text/plain")
+                    .AddFile("bin", new byte[] { 1, 2, 3 }, "a.bin"))
+                .PostAsync();
+
+            Assert.True(result.IsSuccessStatusCode);
+            Assert.Equal(1, result.RetryCount);
+            Assert.Equal(2, handler.Requests.Count);
+            Assert.Equal("multipart/form-data", handler.Requests[1].Content.Headers.ContentType.MediaType);
+            string body = handler.RequestBodies[1];
+            Assert.Contains("name=title", body);
+            Assert.Contains("hello", body);
+            Assert.Contains("filename=doc.txt", body);
+            Assert.Contains("file-content", body);
+            Assert.Contains("Content-Type: text/plain", body);
+            Assert.True(file.CanRead); // the caller's stream is not disposed
         }
 
         [Fact]
@@ -276,7 +329,7 @@ namespace RestClient.Tests
                 .Payload(new { text = new string('x', 50_000) })
                 .OnUploadProgress(upload.Add)
                 .OnDownloadProgress(download.Add)
-                .PostAsByteArrayAsync();
+                .PostAsync<byte[]>();
 
             Assert.Equal(payload, result.Content);
             Assert.Equal(10, download.Count);
@@ -286,7 +339,28 @@ namespace RestClient.Tests
         }
 
         [Fact]
-        public async Task Stream_and_string_results_and_events()
+        public async Task Stream_result_is_not_buffered()
+        {
+            var release = new TaskCompletionSource<bool>();
+            var handler = new FakeHttpMessageHandler((r, i) => new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StreamContent(new SlowStream(Encoding.UTF8.GetBytes("first-"), Encoding.UTF8.GetBytes("second"), release.Task))
+            });
+            var progress = new List<long>();
+
+            using RestResult<Stream> result = await Root(handler).OnDownloadProgress(p => progress.Add(p.CurrentBytes)).GetAsync<Stream>();
+
+            // the result is available before the whole body has been produced
+            Assert.False(release.Task.IsCompleted);
+            release.SetResult(true);
+
+            using var reader = new StreamReader(result.Content, Encoding.UTF8);
+            Assert.Equal("first-second", await reader.ReadToEndAsync());
+            Assert.Equal(new long[] { 6, 12 }, progress);
+        }
+
+        [Fact]
+        public async Task String_result_and_events()
         {
             var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK, "hello", "text/plain");
             string preview = null;
@@ -304,10 +378,6 @@ namespace RestClient.Tests
             Assert.Equal("hello", preview);
             Assert.Same(text, preCompleted.Result);
             Assert.Same(text, completed.Result);
-
-            using RestResult<Stream> stream = await Root(handler).GetAsStreamAsync();
-            using var reader = new StreamReader(stream.Content, Encoding.UTF8);
-            Assert.Equal("hello", await reader.ReadToEndAsync());
         }
 
         [Fact]
@@ -335,6 +405,41 @@ namespace RestClient.Tests
             var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
             await builder.UseHttpClient(handler.CreateClient()).GetAsync();
             Assert.Equal("a.example.com", handler.Requests[0].RequestUri.Host);
+        }
+
+        /// <summary>
+        /// Returns the first chunk, then waits for the release before returning the second one
+        /// </summary>
+        private sealed class SlowStream : Stream
+        {
+            private readonly Queue<byte[]> chunks;
+            private readonly Task release;
+
+            public SlowStream(byte[] first, byte[] second, Task release)
+            {
+                chunks = new Queue<byte[]>(new[] { first, second });
+                this.release = release;
+            }
+
+            public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+            {
+                if (chunks.Count == 0) { return 0; }
+                if (chunks.Count == 1) { await release; }
+                byte[] chunk = chunks.Dequeue();
+                Array.Copy(chunk, 0, buffer, offset, chunk.Length);
+                return chunk.Length;
+            }
+
+            public override int Read(byte[] buffer, int offset, int count) => ReadAsync(buffer, offset, count, default).GetAwaiter().GetResult();
+            public override bool CanRead => true;
+            public override bool CanSeek => false;
+            public override bool CanWrite => false;
+            public override long Length => throw new NotSupportedException();
+            public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+            public override void Flush() { }
+            public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+            public override void SetLength(long value) => throw new NotSupportedException();
+            public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
         }
     }
 }

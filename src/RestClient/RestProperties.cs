@@ -50,7 +50,7 @@ namespace RestClient
         /// <summary>
         /// End Point
         /// </summary>
-        public Uri EndPoint { get; set; }
+        public Uri? EndPoint { get; set; }
 
         /// <summary>
         /// Specifies how client certificated are provided. Default is "Manual"

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net10.0;net8.0;netstandard2.0</TargetFrameworks>
+    <AssemblyName>Mafe.RestClient.Extensions.DependencyInjection</AssemblyName>
+    <RootNamespace>RestClient.Extensions.DependencyInjection</RootNamespace>
+    <PackageId>Mafe.RestClient.Extensions.DependencyInjection</PackageId>
+    <Product>RestClient</Product>
+    <Description>Registers Mafe.RestClient builders in the dependency injection container, on top of IHttpClientFactory (pooled handlers, delegating handlers, resilience).</Description>
+    <PackageTags>rest-client, restclient, mafe, dependency-injection, httpclientfactory, fluent</PackageTags>
+    <PackageReleaseNotes>
+      2.0.0
+      - First release: AddRestClient(name, ...), AddRestClient&lt;TClient&gt;(...), IRestClientFactory
+    </PackageReleaseNotes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RestClient\RestClient.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.14" />
+  </ItemGroup>
+
+</Project>

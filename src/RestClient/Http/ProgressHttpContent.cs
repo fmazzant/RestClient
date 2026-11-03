@@ -93,7 +93,7 @@ namespace RestClient.Http
         /// <param name="stream">The target stream.</param>
         /// <param name="context">Information about the transport. This parameter may be null.</param>
         /// <returns>The task object representing the asynchronous operation</returns>
-        protected override async Task SerializeToStreamAsync(Stream stream, TransportContext context)
+        protected override async Task SerializeToStreamAsync(Stream stream, TransportContext? context)
         {
             long total = content.Headers.ContentLength ?? 0;
             long uploaded = 0;
