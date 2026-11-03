@@ -6,11 +6,11 @@
     <RootNamespace>RestClient.Extensions.DependencyInjection</RootNamespace>
     <PackageId>Mafe.RestClient.Extensions.DependencyInjection</PackageId>
     <Product>RestClient</Product>
-    <Version>2.0.0-rc.1</Version>
+    <Version>2.0.0</Version>
     <Description>Registers Mafe.RestClient builders in the dependency injection container, on top of IHttpClientFactory (pooled handlers, delegating handlers, resilience).</Description>
     <PackageTags>rest-client, restclient, mafe, dependency-injection, httpclientfactory, fluent</PackageTags>
     <PackageReleaseNotes>
-      2.0.0-rc.1
+      2.0.0
       - First release: AddRestClient(name, ...), AddRestClient&lt;TClient&gt;(...), IRestClientFactory
     </PackageReleaseNotes>
   </PropertyGroup>
