@@ -30,6 +30,9 @@
 namespace RestClient.Serialization
 {
     using System;
+    using System.IO;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Provides custom formatting for generic serialization and deserialization.
@@ -48,7 +51,7 @@ namespace RestClient.Serialization
         /// <param name="typeOf">The System.Type of object being deserialized.</param>
         /// <param name="options">The serializer options</param>
         /// <returns>The deserialized object from the custom string.</returns>
-        object DeserializeObject(string value, Type typeOf, object options = null);
+        object? DeserializeObject(string value, Type typeOf, object? options = null);
 
         /// <summary>
         /// Serializes the specified object to a custom string
@@ -57,6 +60,23 @@ namespace RestClient.Serialization
         /// <param name="typeOf">The type of the value being serialized.</param>
         /// <param name="options">The serializer options</param>
         /// <returns>A custom string representation of the object.</returns>
-        string SerializeObject(object value, Type typeOf, object options = null);
+        string SerializeObject(object? value, Type typeOf, object? options = null);
+    }
+
+    /// <summary>
+    /// A serializer that can deserialize directly from the response stream, without buffering it as a string.
+    /// RestClient uses it for successful responses when no OnPreviewContentResponseAsString handler is set.
+    /// </summary>
+    public interface IAsyncSerializerContent : ISerializerContent
+    {
+        /// <summary>
+        /// Deserializes the stream to the specified type.
+        /// </summary>
+        /// <param name="stream">The stream to deserialize. It can be empty.</param>
+        /// <param name="typeOf">The System.Type of object being deserialized.</param>
+        /// <param name="options">The serializer options</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>The deserialized object.</returns>
+        Task<object?> DeserializeObjectAsync(Stream stream, Type typeOf, object? options = null, CancellationToken cancellationToken = default);
     }
 }

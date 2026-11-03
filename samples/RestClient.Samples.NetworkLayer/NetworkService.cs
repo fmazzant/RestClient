@@ -29,7 +29,6 @@
 
 namespace RestClient.Samples.NetworkLayer
 {
-    using RestClient.Generic;
     using RestClient.Samples.NetworkLayer.Models;
     using System;
     using System.Threading.Tasks;

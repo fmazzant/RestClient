@@ -30,17 +30,27 @@
 namespace RestClient.Serialization.Json
 {
     using System;
+    using System.IO;
     using System.Text.Json;
+    using System.Text.Json.Serialization;
+    using System.Text.Json.Serialization.Metadata;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     /// <summary>
-    /// Implements a RestClient.Serialization.ISerializerContent for JSON object serialization based on System.Text.Json
+    /// Implements a RestClient.Serialization.ISerializerContent for JSON object serialization based on System.Text.Json.
+    /// The type metadata is always resolved with JsonSerializerOptions.GetTypeInfo: pass the options of a
+    /// JsonSerializerContext (source generator) to be Native AOT and trimming safe.
     /// </summary>
-    public sealed class JSON : ISerializerContent
+    public sealed class JSON : IAsyncSerializerContent
     {
         /// <summary>
         /// Default options used when no options are provided: web defaults (camelCase names, case-insensitive properties, numbers allowed as strings).
+        /// They use reflection: in Native AOT applications pass the options of a JsonSerializerContext.
         /// </summary>
         public static JsonSerializerOptions DefaultOptions { get; } = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+
+        private static readonly object resolverLock = new object();
 
         /// <summary>
         /// Initializes a new instance of the RestClient.Serialization.Json.JSON class.
@@ -57,15 +67,29 @@ namespace RestClient.Serialization.Json
         /// </summary>
         /// <param name="value">The JSON string to deserialize.</param>
         /// <param name="typeOf">The System.Type of object being deserialized.</param>
-        /// <param name="options">The System.Text.Json.JsonSerializerOptions. When null DefaultOptions are used.</param>
+        /// <param name="options">The JsonSerializerOptions or the JsonSerializerContext. When null DefaultOptions are used.</param>
         /// <returns>The deserialized object from the JSON string.</returns>
-        public object DeserializeObject(string value, Type typeOf, object options = null)
+        public object? DeserializeObject(string value, Type typeOf, object? options = null)
         {
             if (string.IsNullOrEmpty(value))
             {
                 return null;
             }
-            return JsonSerializer.Deserialize(value, typeOf, options as JsonSerializerOptions ?? DefaultOptions);
+            return JsonSerializer.Deserialize(value, GetTypeInfo(typeOf, options));
+        }
+
+        /// <summary>
+        /// Deserializes the JSON stream to the specified type.
+        /// </summary>
+        /// <param name="stream">The JSON stream to deserialize.</param>
+        /// <param name="typeOf">The System.Type of object being deserialized.</param>
+        /// <param name="options">The JsonSerializerOptions or the JsonSerializerContext. When null DefaultOptions are used.</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>The deserialized object.</returns>
+        public async Task<object?> DeserializeObjectAsync(Stream stream, Type typeOf, object? options = null, CancellationToken cancellationToken = default)
+        {
+            if (stream == null) { throw new ArgumentNullException(nameof(stream)); }
+            return await JsonSerializer.DeserializeAsync(stream, GetTypeInfo(typeOf, options), cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -73,15 +97,42 @@ namespace RestClient.Serialization.Json
         /// </summary>
         /// <param name="value">The object to serialize.</param>
         /// <param name="typeOf">The type of the value being serialized.</param>
-        /// <param name="options">The System.Text.Json.JsonSerializerOptions. When null DefaultOptions are used.</param>
+        /// <param name="options">The JsonSerializerOptions or the JsonSerializerContext. When null DefaultOptions are used.</param>
         /// <returns>A JSON string representation of the object.</returns>
-        public string SerializeObject(object value, Type typeOf, object options = null)
+        public string SerializeObject(object? value, Type typeOf, object? options = null)
         {
             if (value == null)
             {
                 return string.Empty;
             }
-            return JsonSerializer.Serialize(value, typeOf ?? value.GetType(), options as JsonSerializerOptions ?? DefaultOptions);
+            return JsonSerializer.Serialize(value, GetTypeInfo(typeOf ?? value.GetType(), options));
+        }
+
+        private static JsonTypeInfo GetTypeInfo(Type type, object? options)
+        {
+            if (type == null) { throw new ArgumentNullException(nameof(type)); }
+
+            JsonSerializerOptions jsonOptions = options switch
+            {
+                JsonSerializerContext context => context.Options,
+                JsonSerializerOptions o => o,
+                _ => DefaultOptions
+            };
+
+            if (!jsonOptions.IsReadOnly && jsonOptions.TypeInfoResolver == null && JsonSerializer.IsReflectionEnabledByDefault)
+            {
+                lock (resolverLock)
+                {
+                    if (!jsonOptions.IsReadOnly && jsonOptions.TypeInfoResolver == null)
+                    {
+#pragma warning disable IL2026, IL3050 // guarded by JsonSerializer.IsReflectionEnabledByDefault, false in Native AOT/trimmed apps
+                        jsonOptions.TypeInfoResolver = new DefaultJsonTypeInfoResolver();
+#pragma warning restore IL2026, IL3050
+                    }
+                }
+            }
+
+            return jsonOptions.GetTypeInfo(type);
         }
     }
 }

@@ -1,0 +1,8 @@
+#nullable enable
+Microsoft.Extensions.DependencyInjection.RestClientServiceCollectionExtensions
+RestClient.IRestClientFactory
+RestClient.IRestClientFactory.CreateClient(string! name) -> RestClient.RestBuilder!
+static Microsoft.Extensions.DependencyInjection.RestClientServiceCollectionExtensions.AddRestClient(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, string! name, System.Func<RestClient.RestBuilder!, RestClient.RestBuilder!>! configure) -> Microsoft.Extensions.DependencyInjection.IHttpClientBuilder!
+static Microsoft.Extensions.DependencyInjection.RestClientServiceCollectionExtensions.AddRestClient(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, string! name, System.Func<System.IServiceProvider!, RestClient.RestBuilder!, RestClient.RestBuilder!>! configure) -> Microsoft.Extensions.DependencyInjection.IHttpClientBuilder!
+static Microsoft.Extensions.DependencyInjection.RestClientServiceCollectionExtensions.AddRestClient<TClient>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Func<RestClient.RestBuilder!, RestClient.RestBuilder!>! configure) -> Microsoft.Extensions.DependencyInjection.IHttpClientBuilder!
+static Microsoft.Extensions.DependencyInjection.RestClientServiceCollectionExtensions.AddRestClient<TClient>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Func<System.IServiceProvider!, RestClient.RestBuilder!, RestClient.RestBuilder!>! configure) -> Microsoft.Extensions.DependencyInjection.IHttpClientBuilder!

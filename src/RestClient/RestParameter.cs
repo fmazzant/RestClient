@@ -39,7 +39,7 @@ namespace RestClient
         /// </summary>
         /// <param name="key">Key parameter</param>
         /// <param name="value">Value parameter</param>
-        public RestParameter(string key, object value)
+        public RestParameter(string? key, object? value)
         {
             Key = key;
             Value = value;
@@ -48,12 +48,12 @@ namespace RestClient
         /// <summary>
         /// Key parameter
         /// </summary>
-        public string Key { get; set; }
+        public string? Key { get; set; }
 
         /// <summary>
         /// Value parameter
         /// </summary>
-        public object Value { get; set; }
+        public object? Value { get; set; }
 
         /// <summary>
         /// true if the Key has a value; false if the Key has no value.

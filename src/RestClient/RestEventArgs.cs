@@ -44,12 +44,12 @@ namespace RestClient
         /// <summary>
         /// The payload of request
         /// </summary>
-        public object Payload { get; internal set; }
+        public object? Payload { get; internal set; }
 
         /// <summary>
         /// The Url request
         /// </summary>
-        public string Url { get; internal set; }
+        public string Url { get; internal set; } = string.Empty;
     }
 
     /// <summary>
@@ -86,12 +86,12 @@ namespace RestClient
         /// <summary>
         /// Content serialized As String
         /// </summary>
-        public string ContentAsString { get; internal set; }
+        public string? ContentAsString { get; internal set; }
 
         /// <summary>
         /// Content serialized Type
         /// </summary>
-        public Type ContentType { get; internal set; }
+        public Type? ContentType { get; internal set; }
     }
 
     /// <summary>
@@ -102,7 +102,7 @@ namespace RestClient
         /// <summary>
         /// The result of the request
         /// </summary>
-        public RestResult Result { get; internal set; }
+        public RestResult Result { get; internal set; } = null!;
 
         /// <summary>
         /// true is completed
@@ -118,7 +118,7 @@ namespace RestClient
         /// <summary>
         /// The result of the request
         /// </summary>
-        public RestResult Result { get; internal set; }
+        public RestResult Result { get; internal set; } = null!;
 
         /// <summary>
         /// Time of execution

@@ -8,6 +8,15 @@ To use it in your project, add the Mafe.RestClient NuGet package to your project
 
 Supported target frameworks: `net10.0`, `net8.0`, `netstandard2.1`, `netstandard2.0` (.NET Framework 4.6.2+, Xamarin, Unity, ...).
 
+Highlights:
+
+* fluent and immutable builder, safe to reuse and to share between threads
+* pooled connections, retry policy, refresh token, timeout, cancellation
+* JSON (System.Text.Json, Native AOT ready), XML or custom serialization, `multipart/form-data`, form-url-encoded
+* real streaming for downloads, upload/download progress
+* `ILogger` logging and OpenTelemetry tracing
+* `IHttpClientFactory` integration with the [Mafe.RestClient.Extensions.DependencyInjection](#dependency-injection) package
+
 > Upgrading from 1.x? Read [Migrating to 2.0](#migrating-to-20): version 2.0.0 contains breaking changes.
 
 ### What is RestClient?
@@ -73,6 +82,7 @@ var rest = Rest.Build(properties);
 ```
 
 The properties are copied: changing `properties` after `Build` does not affect the builder.
+`RestBuilder.Properties` returns a copy too: use the builder methods (`Url`, `Timeout`, `BufferSize`) to change them.
 
 ### Immutable builder
 
@@ -87,15 +97,18 @@ var user2 = await users.Command(2).GetAsync<User>();   // [URL]/users/2
 var all   = await users.GetAsync<List<User>>();        // [URL]/users
 ```
 
+### Connections
+
+RestClient keeps a pool of HTTP handlers, one for each combination of compression, credentials, certificate option and
+certificate validation callback. The TCP/TLS connections are reused by all the requests (no socket exhaustion, no handshake
+for every call) and, on .NET 8+, they are recycled every 2 minutes so that DNS changes are honored. Cookies are not stored.
+
 ### Using an existing HttpClient (IHttpClientFactory)
 
-By default RestClient creates (and disposes) an `HttpClient` for every request. In server applications it is better to
-reuse the `HttpClient` instances, for example those created by `IHttpClientFactory`:
+You can send the requests with your own `HttpClient`, for example one created by `IHttpClientFactory`
+(see also [Dependency Injection](#dependency-injection)):
 
 ```c#
-services.AddHttpClient("api");
-
-// ...
 HttpClient httpClient = httpClientFactory.CreateClient("api");
 
 var result = await Rest.Build(httpClient)       // or Rest.Build().UseHttpClient(httpClient)
@@ -105,9 +118,35 @@ var result = await Rest.Build(httpClient)       // or Rest.Build().UseHttpClient
 ```
 
 The external `HttpClient` is never disposed by RestClient. `NetworkCredential`, `CertificateValidation`,
-`RestProperties.CertificateOption`, `EnableGZipCompression` and `OnConfigureHttpClient` configure the `HttpClient` created
+`RestProperties.CertificateOption`, `EnableGZipCompression` and `OnConfigureHttpClient` configure the `HttpClient` managed
 by RestClient, so they are not applied to an external one: configure them on your handler.
-Headers, authentication, timeout, serialization, progress and all the events work in both cases.
+Headers, authentication, timeout, retry, serialization, progress and all the events work in both cases.
+
+### Dependency Injection
+
+The `Mafe.RestClient.Extensions.DependencyInjection` package registers the builders on top of `IHttpClientFactory`:
+
+```c#
+// named client
+services.AddRestClient("github", builder => builder
+        .Url("https://api.github.com")
+        .Header("User-Agent", "my-app"))
+    .AddStandardResilienceHandler();   // any IHttpClientBuilder extension: handlers, resilience, ...
+
+public class ReposService(IRestClientFactory factory)
+{
+    private readonly RestBuilder github = factory.CreateClient("github");
+
+    public Task<RestResult<Repo>> GetAsync(string owner, string name)
+        => github.Command("repos").Command(owner).Command(name).GetAsync<Repo>();
+}
+
+// typed client: UsersClient receives a configured RestBuilder in its constructor
+services.AddRestClient<UsersClient>((provider, builder) => builder
+    .Url(provider.GetRequiredService<IConfiguration>()["Api:Url"]!));
+```
+
+The builders created by `IRestClientFactory` log with the category `Mafe.RestClient.{name}`.
 
 ### Certificate Validation
 
@@ -141,6 +180,10 @@ var result = Rest.Build()
     .Url("[URL]")
     .Get();
 ```
+
+By default RestClient uses the validation of the operating system. The callback is applied only to the requests of the builder.
+Since the HTTP handlers are pooled by configuration, define the callback once (a static method or a field) instead of
+creating a new closure for every request.
 
 ### Authentication
 
@@ -181,6 +224,11 @@ var result = Rest.Build()
     .Url(url)
     .Get();
 ```
+
+When the response is `401 Unauthorized` the refresh func is invoked and, if it returns a 2xx result, the request is sent again
+(once). The `Authentication` func is evaluated for every attempt, so the new token is used.
+When many concurrent requests of the same builder receive 401, the refresh func is invoked **only once** and the other
+requests wait for it. The requests sent from inside the refresh func never trigger another refresh.
 
 A refresh_token should be revoked:
 * If a user is no longer permitted to make requests on the API, or
@@ -250,6 +298,27 @@ var result = Rest.Build()
     .Get<ResponseObject>();
 ```
 
+Successful JSON responses are deserialized directly from the network stream, without buffering the body as a string
+(unless `OnPreviewContentResponseAsString` is used). An empty body (for example `204 No Content`) is a `null` content.
+
+#### Native AOT and trimming
+
+The JSON serializer is compatible with Native AOT and trimming when it uses a source generated `JsonSerializerContext`:
+
+```c#
+[JsonSerializable(typeof(User))]
+[JsonSerializable(typeof(List<User>))]
+[JsonSourceGenerationOptions(JsonSerializerDefaults.Web)]
+public partial class AppJsonContext : JsonSerializerContext { }
+
+var users = await Rest.Build()
+    .Url("[URL]")
+    .Json(AppJsonContext.Default)
+    .GetAsync<List<User>>();
+```
+
+`Xml()` uses `XmlSerializer`, which is not compatible with trimming: the method is annotated, so the compiler warns you.
+
 RestClient uses .Xml() to serialize an object into xml.
 
 ```c#
@@ -277,17 +346,20 @@ public class MyCustomSerializer : ISerializerContent
 {
     public string MediaTypeAsString => throw new NotImplementedException();
 
-    public object DeserializeObject(string value, Type typeOf, object options = null)
+    public object? DeserializeObject(string value, Type typeOf, object? options = null)
     {
         throw new NotImplementedException();
     }
 
-    public string SerializeObject(object value, Type typeOf, object options = null)
+    public string SerializeObject(object? value, Type typeOf, object? options = null)
     {
         throw new NotImplementedException();
     }
 }
 ```
+
+Implement `IAsyncSerializerContent` (it adds `DeserializeObjectAsync(Stream, ...)`) to deserialize directly from the response stream.
+
 Now, we can use MyCustomSerializer like this:
 
 ```c#
@@ -320,6 +392,32 @@ var result = Rest.Build()
 ```
 
 The library sends the `Accept-Encoding` header and uncompresses automatically the response (gzip, deflate and, on .NET 8+, brotli).
+
+### Response types
+
+Every HTTP method has a non generic version, that returns the body as `string`, and a generic one. `T` can be:
+
+| T | Content |
+|---|---|
+| `string` | the raw body |
+| `byte[]` | the raw body |
+| `Stream` | the body **not buffered**: it is read from the network while you read it. Dispose the result when done. |
+| any other type | the body deserialized with the configured serializer (JSON by default) |
+
+```c#
+RestResult<User> user = await root.Command("users/1").GetAsync<User>();
+RestResult<byte[]> image = await root.Command("avatar.png").GetAsync<byte[]>();
+
+using RestResult<Stream> file = await root.Command("big-file.zip").GetAsync<Stream>();
+await file.Content!.CopyToAsync(destination);
+```
+
+The available methods are `Get`, `Post`, `Put`, `Patch`, `Delete`, `Head` and `Options` (each one with an `Async` version).
+Any other method can be sent with `SendAsync<T>(HttpMethod)` / `Send<T>(HttpMethod)`:
+
+```c#
+var result = await root.Command("calendar").SendAsync<string>(new HttpMethod("REPORT"));
+```
 
 ### Get
 
@@ -365,6 +463,17 @@ The url generated is: [URL]/path?id=10&type=myType
 
 Keys and values are url-encoded (`"a b&c"` becomes `a%20b%26c`) and formatted with the invariant culture
 (`1.5` is always `1.5`, `true` is `true`, dates are ISO 8601). Do not encode the values yourself.
+
+Setting a key again replaces its value. To repeat a key pass a collection, or add more parameters with the same key in one call:
+
+```c#
+.Parameter("id", new[] { 1, 2, 3 })               // ?id=1&id=2&id=3
+.Parameter(p =>
+{
+    p.Add(new RestParameter("tag", "a"));
+    p.Add(new RestParameter("tag", "b"));         // ?tag=a&tag=b
+})
+```
 
 ### Post
 
@@ -434,23 +543,18 @@ var result = await Rest.Build()
 
 ### Download
 
-The DOWNLOAD method download the specified resource.
+To download a resource use `byte[]` (in memory) or `Stream` (streamed, for large files):
 
 ```c#
-var result = Rest.Build()
-    .Download("[URL]");
+var bytes = await Rest.Build().Url("[URL]").GetAsync<byte[]>();
 
-var result = await rest
-    .DownloadAsync("[URL]");
-```
-Is possible display the download status with OnDownloadProgress.
-
-```c#
-var rest = Rest.Build();
-
-var result = await rest
+using var file = await Rest.Build()
+    .Url("[URL]")
     .OnDownloadProgress((d) => Console.WriteLine($"{d.CurrentBytes}/{d.TotalBytes}"))
-    .DownloadAsync("[URL]");
+    .GetAsync<Stream>();
+
+using var output = File.Create("file.zip");
+await file.Content!.CopyToAsync(output);   // OnDownloadProgress is raised while copying
 ```
 
 ### CancellationToken
@@ -465,43 +569,39 @@ The following example uses cancellation token to stop execution:
 
 ```c#
 // Define the cancellation token.
-CancellationTokenSource source = new CancellationTokenSource();
-CancellationToken token = source.Token;
+using CancellationTokenSource source = new CancellationTokenSource();
 
-// Schedules a cancel operation on this System.Threading.CancellationTokenSource
-// after the specified number of milliseconds
-token.CancelAfter(3000);
+// Schedules a cancel operation after the specified number of milliseconds
+source.CancelAfter(3000);
 
-var file1 = Rest.Build().DownloadAsync("[URL FILE1]", token.Token);
-var file2 = Rest.Build().DownloadAsync("[URL FILE2]", token.Token);
-var get1 = Rest.Build().Url("[URL GET1]").GetAsync<MyObject>(token.Token);
+var file1 = Rest.Build().Url("[URL FILE1]").GetAsync<byte[]>(source.Token);
+var file2 = Rest.Build().Url("[URL FILE2]").GetAsync<byte[]>(source.Token);
+var get1 = Rest.Build().Url("[URL GET1]").GetAsync<MyObject>(source.Token);
 
-Task.WaitAll(file1, file2, get1);
+await Task.WhenAll(file1, file2, get1);
 ```
 
-After cancellation requested it throws a TaskCancellatedException. 
-The exception will be encapsulated into RestResult object.
+The request does not throw: the `OperationCanceledException` is available in `result.Exception` and
+`result.IsCancellationRequested` is true. The synchronous methods accept a `CancellationToken` too.
 
-### Custom Call
+### Retry
 
-The CUSTOM method customizing the specified resource.
+Transient errors (network errors, timeouts, 408, 429, 500, 502, 503, 504) can be retried with an exponential backoff
+with jitter. The `Retry-After` header is honored (up to 30 seconds).
 
 ```c#
-HttpMethod PATCH = new HttpMethod("PATCH");
-var rest = Rest.Build();
-
-var result = rest
+var result = await Rest.Build()
     .Url("[URL]")
-    .Command("/action")
-    .Payload(new Object{})
-    .CustomCall<ResponseObject>(PATCH);
+    .Retry(3)                                   // 3 retries: 200ms, 400ms, 800ms (+ jitter)
+    .GetAsync<MyObject>();
 
-var result = await rest
-    .Url("[URL]")
-    .Command("/action")
-    .Payload(new Object{})
-    .CustomCallAsync<ResponseObject>(PATCH);
+var count = result.RetryCount;                  // retries executed
 ```
+
+Only idempotent methods (GET, HEAD, OPTIONS, PUT, DELETE, TRACE) are retried, because a POST or a PATCH could be executed twice.
+Use `Retry(3, TimeSpan.FromSeconds(1), retryNonIdempotentMethods: true)` if your API is idempotent.
+The timeout applies to every attempt. For advanced policies (circuit breaker, hedging) use `IHttpClientFactory` with
+`Microsoft.Extensions.Http.Resilience`, see [Dependency Injection](#dependency-injection).
 
 ### Payload
 
@@ -553,6 +653,26 @@ var result = Rest.Build()
     })
     .Post();
 ```
+
+### Multipart (multipart/form-data)
+
+To upload files and fields use `Multipart`:
+
+```c#
+var result = await Rest.Build()
+    .Url("[URL]")
+    .Command("/upload")
+    .OnUploadProgress(p => Console.WriteLine($"{p.ProgressPercentage}%"))
+    .Multipart(m => m
+        .Add("title", "My document")
+        .AddFile("document", "C:\\docs\\report.pdf", "application/pdf")   // opened when the request is sent
+        .AddFile("thumbnail", thumbnailBytes, "thumb.png", "image/png")
+        .AddFile("data", stream, "data.csv", "text/csv"))                 // not disposed by RestClient
+    .PostAsync<UploadResponse>();
+```
+
+The content is created again for every attempt (retry, refresh token): byte arrays, file paths and stream factories
+(`AddFile(name, () => OpenStream(), fileName)`) can always be resent, a `Stream` only if it is seekable.
 
 ### OnUploadProgress
 
@@ -632,6 +752,30 @@ else                                     // no response: network error, timeout,
 
 // or, if you prefer exceptions:
 result.EnsureSuccessStatusCode();
+```
+
+### Logging
+
+Pass an `ILogger` to log the requests (Debug), the responses (Information), the retries (Warning) and the errors (Error).
+The query string is never logged because it can contain secrets.
+
+```c#
+var result = await Rest.Build()
+    .Url("[URL]")
+    .Logger(loggerFactory.CreateLogger("MyApi"))
+    .GetAsync<MyObject>();
+```
+
+### Tracing (OpenTelemetry)
+
+Every request creates an `Activity` named `RestClient {METHOD}` from the `ActivitySource` `Mafe.RestClient`, with the tags
+`http.request.method`, `url.full` (without query string), `http.response.status_code`, `rest_client.retry_count` and
+`error.type`. The activities of `HttpClient` (one for each attempt) are its children.
+
+```c#
+builder.Services.AddOpenTelemetry().WithTracing(tracing => tracing
+    .AddSource(RestClientTelemetry.ActivitySourceName)
+    .AddHttpClientInstrumentation());
 ```
 
 ### OnStart
@@ -802,22 +946,45 @@ Version 2.0.0 modernizes the library and fixes several long-standing issues. It 
 * Removed (out of support): `net7.0`, `net6.0`, `netcoreapp3.1`, `netstandard1.3`, `net452`, `net46`, `net461`, `net462`, `net47`, `net471`, `net472`, `net48`.
   .NET Framework 4.6.2+ applications keep working through `netstandard2.0`.
 * Newtonsoft.Json is no longer used: JSON is always System.Text.Json. `Json(JsonSerializerSettings)` has been removed; use `Json(JsonSerializerOptions)` or a custom `ISerializerContent`.
+* New dependencies: `Microsoft.Extensions.Logging.Abstractions` (and, on .NET Standard, `System.Text.Json` and `System.Diagnostics.DiagnosticSource`).
+
+### Namespaces
+
+`RestResult<T>` moved from `RestClient.Generic` to `RestClient`: remove `using RestClient.Generic;`.
 
 ### Removed APIs
 
 | Removed | Use instead |
 |---|---|
+| `GetAsByteArray()`, `PostAsByteArrayAsync()`, ... (all `*AsByteArray*`) | `Get<byte[]>()`, `PostAsync<byte[]>()`, ... |
+| `GetAsStream()`, `PostAsStreamAsync()`, ... (all `*AsStream*`) | `Get<Stream>()`, `PostAsync<Stream>()`, ... (now really streamed: dispose the result) |
+| `Download(url)`, `DownloadAsync(url)` | `Url(url).GetAsync<byte[]>()` |
+| `CustomCall(method)`, `CustomCallAsync<T>(method)`, ... | `Send<string>(method)`, `SendAsync<T>(method)`, ... |
+| `Get(string url)`, `Get(Uri url)` | `Url(url).Get()` |
+| `Command(uint)` | `Command(long)` (an `uint` argument still compiles) |
 | `OnAuthentication(...)` | `Authentication(...)` |
 | `Compression()` | `EnableGZipCompression()` |
 | `EnableGZipCompression(bool deflate)` | `EnableGZipCompression()` (gzip, deflate and brotli are all enabled) |
 | `OnPreResult(...)` | `OnPreCompleted(e => e.Result)` |
 | `OnPreviewContentAsString(...)` | `OnPreviewContentResponseAsString(...)` |
 | `RestResult<T>.StringContent` | `OnPreviewContentResponseAsString(...)` |
-| `HttpClientCompressionHandler` | automatic decompression of `HttpClientHandler` |
+| `HttpClientCompressionHandler` | automatic decompression of the pooled handlers |
 | `ProgressBytesChangedEventHandler` | `OnUploadProgress` / `OnDownloadProgress` |
+
+### Changed signatures
+
+* `GetAsync<T>()` with `T = string` returns the raw body (in 1.x it was deserialized as a JSON string).
+* The synchronous methods (`Get()`, `Post<T>()`, ...) accept an optional `CancellationToken`.
+* `CertificateValidation` takes `Func<object, X509Certificate?, X509Chain?, SslPolicyErrors, bool>` (existing lambdas compile unchanged).
+* `NetworkCredential(Func<ICredentials?>)` instead of `Func<NetworkCredential>` (existing lambdas compile unchanged).
+* `RestBuilder.Properties` returns a copy of the properties (in 1.x changing it changed every builder sharing the instance).
+* `RestResult<T>` is sealed and it can no longer be created or subclassed outside the library.
+* The whole API is annotated for nullable reference types.
 
 ### Behavior changes
 
+* **Connections**: the HTTP handlers are pooled and the connections are reused (in 1.x a new handler, and a new TCP/TLS connection,
+  was created for every request). Cookies are not stored, as in 1.x.
 * **TLS certificate validation**: 1.x set `ServicePointManager.ServerCertificateValidationCallback` to *accept every certificate*
   for the whole process on .NET Framework/.NET Standard, as soon as a `RestBuilder` was created. This has been removed:
   certificates are validated by default and `CertificateValidation(...)` only affects the requests of that builder.
@@ -828,22 +995,25 @@ Version 2.0.0 modernizes the library and fixes several long-standing issues. It 
   and responses are read case-insensitively. To keep the 1.x behavior use `.Json(new JsonSerializerOptions())`.
 * **Query string**: keys and values are url-encoded and formatted with the invariant culture. If you encoded them manually,
   remove the manual encoding. A trailing `/` in the endpoint is removed before appending the commands.
+  Collections are expanded into repeated keys (`?id=1&id=2`).
 * **Headers**: `Header(...)` and `Authentication(...)` are applied to the request message instead of `HttpClient.DefaultRequestHeaders`.
   Multiple `Header(...)` calls are combined (in 1.x the last one won).
 * **FormUrlEncoded**: `FormUrlEncoded(dictionary)` and `FormUrlEncoded(action)` enable the form-url-encoded content automatically.
-* **Timeout**: the timeout is managed by RestClient. When it elapses the result contains a `TimeoutException`
-  (`IsTimedOut == true`, `IsCancellationRequested == false`). `OnConfigureHttpClient` can still set `HttpClient.Timeout`.
+  `Payload`, `FormUrlEncoded` and `Multipart` replace each other.
+* **Timeout**: the timeout is managed by RestClient and applies to every attempt. When it elapses the result contains a `TimeoutException`
+  (`IsTimedOut == true`, `IsCancellationRequested == false`). For `Stream` results it covers the response headers only.
+* **Streams**: `Stream` results are not buffered anymore: the connection stays open until the result (or the stream) is disposed.
 * **RestResult**:
   * `StatusCode` is `0` (instead of `404 NotFound`) when no response has been received.
   * `Version` is `null` (in 1.x it threw a `FormatException`) and `ReasonPhrase` is the exception message when no response has been received.
   * `Exception` is available on the base `RestResult` class.
   * When the response body cannot be deserialized, the result keeps `Response`, `StatusCode` and `Headers` and the error is in `Exception`
-    (in 1.x the whole response was lost). `IsSuccessStatusCode` is false in this case.
+    (in 1.x the whole response was lost). `IsSuccessStatusCode` is false in this case. An empty body is a `null` content, not an error.
   * `IRestResult.Content` returns the content (in 1.x it was always null).
   * Disposing a `RestResult<Stream>` disposes the stream.
-  * `RestResult` can no longer be subclassed outside the library.
-* **Refresh token**: the refresh func is accepted when it returns any 2xx status code (not only 200). The retry happens once per request,
-  and the builder can be reused for later requests (in 1.x, after the first refresh the builder never refreshed again).
+* **Refresh token**: the refresh func is accepted when it returns any 2xx status code (not only 200). It runs once for all the concurrent
+  requests that receive 401, the retry happens once per request, and the builder can be reused for later requests
+  (in 1.x, after the first refresh the builder never refreshed again).
 * **Generic methods**: the `where T : new()` constraint has been removed, so interfaces, arrays, records and immutable types can be used.
 * **Sync methods** (`Get()`, `Post()`, ...) no longer deadlock in UI or classic ASP.NET synchronization contexts.
 * **XML**: `Xml(readerOptions, writerOptions)` used the reader settings to serialize and the writer settings to deserialize; this has been fixed.
@@ -851,10 +1021,13 @@ Version 2.0.0 modernizes the library and fixes several long-standing issues. It 
 
 ### New APIs
 
+* `SendAsync<T>(HttpMethod)` / `Send<T>(HttpMethod)`, `Head`, `Options`; `T` can be `string`, `byte[]`, `Stream` or a DTO.
+* `Retry(maxRetries, delay, retryNonIdempotentMethods)` and `RestResult.RetryCount`.
+* `Multipart(m => m.Add(...).AddFile(...))`.
+* `Logger(ILogger)` and the `ActivitySource` `RestClientTelemetry.ActivitySourceName`.
+* `Json(JsonSerializerContext)` for Native AOT, `IAsyncSerializerContent` for streaming deserialization.
 * `Rest.Build(HttpClient)` and `UseHttpClient(HttpClient)` to reuse an external `HttpClient`.
-* `Header(string name, string value)`.
-* `Command(long)`.
-* `CustomSerializer(serializer, options)`.
+* Package `Mafe.RestClient.Extensions.DependencyInjection`: `AddRestClient(name, ...)`, `AddRestClient<TClient>(...)`, `IRestClientFactory`.
+* `Header(string name, string value)`, `Command(long)`, `CustomSerializer(serializer, options)`, `new RestParameter(key, value)`.
 * `RestResult.EnsureSuccessStatusCode()`, `RestResult.IsTimedOut`.
-* `new RestParameter(key, value)`.
 * `RestProperties.Clone()`, `RestProperties.DefaultTimeout`, `RestProperties.DefaultBufferSize`, `JSON.DefaultOptions`.

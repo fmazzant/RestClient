@@ -33,7 +33,7 @@ jobs:
         dotnet test -c Release --no-build -f net8.0 tests/RestClient.Tests/RestClient.Tests.csproj
 
     - name: Package
-      run: dotnet pack -c Release --no-build -o ./artifacts src/RestClient/RestClient.csproj
+      run: dotnet pack -c Release --no-build -o ./artifacts src/RestClient.sln
 
     - name: Publish on NuGet
       run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate

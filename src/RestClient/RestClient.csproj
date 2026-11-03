@@ -2,82 +2,43 @@
 
   <PropertyGroup>
     <TargetFrameworks>net10.0;net8.0;netstandard2.1;netstandard2.0</TargetFrameworks>
-    <LangVersion>latest</LangVersion>
-    <NeutralLanguage>en</NeutralLanguage>
-    <Authors>Federico Mazzanti</Authors>
-    <Description>RestClient is a library for .net that can help you to consume REST services.</Description>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/fmazzant/RestClient</RepositoryUrl>
-    <PackageTags>rest-client, c-sharp, dotnet-standard, dotnet-core, dotnet-framework, http-client, restclient, mafe, xml, json, rest, fluent</PackageTags>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <Copyright>Copyright (c) 2020-2026 Federico Mazzanti</Copyright>
-    <Company />
-    <PackageId>Mafe.RestClient</PackageId>
-    <Product>RestClient</Product>
-    <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <Version>2.0.0</Version>
     <AssemblyName>Mafe.$(MSBuildProjectName)</AssemblyName>
     <RootNamespace>RestClient</RootNamespace>
-
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn);CS1591</NoWarn>
-    <Deterministic>true</Deterministic>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-
+    <PackageId>Mafe.RestClient</PackageId>
+    <Product>RestClient</Product>
+    <Description>RestClient is a fluent library for .NET that helps you to consume REST services.</Description>
+    <PackageTags>rest-client, c-sharp, dotnet-standard, dotnet-core, dotnet-framework, http-client, restclient, mafe, xml, json, rest, fluent</PackageTags>
     <PackageReleaseNotes>
       2.0.0 (breaking changes, see README "Migrating to 2.0")
       - Target frameworks: net10.0, net8.0, netstandard2.1, netstandard2.0 (.NET Framework 4.6.2+ via netstandard2.0)
-      - Removed EOL targets (net7.0, net6.0, netcoreapp3.1, netstandard1.3, net45x, net46x, net47x, net48) and Newtonsoft.Json
-      - Removed all members marked as [Obsolete]
+      - Removed EOL targets and Newtonsoft.Json, removed all [Obsolete] members
+      - Pooled HTTP handlers: connections are reused across requests (no more socket exhaustion)
       - Removed the global ServicePointManager callback that disabled TLS certificate validation for the whole process
-      - Builder is now really immutable: every fluent call returns an independent copy (commands, parameters, properties)
-      - Query string keys and values are URL-encoded and formatted with the invariant culture
-      - JSON uses System.Text.Json with web defaults (camelCase, case-insensitive) unless options are provided
-      - New UseHttpClient(HttpClient) / Rest.Build(HttpClient) to reuse an external HttpClient (IHttpClientFactory friendly)
-      - Headers and authentication are applied to the request message, not to HttpClient.DefaultRequestHeaders
-      - Automatic gzip/deflate (and brotli on .NET) decompression
-      - Timeout produces a TimeoutException (RestResult.IsTimedOut) instead of a generic cancellation
-      - Deserialization errors no longer hide the HTTP response: status code and headers are preserved, error in RestResult.Exception
-      - Refresh token flow no longer mutates the builder and accepts any 2xx response from the refresh call
-      - Removed the "new()" constraint from generic methods
-      - ConfigureAwait(false) everywhere: synchronous methods no longer deadlock on UI/ASP.NET classic contexts
-      - Bug fixes: XML reader/writer settings swapped, duplicated parameter keys exception, RestResult.Version/ReasonPhrase/Dispose crashes
+      - Immutable builder: every fluent call returns an independent copy
+      - Smaller API: SendAsync&lt;T&gt;(method) + Get/Post/Put/Patch/Delete/Head/Options; T can be string, byte[], Stream or a DTO
+      - Real streaming for Stream results, streaming JSON deserialization
+      - RestResult&lt;T&gt; moved to the RestClient namespace
+      - Query string: url-encoded, invariant culture, repeated keys
+      - Built-in retry policy, refresh token de-duplicated across concurrent requests
+      - multipart/form-data uploads
+      - Native AOT and trimming friendly JSON (JsonSerializerContext)
+      - ILogger logging and OpenTelemetry tracing (ActivitySource "Mafe.RestClient")
+      - Nullable reference types annotations
+      - New package Mafe.RestClient.Extensions.DependencyInjection (IHttpClientFactory integration)
 
       1.9.5
       - Target .NET 8.0 (net8.0)
       - Upgrade all dependences
-
-      1.9.3
-      - Target .NET 7.0 (net7.0)
-      - Upgrade all dependences
-
-      1.9.2
-      - Upgrade all dependences
-
-      1.9.1
-      - Improper Handling of Exceptional Conditions in Newtonsoft.Json #1
-
-      1.9.0
-      - Target .NET 6.0 (net6.0)
-      - Upgrade all dependences
     </PackageReleaseNotes>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
-    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-  </PropertyGroup>
-
   <ItemGroup>
-    <None Include="..\..\LICENSE" Pack="true" PackagePath="" />
-    <None Include="..\..\README.md" Pack="true" PackagePath="" Link="README.md" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.14" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
     <PackageReference Include="System.Text.Json" Version="10.0.14" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="10.0.14" />
   </ItemGroup>
 
 </Project>

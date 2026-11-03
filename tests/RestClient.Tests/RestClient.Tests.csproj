@@ -21,7 +21,14 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/RestClient/RestClient.csproj" />
+    <ProjectReference Include="../../src/RestClient.Extensions.DependencyInjection/RestClient.Extensions.DependencyInjection.csproj" />
     <Reference Include="System.Net.Http" Condition="'$(TargetFramework)' == 'net48'" />
+  </ItemGroup>
+
+  <!-- integration tests with a real Kestrel server -->
+  <ItemGroup Condition="'$(TargetFramework)' != 'net48'">
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.11.0" />
   </ItemGroup>
 
 </Project>
