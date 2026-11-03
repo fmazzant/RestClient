@@ -5,9 +5,6 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <NeutralLanguage>en</NeutralLanguage>
-    <!-- The publish workflow checks that the tag (v2.0.0-rc.1) matches this version -->
-    <VersionPrefix>2.0.0</VersionPrefix>
-    <VersionSuffix>rc.1</VersionSuffix>
     <Authors>Federico Mazzanti</Authors>
     <Copyright>Copyright (c) 2020-2026 Federico Mazzanti</Copyright>
     <Company />
