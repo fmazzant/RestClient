@@ -1,31 +1,39 @@
 name: Publish on NuGet
- 
+
 on:
   push:
     branches: [ master ]
     paths: [ 'src/**' ]
   workflow_dispatch:
-  
+
 jobs:
   build:
 
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+
     - name: Setup .NET
-      uses: actions/setup-dotnet@v2
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.0.x
-        
+        dotnet-version: |
+          8.0.x
+          10.0.x
+
     - name: Restore dependencies
-      run: dotnet restore src/RestClient/RestClient.csproj 
-      
+      run: dotnet restore src/RestClient.sln
+
     - name: Build
-      run: dotnet build --no-restore src/RestClient/RestClient.csproj 
-        
+      run: dotnet build -c Release --no-restore src/RestClient.sln
+
+    - name: Test
+      run: |
+        dotnet test -c Release --no-build -f net10.0 tests/RestClient.Tests/RestClient.Tests.csproj
+        dotnet test -c Release --no-build -f net8.0 tests/RestClient.Tests/RestClient.Tests.csproj
+
     - name: Package
-      run: dotnet pack -c Release -o . src/RestClient/RestClient.csproj 
-      
+      run: dotnet pack -c Release --no-build -o ./artifacts src/RestClient/RestClient.csproj
+
     - name: Publish on NuGet
-      run: dotnet nuget push ./*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate

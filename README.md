@@ -6,6 +6,10 @@ To use it in your project, add the Mafe.RestClient NuGet package to your project
 
 [![Nuget](https://img.shields.io/nuget/v/Mafe.RestClient?style=flat-square)](https://www.nuget.org/packages/Mafe.RestClient)
 
+Supported target frameworks: `net10.0`, `net8.0`, `netstandard2.1`, `netstandard2.0` (.NET Framework 4.6.2+, Xamarin, Unity, ...).
+
+> Upgrading from 1.x? Read [Migrating to 2.0](#migrating-to-20): version 2.0.0 contains breaking changes.
+
 ### What is RestClient?
 
 The goal of RestClient is to enable developers to easily connect to any server in a really easy way. 
@@ -67,6 +71,43 @@ Use Build() method with properties to create a RestBuilder from Rest:
 ```c#
 var rest = Rest.Build(properties);
 ```
+
+The properties are copied: changing `properties` after `Build` does not affect the builder.
+
+### Immutable builder
+
+Every method of `RestBuilder` returns a new, independent instance. A configured builder can be safely stored and reused
+as the base of many requests (also from different threads):
+
+```c#
+var users = Rest.Build().Url("[URL]").Command("/users");
+
+var user1 = await users.Command(1).GetAsync<User>();   // [URL]/users/1
+var user2 = await users.Command(2).GetAsync<User>();   // [URL]/users/2
+var all   = await users.GetAsync<List<User>>();        // [URL]/users
+```
+
+### Using an existing HttpClient (IHttpClientFactory)
+
+By default RestClient creates (and disposes) an `HttpClient` for every request. In server applications it is better to
+reuse the `HttpClient` instances, for example those created by `IHttpClientFactory`:
+
+```c#
+services.AddHttpClient("api");
+
+// ...
+HttpClient httpClient = httpClientFactory.CreateClient("api");
+
+var result = await Rest.Build(httpClient)       // or Rest.Build().UseHttpClient(httpClient)
+    .Url("[URL]")
+    .Command("/users")
+    .GetAsync<List<User>>();
+```
+
+The external `HttpClient` is never disposed by RestClient. `NetworkCredential`, `CertificateValidation`,
+`RestProperties.CertificateOption`, `EnableGZipCompression` and `OnConfigureHttpClient` configure the `HttpClient` created
+by RestClient, so they are not applied to an external one: configure them on your handler.
+Headers, authentication, timeout, serialization, progress and all the events work in both cases.
 
 ### Certificate Validation
 
@@ -175,14 +216,21 @@ var result = Rest.Build()
         if(!h.Contains("auth-custom"))
             h.Add("auth-custom", "value");
     })
+    .Header("X-Correlation-Id", Guid.NewGuid().ToString())
     .Url("[URL]")
     .Get();
 ```
 
+Headers are added to the request message (not to `HttpClient.DefaultRequestHeaders`) and calling `Header` more than once
+adds all the headers.
+
 ### Serialization
 
 Two types of serialization are supported by RestClient: Xml and Json, but it is possible to implementate ISerializerContent to customize the serialization.
-RestClient uses .Json() to serialize an object into json.
+RestClient uses .Json() to serialize an object into json. Json is the default serialization and it is based on System.Text.Json.
+
+When no options are provided `JSON.DefaultOptions` is used: it is `new JsonSerializerOptions(JsonSerializerDefaults.Web)`,
+so property names are written in camelCase and read case-insensitively.
 
 ```c#
 var result = Rest.Build()
@@ -202,17 +250,6 @@ var result = Rest.Build()
     .Get<ResponseObject>();
 ```
 
-The above snippet code consideres using System.Text.Json library. If we using Netwnsoft like this:
-
-```c#
-var result = Rest.Build()
-    .Url("[URL]")
-    .Json(new JsonSerializerSettings {
-        Formatting = Formatting.Indented
-    })
-    .Get<ResponseObject>();
-```  
-
 RestClient uses .Xml() to serialize an object into xml.
 
 ```c#
@@ -222,12 +259,12 @@ var result = rest
     .Get<ResponseObject>();
 ```
 
-It is possible to pass the settings to .Xml() method, like this:
+It is possible to pass the settings to .Xml() method: the reader settings are used to read the response, the writer settings to write the payload.
 
 ```c#
 var result = Rest.Build()
     .Url("[URL]")
-    .Xml(new XmlReaderSettings { Indent = true }, new XmlWriterSettings { IgnoreWhitespace = true })
+    .Xml(new XmlReaderSettings { IgnoreWhitespace = true }, new XmlWriterSettings { Indent = true })
     .Get<ResponseObject>();
 ```
 
@@ -256,7 +293,7 @@ Now, we can use MyCustomSerializer like this:
 ```c#
 var result = Rest.Build()
     .Url("[URL]")
-    .CustomSerializer(new MyCustomSerializer { })
+    .CustomSerializer(new MyCustomSerializer { }, myOptions) // options are optional
     .Get<ResponseObject>();
 ```
 
@@ -282,7 +319,7 @@ var result = Rest.Build()
     .Get();
 ```
 
-The library uncompresses automatically the response.
+The library sends the `Accept-Encoding` header and uncompresses automatically the response (gzip, deflate and, on .NET 8+, brotli).
 
 ### Get
 
@@ -325,6 +362,9 @@ var result = Rest.Build()
 ```
 
 The url generated is: [URL]/path?id=10&type=myType
+
+Keys and values are url-encoded (`"a b&c"` becomes `a%20b%26c`) and formatted with the invariant culture
+(`1.5` is always `1.5`, `true` is `true`, dates are ISO 8601). Do not encode the values yourself.
 
 ### Post
 
@@ -485,31 +525,22 @@ var result = Rest.Build()
 
 ### Form Url Encoded (application/x-www-form-urlencoded)
 
-When necessary we can use the request as a form-url-encoded. To use it we need to enabled it, like this:
+When necessary we can send the request as a form-url-encoded, passing the parameters as a dictionary
+(`FormUrlEncoded(...)` enables the form-url-encoded content automatically):
 
 ```c#
-var result = Rest.Build()
-    .Url("[URL]")
-    .Command("/action")
-    .EnableFormUrlEncoded(true)
-```
-
-and then we can pass the parameters as a dictionary:
-
-```c#
- var params = new Dictionary<string, string>();
- params.Add("key1", "value1");
- params.Add("key2", "value2");
+var values = new Dictionary<string, string>();
+values.Add("key1", "value1");
+values.Add("key2", "value2");
 
 var result = Rest.Build()
     .Url("[URL]")
     .Command("/action")
-    .EnableFormUrlEncoded(true)
-    .FormUrlEncoded(params)
+    .FormUrlEncoded(values)
     .Post();
 ```
 
-It is possible to pass the parameters inside the handler and enabling the form-url-encoded:
+It is possible to pass the parameters inside the handler, and to explicitly enable or disable the form-url-encoded:
 
 ```c#
 var result = Rest.Build()
@@ -575,6 +606,34 @@ var result = Rest.Build()
     .Get<ResponseObject>();
 ```
 
+When the timeout elapses the result contains a `TimeoutException` and `result.IsTimedOut` is true.
+When the request is cancelled by a `CancellationToken` (or by `OnStart`) `result.IsCancellationRequested` is true.
+
+### Handling the result
+
+Requests never throw: network errors, timeouts and cancellations are reported in the result.
+
+```c#
+var result = await Rest.Build().Url("[URL]").GetAsync<User>();
+
+if (result.IsSuccessStatusCode)          // 2xx and no exception
+{
+    var user = result.Content;
+}
+else if (result.Response != null)        // a response was received
+{
+    var status = result.StatusCode;      // e.g. 404
+    var error = result.Exception;        // not null if the body could not be deserialized
+}
+else                                     // no response: network error, timeout, cancellation
+{
+    var error = result.Exception;
+}
+
+// or, if you prefer exceptions:
+result.EnsureSuccessStatusCode();
+```
+
 ### OnStart
 
 OnStart is an event that triggers when the request starts.
@@ -605,7 +664,7 @@ var result = Rest.Build()
     .Post<ResponseObject>();
 ```
 
-### OnPreviewContentAsString -> OnPreviewContentResponseAsString (renaming)
+### OnPreviewContentResponseAsString
 
 OnPreviewContentResponseAsString is an event that triggers when the response is received and it isn't no deserialized yet.
 
@@ -620,10 +679,10 @@ var result = Rest.Build()
     .Post<ResponseObject>();
 ```
 
-### OnPreResult -> OnPreCompleted (renaming)
+### OnPreCompleted
 
-OnPreResult occurs when the request is completing but  still hasn't completed yet. 
-When OnPreResult is raises we can todo somethings, for example  get and use the result of request.
+OnPreCompleted occurs when the request is completing but still hasn't completed yet. 
+When OnPreCompleted is raised we can do something, for example get and use the result of request.
 
 ```c#
 var result = Rest.Build()
@@ -651,7 +710,7 @@ var result = Rest.Build()
     .Post<ResponseObject>();
 ```
 
-### OnCompleted (changed type of parameter, from EventArgs to CompletedEventArgs)
+### OnCompleted
 
 OnCompleted occurs when the request is completed. 
 
@@ -733,3 +792,69 @@ public class NetworkService {
 }
 ```
 
+## Migrating to 2.0
+
+Version 2.0.0 modernizes the library and fixes several long-standing issues. It contains the following breaking changes.
+
+### Target frameworks
+
+* Supported: `net10.0`, `net8.0`, `netstandard2.1`, `netstandard2.0`.
+* Removed (out of support): `net7.0`, `net6.0`, `netcoreapp3.1`, `netstandard1.3`, `net452`, `net46`, `net461`, `net462`, `net47`, `net471`, `net472`, `net48`.
+  .NET Framework 4.6.2+ applications keep working through `netstandard2.0`.
+* Newtonsoft.Json is no longer used: JSON is always System.Text.Json. `Json(JsonSerializerSettings)` has been removed; use `Json(JsonSerializerOptions)` or a custom `ISerializerContent`.
+
+### Removed APIs
+
+| Removed | Use instead |
+|---|---|
+| `OnAuthentication(...)` | `Authentication(...)` |
+| `Compression()` | `EnableGZipCompression()` |
+| `EnableGZipCompression(bool deflate)` | `EnableGZipCompression()` (gzip, deflate and brotli are all enabled) |
+| `OnPreResult(...)` | `OnPreCompleted(e => e.Result)` |
+| `OnPreviewContentAsString(...)` | `OnPreviewContentResponseAsString(...)` |
+| `RestResult<T>.StringContent` | `OnPreviewContentResponseAsString(...)` |
+| `HttpClientCompressionHandler` | automatic decompression of `HttpClientHandler` |
+| `ProgressBytesChangedEventHandler` | `OnUploadProgress` / `OnDownloadProgress` |
+
+### Behavior changes
+
+* **TLS certificate validation**: 1.x set `ServicePointManager.ServerCertificateValidationCallback` to *accept every certificate*
+  for the whole process on .NET Framework/.NET Standard, as soon as a `RestBuilder` was created. This has been removed:
+  certificates are validated by default and `CertificateValidation(...)` only affects the requests of that builder.
+* **Immutable builder**: in 1.x commands and parameters were shared between a builder and the builders derived from it,
+  so reusing a "root" builder could accumulate url segments. Now each call returns an independent copy.
+  `Rest.Build(RestProperties)` copies the properties.
+* **JSON defaults**: when no options are passed, JSON uses `JsonSerializerDefaults.Web`: payloads are serialized in **camelCase**
+  and responses are read case-insensitively. To keep the 1.x behavior use `.Json(new JsonSerializerOptions())`.
+* **Query string**: keys and values are url-encoded and formatted with the invariant culture. If you encoded them manually,
+  remove the manual encoding. A trailing `/` in the endpoint is removed before appending the commands.
+* **Headers**: `Header(...)` and `Authentication(...)` are applied to the request message instead of `HttpClient.DefaultRequestHeaders`.
+  Multiple `Header(...)` calls are combined (in 1.x the last one won).
+* **FormUrlEncoded**: `FormUrlEncoded(dictionary)` and `FormUrlEncoded(action)` enable the form-url-encoded content automatically.
+* **Timeout**: the timeout is managed by RestClient. When it elapses the result contains a `TimeoutException`
+  (`IsTimedOut == true`, `IsCancellationRequested == false`). `OnConfigureHttpClient` can still set `HttpClient.Timeout`.
+* **RestResult**:
+  * `StatusCode` is `0` (instead of `404 NotFound`) when no response has been received.
+  * `Version` is `null` (in 1.x it threw a `FormatException`) and `ReasonPhrase` is the exception message when no response has been received.
+  * `Exception` is available on the base `RestResult` class.
+  * When the response body cannot be deserialized, the result keeps `Response`, `StatusCode` and `Headers` and the error is in `Exception`
+    (in 1.x the whole response was lost). `IsSuccessStatusCode` is false in this case.
+  * `IRestResult.Content` returns the content (in 1.x it was always null).
+  * Disposing a `RestResult<Stream>` disposes the stream.
+  * `RestResult` can no longer be subclassed outside the library.
+* **Refresh token**: the refresh func is accepted when it returns any 2xx status code (not only 200). The retry happens once per request,
+  and the builder can be reused for later requests (in 1.x, after the first refresh the builder never refreshed again).
+* **Generic methods**: the `where T : new()` constraint has been removed, so interfaces, arrays, records and immutable types can be used.
+* **Sync methods** (`Get()`, `Post()`, ...) no longer deadlock in UI or classic ASP.NET synchronization contexts.
+* **XML**: `Xml(readerOptions, writerOptions)` used the reader settings to serialize and the writer settings to deserialize; this has been fixed.
+* `Parameter(RestParameter, ...)` no longer throws when the key already exists: the value is replaced.
+
+### New APIs
+
+* `Rest.Build(HttpClient)` and `UseHttpClient(HttpClient)` to reuse an external `HttpClient`.
+* `Header(string name, string value)`.
+* `Command(long)`.
+* `CustomSerializer(serializer, options)`.
+* `RestResult.EnsureSuccessStatusCode()`, `RestResult.IsTimedOut`.
+* `new RestParameter(key, value)`.
+* `RestProperties.Clone()`, `RestProperties.DefaultTimeout`, `RestProperties.DefaultBufferSize`, `JSON.DefaultOptions`.
