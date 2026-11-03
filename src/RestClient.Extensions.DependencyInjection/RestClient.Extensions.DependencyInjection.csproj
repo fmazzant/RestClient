@@ -9,7 +9,7 @@
     <Description>Registers Mafe.RestClient builders in the dependency injection container, on top of IHttpClientFactory (pooled handlers, delegating handlers, resilience).</Description>
     <PackageTags>rest-client, restclient, mafe, dependency-injection, httpclientfactory, fluent</PackageTags>
     <PackageReleaseNotes>
-      2.0.0
+      2.0.0-rc.1
       - First release: AddRestClient(name, ...), AddRestClient&lt;TClient&gt;(...), IRestClientFactory
     </PackageReleaseNotes>
   </PropertyGroup>
