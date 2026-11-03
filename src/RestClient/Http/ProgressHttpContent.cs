@@ -1,31 +1,31 @@
-﻿/// <summary>
-/// 
-/// The MIT License (MIT)
-/// 
-/// Copyright (c) 2020 Federico Mazzanti
-/// 
-/// Permission is hereby granted, free of charge, to any person
-/// obtaining a copy of this software and associated documentation
-/// files (the "Software"), to deal in the Software without
-/// restriction, including without limitation the rights to use,
-/// copy, modify, merge, publish, distribute, sublicense, and/or sell
-/// copies of the Software, and to permit persons to whom the
-/// Software is furnished to do so, subject to the following
-/// conditions:
-/// 
-/// The above copyright notice and this permission notice shall be
-/// included in all copies or substantial portions of the Software.
-/// 
-/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-/// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-/// OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-/// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-/// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-/// WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-/// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-/// OTHER DEALINGS IN THE SOFTWARE.
-/// 
-/// </summary>
+﻿// <summary>
+// 
+// The MIT License (MIT)
+// 
+// Copyright (c) 2020 Federico Mazzanti
+// 
+// Permission is hereby granted, free of charge, to any person
+// obtaining a copy of this software and associated documentation
+// files (the "Software"), to deal in the Software without
+// restriction, including without limitation the rights to use,
+// copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the
+// Software is furnished to do so, subject to the following
+// conditions:
+// 
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+// OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+// WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+// OTHER DEALINGS IN THE SOFTWARE.
+// 
+// </summary>
 
 namespace RestClient.Http
 {
@@ -33,65 +33,57 @@ namespace RestClient.Http
     using System.IO;
     using System.Net;
     using System.Net.Http;
+    using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
-    /// A  class representing an HTTP entity body and content headers.
+    /// An HTTP content that wraps another content and reports the upload progress.
     /// </summary>
-    internal class ProgressHttpContent : HttpContent
+    internal sealed class ProgressHttpContent : HttpContent
     {
-        /// <summary>
-        /// Lets keep buffer of 20kb
-        /// </summary>
-        private const int defaultBufferSize = 5 * 4096 * 4; //80kb
-
         /// <summary>
         /// Http entity body and content headers
         /// </summary>
-        private HttpContent content;
+        private readonly HttpContent content;
 
         /// <summary>
         /// Buffer size
         /// </summary>
-        private int bufferSize;
+        private readonly int bufferSize;
 
         /// <summary>
-        /// Progress value
+        /// Progress callback (bytes uploaded, total bytes)
         /// </summary>
-        private Action<long, long> progress;
+        private readonly Action<long, long> progress;
 
         /// <summary>
-        /// Initializes a new instance of the RestClient.ProgressableStreamContent class.
+        /// Token used to cancel the upload
         /// </summary>
-        /// <param name="content">Http entity body and content headers</param>
-        /// <param name="progress">Progress value</param>
-        public ProgressHttpContent(HttpContent content, Action<long, long> progress)
-            : this(content, defaultBufferSize, progress)
-        {
-
-        }
+        private readonly CancellationToken cancellationToken;
 
         /// <summary>
-        /// Initializes a new instance of the RestClient.ProgressableStreamContent class.
+        /// Initializes a new instance of the RestClient.Http.ProgressHttpContent class.
         /// </summary>
         /// <param name="content">Http entity body and content headers</param>
         /// <param name="bufferSize">Buffer size</param>
-        /// <param name="progress">Progress value</param>
-        public ProgressHttpContent(HttpContent content, int bufferSize, Action<long, long> progress)
+        /// <param name="progress">Progress callback</param>
+        /// <param name="cancellationToken">Token used to cancel the upload</param>
+        public ProgressHttpContent(HttpContent content, int bufferSize, Action<long, long> progress, CancellationToken cancellationToken = default)
         {
-            this.content = content ?? throw new ArgumentNullException("the content cannot be null");
+            this.content = content ?? throw new ArgumentNullException(nameof(content));
 
             if (bufferSize <= 0)
             {
-                throw new ArgumentOutOfRangeException("the bufferSize cannot be <= 0");
+                throw new ArgumentOutOfRangeException(nameof(bufferSize), "the bufferSize cannot be <= 0");
             }
 
             this.bufferSize = bufferSize;
             this.progress = progress;
+            this.cancellationToken = cancellationToken;
 
             foreach (var h in content.Headers)
             {
-                this.Headers.Add(h.Key, h.Value);
+                this.Headers.TryAddWithoutValidation(h.Key, h.Value);
             }
         }
 
@@ -99,56 +91,38 @@ namespace RestClient.Http
         /// Serialize the HTTP content to a stream as an asynchronous operation.
         /// </summary>
         /// <param name="stream">The target stream.</param>
-        /// <param name="context">Information about the transport (channel binding token, for example). This parameter may be null.</param>
-        /// <returns>Returns System.Threading.Tasks.Task.The task object representing the asynchronous operation</returns>
-        protected override Task SerializeToStreamAsync(Stream stream, TransportContext context)
+        /// <param name="context">Information about the transport. This parameter may be null.</param>
+        /// <returns>The task object representing the asynchronous operation</returns>
+        protected override async Task SerializeToStreamAsync(Stream stream, TransportContext context)
         {
-            return Task.Run(async () =>
+            long total = content.Headers.ContentLength ?? 0;
+            long uploaded = 0;
+            byte[] buffer = new byte[bufferSize];
+
+            using (Stream source = await content.ReadAsStreamAsync().ConfigureAwait(false))
             {
-                var buffer = new Byte[this.bufferSize];
-                long size;
-                TryComputeLength(out size);
-                var uploaded = 0;
-
-                using (var sinput = await content.ReadAsStreamAsync())
+                int length;
+                while ((length = await source.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false)) > 0)
                 {
-                    while (true)
-                    {
-                        var length = sinput.Read(buffer, 0, buffer.Length);
-                        if (length <= 0)
-                        {
-                            break;
-                        }
-
-                        uploaded += length;
-                        progress?.Invoke(uploaded, size);
-
-                        stream.Write(buffer, 0, length);
-                        stream.Flush();
-                    }
+                    await stream.WriteAsync(buffer, 0, length, cancellationToken).ConfigureAwait(false);
+                    uploaded += length;
+                    progress?.Invoke(uploaded, total);
                 }
-                stream.Flush();
-            });
-        }
+            }
 
-        /// <summary>
-        /// Serialize the HTTP content to a memory stream as an asynchronous operation.
-        /// </summary>
-        /// <returns></returns>
-        protected override Task<Stream> CreateContentReadStreamAsync()
-        {
-            return base.CreateContentReadStreamAsync();
+            await stream.FlushAsync(cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
         ///  Determines whether the HTTP content has a valid length in bytes.
         /// </summary>
-        /// <param name="length">The length in bytes of the HHTP content.</param>
-        /// <returns>Returns System.Boolean.true if length is a valid length; otherwise, false.</returns>
+        /// <param name="length">The length in bytes of the HTTP content.</param>
+        /// <returns>true if length is a valid length; otherwise, false.</returns>
         protected override bool TryComputeLength(out long length)
         {
-            length = content.Headers.ContentLength.GetValueOrDefault();
-            return true;
+            long? contentLength = content.Headers.ContentLength;
+            length = contentLength ?? -1;
+            return contentLength.HasValue;
         }
 
         /// <summary>
@@ -161,7 +135,6 @@ namespace RestClient.Http
             if (disposing)
             {
                 content.Dispose();
-                progress = null;
             }
             base.Dispose(disposing);
         }
