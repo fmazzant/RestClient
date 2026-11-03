@@ -1,12 +1,12 @@
 # Changelog
 
-## 2.0.0-rc.1
+## 2.0.0
 
-Release candidate of 2.0.0: a major update with **breaking changes**. Read [Migrating to 2.0](README.md#migrating-to-20) before upgrading.
+A major update with **breaking changes**. Read [Migrating to 2.0](README.md#migrating-to-20) before upgrading.
 
 ```
-dotnet add package Mafe.RestClient --prerelease
-dotnet add package Mafe.RestClient.Extensions.DependencyInjection --prerelease
+dotnet add package Mafe.RestClient
+dotnet add package Mafe.RestClient.Extensions.DependencyInjection
 ```
 
 ### Platforms
