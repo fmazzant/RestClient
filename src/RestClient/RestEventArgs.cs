@@ -1,31 +1,31 @@
-﻿/// <summary>
-/// 
-/// The MIT License (MIT)
-/// 
-/// Copyright (c) 2020 Federico Mazzanti
-/// 
-/// Permission is hereby granted, free of charge, to any person
-/// obtaining a copy of this software and associated documentation
-/// files (the "Software"), to deal in the Software without
-/// restriction, including without limitation the rights to use,
-/// copy, modify, merge, publish, distribute, sublicense, and/or sell
-/// copies of the Software, and to permit persons to whom the
-/// Software is furnished to do so, subject to the following
-/// conditions:
-/// 
-/// The above copyright notice and this permission notice shall be
-/// included in all copies or substantial portions of the Software.
-/// 
-/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-/// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-/// OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-/// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-/// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-/// WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-/// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-/// OTHER DEALINGS IN THE SOFTWARE.
-/// 
-/// </summary>
+﻿// <summary>
+// 
+// The MIT License (MIT)
+// 
+// Copyright (c) 2020 Federico Mazzanti
+// 
+// Permission is hereby granted, free of charge, to any person
+// obtaining a copy of this software and associated documentation
+// files (the "Software"), to deal in the Software without
+// restriction, including without limitation the rights to use,
+// copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the
+// Software is furnished to do so, subject to the following
+// conditions:
+// 
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+// OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+// WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+// OTHER DEALINGS IN THE SOFTWARE.
+// 
+// </summary>
 
 namespace RestClient
 {
@@ -44,33 +44,33 @@ namespace RestClient
         /// <summary>
         /// The payload of request
         /// </summary>
-        public object Payload { get; internal set; }
+        public object? Payload { get; internal set; }
 
         /// <summary>
         /// The Url request
         /// </summary>
-        public string Url { get; internal set; }
+        public string Url { get; internal set; } = string.Empty;
     }
 
-    /// <summary>    
+    /// <summary>
     /// Provides data for generic network communication events related to progress changed
     /// </summary>
     public class ProgressEventArgs : EventArgs
     {
         /// <summary>
-        /// Gets a value indicating the bytes received.
+        /// Gets a value indicating the bytes transferred.
         /// </summary>
         public long CurrentBytes { get; internal set; }
 
         /// <summary>
-        /// Gets a value indicating the total bytes to receive.
+        /// Gets a value indicating the total bytes to transfer. 0 when unknown.
         /// </summary>
         public long TotalBytes { get; internal set; }
 
         /// <summary>
         /// Get a value indication the progress float number of comminication. The value can be from 0 to 1
         /// </summary>
-        public float ProgressFloat => (TotalBytes == 0) ? 0 : (float)((float)CurrentBytes / (float)TotalBytes);
+        public float ProgressFloat => (TotalBytes <= 0) ? 0 : Math.Min(1f, (float)CurrentBytes / TotalBytes);
 
         /// <summary>
         /// Get a value indication the progress percentage number of comminication. The value can be from 0 to 100
@@ -79,30 +79,30 @@ namespace RestClient
     }
 
     /// <summary>
-    ///  Represents the class that contains the content as string of response.
+    ///  Represents the class that contains the content as string of request or response.
     /// </summary>
-    public class PreviewContentAsStringEventArgs
+    public class PreviewContentAsStringEventArgs : EventArgs
     {
         /// <summary>
         /// Content serialized As String
         /// </summary>
-        public string ContentAsString { get; internal set; }
+        public string? ContentAsString { get; internal set; }
 
         /// <summary>
         /// Content serialized Type
         /// </summary>
-        public Type ContentType { get; internal set; }
+        public Type? ContentType { get; internal set; }
     }
 
     /// <summary>
     /// Represents the class that contain pre completed event data, and provides a value to use when the communication is not completed yet.
     /// </summary>
-    public class PreCompletedEventArgs
+    public class PreCompletedEventArgs : EventArgs
     {
         /// <summary>
-        /// The result of
+        /// The result of the request
         /// </summary>
-        public RestResult Result { get; internal set; }
+        public RestResult Result { get; internal set; } = null!;
 
         /// <summary>
         /// true is completed
@@ -113,12 +113,12 @@ namespace RestClient
     /// <summary>
     /// Represents the class that contain completed event data, and provides a value to use when the communication is completed.
     /// </summary>
-    public class CompletedEventArgs
+    public class CompletedEventArgs : EventArgs
     {
         /// <summary>
-        /// The result of
+        /// The result of the request
         /// </summary>
-        public RestResult Result { get; internal set; }
+        public RestResult Result { get; internal set; } = null!;
 
         /// <summary>
         /// Time of execution

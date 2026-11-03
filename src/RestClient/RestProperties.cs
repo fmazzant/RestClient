@@ -1,31 +1,31 @@
-﻿/// <summary>
-/// 
-/// The MIT License (MIT)
-/// 
-/// Copyright (c) 2020 Federico Mazzanti
-/// 
-/// Permission is hereby granted, free of charge, to any person
-/// obtaining a copy of this software and associated documentation
-/// files (the "Software"), to deal in the Software without
-/// restriction, including without limitation the rights to use,
-/// copy, modify, merge, publish, distribute, sublicense, and/or sell
-/// copies of the Software, and to permit persons to whom the
-/// Software is furnished to do so, subject to the following
-/// conditions:
-/// 
-/// The above copyright notice and this permission notice shall be
-/// included in all copies or substantial portions of the Software.
-/// 
-/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-/// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-/// OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-/// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-/// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-/// WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-/// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-/// OTHER DEALINGS IN THE SOFTWARE.
-/// 
-/// </summary>
+﻿// <summary>
+// 
+// The MIT License (MIT)
+// 
+// Copyright (c) 2020 Federico Mazzanti
+// 
+// Permission is hereby granted, free of charge, to any person
+// obtaining a copy of this software and associated documentation
+// files (the "Software"), to deal in the Software without
+// restriction, including without limitation the rights to use,
+// copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the
+// Software is furnished to do so, subject to the following
+// conditions:
+// 
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+// OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+// WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+// OTHER DEALINGS IN THE SOFTWARE.
+// 
+// </summary>
 
 namespace RestClient
 {
@@ -38,14 +38,19 @@ namespace RestClient
     public class RestProperties
     {
         /// <summary>
-        /// Default buffer size 20k
+        /// Default buffer size (80kb)
         /// </summary>
-        private const int DefaultBufferSize = 5 * 4096 * 4; //80kb
+        public const int DefaultBufferSize = 5 * 4096 * 4;
+
+        /// <summary>
+        /// Default timeout (100 seconds)
+        /// </summary>
+        public static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(100);
 
         /// <summary>
         /// End Point
         /// </summary>
-        public Uri EndPoint { get; set; }
+        public Uri? EndPoint { get; set; }
 
         /// <summary>
         /// Specifies how client certificated are provided. Default is "Manual"
@@ -53,13 +58,19 @@ namespace RestClient
         public ClientCertificateOption CertificateOption { get; set; } = ClientCertificateOption.Manual;
 
         /// <summary>
-        /// Specifies timeout. Default 100.000 milliseconds.
+        /// Specifies timeout. Default 100 seconds. Use System.Threading.Timeout.InfiniteTimeSpan to disable it.
         /// </summary>
-        public TimeSpan Timeout { get; set; } = TimeSpan.FromMilliseconds(100000);
+        public TimeSpan Timeout { get; set; } = DefaultTimeout;
 
         /// <summary>
-        /// Specifies Buffer Size. Default 20kb.
+        /// Specifies Buffer Size used for upload and download. Default 80kb.
         /// </summary>
         public int BufferSize { get; set; } = DefaultBufferSize;
+
+        /// <summary>
+        /// Creates a copy of the properties
+        /// </summary>
+        /// <returns></returns>
+        public RestProperties Clone() => (RestProperties)MemberwiseClone();
     }
 }

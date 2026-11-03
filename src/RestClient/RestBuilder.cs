@@ -1,233 +1,161 @@
-﻿/// <summary>
-/// 
-/// The MIT License (MIT)
-/// 
-/// Copyright (c) 2020 Federico Mazzanti
-/// 
-/// Permission is hereby granted, free of charge, to any person
-/// obtaining a copy of this software and associated documentation
-/// files (the "Software"), to deal in the Software without
-/// restriction, including without limitation the rights to use,
-/// copy, modify, merge, publish, distribute, sublicense, and/or sell
-/// copies of the Software, and to permit persons to whom the
-/// Software is furnished to do so, subject to the following
-/// conditions:
-/// 
-/// The above copyright notice and this permission notice shall be
-/// included in all copies or substantial portions of the Software.
-/// 
-/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-/// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-/// OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-/// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-/// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-/// WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-/// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-/// OTHER DEALINGS IN THE SOFTWARE.
-/// 
-/// </summary>
+﻿// <summary>
+// 
+// The MIT License (MIT)
+// 
+// Copyright (c) 2020 Federico Mazzanti
+// 
+// Permission is hereby granted, free of charge, to any person
+// obtaining a copy of this software and associated documentation
+// files (the "Software"), to deal in the Software without
+// restriction, including without limitation the rights to use,
+// copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the
+// Software is furnished to do so, subject to the following
+// conditions:
+// 
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+// OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+// WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+// OTHER DEALINGS IN THE SOFTWARE.
+// 
+// </summary>
 
 namespace RestClient
 {
-    using RestClient.Generic;
-    using RestClient.Http;
+    using Microsoft.Extensions.Logging;
+    using RestClient.Internal;
     using RestClient.Serialization;
     using RestClient.Serialization.Json;
     using RestClient.Serialization.Xml;
     using System;
+    using System.Collections;
     using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.IO;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Globalization;
     using System.Linq;
     using System.Net;
     using System.Net.Http;
     using System.Net.Http.Headers;
     using System.Net.Security;
     using System.Security.Cryptography.X509Certificates;
-    using System.Text;
-    using System.Threading;
+    using System.Text.Json;
+    using System.Text.Json.Serialization;
     using System.Threading.Tasks;
 
     /// <summary>
-    /// Provides a set of methods for building the requests
+    /// Provides a set of methods for building the requests.
+    /// The builder is immutable: every method returns a new independent instance,
+    /// so a configured builder can be safely reused (also concurrently) as a base for many requests.
     /// </summary>
-    public sealed class RestBuilder
+    public sealed partial class RestBuilder
     {
-        /// <summary>
-        /// Rest Properties
-        /// </summary>
-        public RestProperties Properties { get; internal set; }
-            = new RestProperties();
+        #region [ State ]
 
         /// <summary>
-        /// List of commands
+        /// Rest Properties (a copy: changing it does not change the builder)
         /// </summary>
-        List<string> Commands { get; set; }
-            = new List<string>();
+        public RestProperties Properties => properties.Clone();
 
-        /// <summary>
-        /// List of parameters
-        /// </summary>
-        Dictionary<string, string> Parameters { get; set; }
-            = new Dictionary<string, string>();
+        private RestProperties properties;
+        private List<string> commands = new List<string>();
+        private List<KeyValuePair<string, string>> parameters = new List<KeyValuePair<string, string>>();
+        private ISerializerContent serializer = new JSON();
+        private object? serializeOptions;
+        private object? deserializeOptions;
+        private HttpClient? externalHttpClient;
+        private Func<object, X509Certificate?, X509Chain?, SslPolicyErrors, bool>? certificateCallback;
+        private ICredentials? credentials;
+        private Func<AuthenticationHeaderValue>? onAuthentication;
+        private Action<HttpRequestHeaders>? onRequestHeaders;
+        private bool enabledCompression;
+        private bool refreshTokenExecution = true;
+        private RefreshTokenCoordinator? refreshTokenCoordinator;
+        private RetrySettings? retrySettings;
+        private ILogger? logger;
+        private object? payloadContent;
+        private bool isEnabledFormUrlEncoded;
+        private Dictionary<string, string>? formUrlEncodedKeyValues;
+        private MultipartFormData? multipartFormData;
 
-        /// <summary>
-        /// if true writes log into System.Debug (section is temporary)
-        /// </summary>
-        bool Logger { get; set; }
-            = false;
-
-        /// <summary>
-        /// Serialization kind. JSON is default value
-        /// </summary>
-        ISerializerContent Serializer { get; set; }
-            = new JSON();
-
-        /// <summary>
-        /// Certificate Callback
-        /// </summary>
-        Func<object, X509Certificate, X509Chain, SslPolicyErrors, bool> CertificateCallback;
-
-        /// <summary>
-        /// Current Credentials
-        /// </summary>
-        ICredentials Credentials { get; set; }
-            = null;
-
-        /// <summary>
-        /// if true the refresh token execution is enabled
-        /// </summary>
-        bool RefreshTokenExecution = true;
-
-        /// <summary>
-        /// Func refresh token
-        /// </summary>
-        Func<RestResult> RefreshTokenApi = null;
-
-        /// <summary>
-        /// Func refresh token async
-        /// </summary>
-        Func<Task<RestResult>> RefreshTokenApiAsync = null;
-
-        /// <summary>
-        /// Payload content
-        /// </summary>
-        object PayloadContent { get; set; }
-
-        /// <summary>
-        /// Defines is enabled x-form-urlencoded
-        /// </summary>
-        bool IsEnabledFormUrlEncoded { get; set; } = false;
-
-        /// <summary>
-        /// Params for x-www-form-urlencoded
-        /// </summary>
-        Dictionary<string, string> FormUrlEncodedKeyValues { get; set; }
-
-        /// <summary>
-        /// On Start Action
-        /// </summary>
-        Action<StartEventArgs> OnStartAction = null;
-
-        /// <summary>
-        /// On Preview Content Request As String Action
-        /// </summary>
-        Action<PreviewContentAsStringEventArgs> OnPreviewContentRequestAsStringAction = null;
-
-        /// <summary>
-        /// On Upload Progress Action
-        /// </summary>
-        Action<ProgressEventArgs> OnUploadProgressAction = null;
-
-        /// <summary>
-        /// On Download Progress
-        /// </summary>
-        Action<ProgressEventArgs> OnDownloadProgressAction = null;
-
-        /// <summary>
-        /// On Pre Result Action
-        /// </summary>
-        Action<RestResult> OnPreResultAction = null;
-
-        /// <summary>
-        /// On Pre-Completed Action
-        /// </summary>
-        Action<PreCompletedEventArgs> OnPreCompletedAction = null;
-
-        /// <summary>
-        /// On Preview Content As String Action
-        /// </summary>
-        Action<PreviewContentAsStringEventArgs> OnPreviewContentAsStringAction = null;
-
-        /// <summary>
-        /// On Completed Action
-        /// </summary>
-        Action<EventArgs> OnCompletedActionEA = null;
-
-        /// <summary>
-        /// On Completed Action
-        /// </summary>
-        Action<CompletedEventArgs> OnCompletedAction = null;
-
-        /// <summary>
-        /// On Exception Action
-        /// </summary>
-        Action<Exception> OnExceptionAction = null;
-
-        /// <summary>
-        /// Is After Refresh Token Called
-        /// </summary>
-        bool IsAfterRefreshTokenCalled = false;
-
-        /// <summary>
-        /// Represents the class to send http request and receive the respose.
-        /// </summary>
-        Action<HttpClient> OnConfigureHttpClientAction = null;
+        private Action<HttpClient>? onConfigureHttpClientAction;
+        private Action<StartEventArgs>? onStartAction;
+        private Action<PreviewContentAsStringEventArgs>? onPreviewContentRequestAsStringAction;
+        private Action<ProgressEventArgs>? onUploadProgressAction;
+        private Action<ProgressEventArgs>? onDownloadProgressAction;
+        private Action<PreCompletedEventArgs>? onPreCompletedAction;
+        private Action<PreviewContentAsStringEventArgs>? onPreviewContentResponseAsStringAction;
+        private Action<CompletedEventArgs>? onCompletedAction;
+        private Action<Exception>? onExceptionAction;
 
         /// <summary>
         /// Initializes a new instance
         /// </summary>
-        internal RestBuilder()
+        internal RestBuilder() : this(new RestProperties()) { }
+
+        /// <summary>
+        /// Initializes a new instance
+        /// </summary>
+        internal RestBuilder(RestProperties properties)
         {
-#if NETSTANDARD2_0 || NETSTANDARD2_1 || NETFRAMEWORK
-            ServicePointManager.ServerCertificateValidationCallback = (object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
-                => true;
-#endif
+            this.properties = properties ?? new RestProperties();
         }
+
+        /// <summary>
+        /// Creates a copy of the builder and applies the changes
+        /// </summary>
+        private RestBuilder With(Action<RestBuilder> change)
+        {
+            var result = (RestBuilder)MemberwiseClone();
+            result.properties = properties.Clone();
+            result.commands = new List<string>(commands);
+            result.parameters = new List<KeyValuePair<string, string>>(parameters);
+            change(result);
+            return result;
+        }
+
+        #endregion
 
         #region [ HttpClient ]
 
         /// <summary>
-        /// Configure HttpClient before send a request.
+        /// Configure the HttpClient created by RestClient before sending a request.
+        /// It is not invoked when an external HttpClient is used (see UseHttpClient).
         /// </summary>
         /// <param name="onHttpClient"></param>
         /// <returns></returns>
-        public RestBuilder OnConfigureHttpClient(Action<HttpClient> onHttpClient)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.OnConfigureHttpClientAction = onHttpClient;
-            return result;
-        }
+        public RestBuilder OnConfigureHttpClient(Action<HttpClient>? onHttpClient)
+            => With(r => r.onConfigureHttpClientAction = onHttpClient);
+
+        /// <summary>
+        /// Sends the requests using an existing HttpClient (for example created by IHttpClientFactory).
+        /// The HttpClient is never disposed by RestClient. Credentials, CertificateValidation, CertificateOption,
+        /// compression and OnConfigureHttpClient are not applied: configure them on your HttpClient/handler.
+        /// </summary>
+        /// <param name="httpClient">The HttpClient, null to go back to the HttpClient managed by RestClient.</param>
+        /// <returns></returns>
+        public RestBuilder UseHttpClient(HttpClient? httpClient)
+            => With(r => r.externalHttpClient = httpClient);
 
         #endregion
 
         #region [ Certificate Validation ]
 
         /// <summary>
-        /// The callback to validate a server certificate
+        /// The callback to validate a server certificate. It is applied only to the requests sent by this builder.
+        /// Define the callback once (static method or field): RestClient pools the HTTP handlers by configuration,
+        /// so a new closure for every request prevents connection reuse.
         /// </summary>
         /// <param name="callback"></param>
         /// <returns></returns>
-        public RestBuilder CertificateValidation(Func<object, X509Certificate, X509Chain, SslPolicyErrors, bool> callback)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.CertificateCallback = callback;
-            result.Credentials = Credentials;
-#if NETSTANDARD2_0 || NETSTANDARD2_1 || NETFRAMEWORK
-            ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(callback);
-#endif
-            return result;
-        }
+        public RestBuilder CertificateValidation(Func<object, X509Certificate?, X509Chain?, SslPolicyErrors, bool>? callback)
+            => With(r => r.certificateCallback = callback);
 
         #endregion
 
@@ -238,11 +166,10 @@ namespace RestClient
         /// </summary>
         /// <param name="credential"></param>
         /// <returns></returns>
-        public RestBuilder NetworkCredential(Func<NetworkCredential> credential)
+        public RestBuilder NetworkCredential(Func<ICredentials?> credential)
         {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.Credentials = credential();
-            return result;
+            if (credential == null) { throw new ArgumentNullException(nameof(credential)); }
+            return With(r => r.credentials = credential());
         }
 
         /// <summary>
@@ -252,11 +179,7 @@ namespace RestClient
         /// <param name="password"></param>
         /// <returns></returns>
         public RestBuilder NetworkCredential(string username, string password)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.Credentials = new NetworkCredential(username, password);
-            return result;
-        }
+            => With(r => r.credentials = new NetworkCredential(username, password));
 
         /// <summary>
         /// Authentication information used by username, password and domain
@@ -266,12 +189,8 @@ namespace RestClient
         /// <param name="domain"></param>
         /// <returns></returns>
         public RestBuilder NetworkCredential(string username, string password, string domain)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.Credentials = new NetworkCredential(username, password, domain);
-            return result;
-        }
-#if NETSTANDARD2_0 || NETSTANDARD2_1
+            => With(r => r.credentials = new NetworkCredential(username, password, domain));
+
         /// <summary>
         /// Authentication information used by username and secure string password
         /// </summary>
@@ -279,11 +198,7 @@ namespace RestClient
         /// <param name="password"></param>
         /// <returns></returns>
         public RestBuilder NetworkCredential(string username, System.Security.SecureString password)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.Credentials = new NetworkCredential(username, password);
-            return result;
-        }
+            => With(r => r.credentials = new NetworkCredential(username, password));
 
         /// <summary>
         /// Authentication information used by username, secure string password and domain
@@ -293,37 +208,20 @@ namespace RestClient
         /// <param name="domain"></param>
         /// <returns></returns>
         public RestBuilder NetworkCredential(string username, System.Security.SecureString password, string domain)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.Credentials = new NetworkCredential(username, password, domain);
-            return result;
-        }
-#endif
+            => With(r => r.credentials = new NetworkCredential(username, password, domain));
+
         #endregion
 
         #region [ Authentication ]
 
-        private Func<AuthenticationHeaderValue> onAuthentication { get; set; } = null;
-
         /// <summary>
-        /// The Authorization header for an HTTP request
+        /// The Authorization header for an HTTP request. The func is invoked for every request,
+        /// so after a refresh token the new value is used.
         /// </summary>
         /// <param name="authentication"></param>
         /// <returns></returns>
-        public RestBuilder Authentication(Func<AuthenticationHeaderValue> authentication)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.onAuthentication = new Func<AuthenticationHeaderValue>(() => authentication());
-            return result;
-        }
-
-        /// <summary>
-        /// The Authorization header for an HTTP request (This method will be removed)
-        /// </summary>
-        /// <param name="authentication"></param>
-        /// <returns></returns>
-        [Obsolete("OnAuthentication: This method will be removed with 2.0.0 version.", false)]
-        public RestBuilder OnAuthentication(Func<AuthenticationHeaderValue> authentication) => Authentication(authentication);
+        public RestBuilder Authentication(Func<AuthenticationHeaderValue>? authentication)
+            => With(r => r.onAuthentication = authentication);
 
         /// <summary>
         /// The Authorization header for an HTTP request
@@ -331,19 +229,7 @@ namespace RestClient
         /// <param name="scheme"></param>
         /// <returns></returns>
         public RestBuilder Authentication(string scheme)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.onAuthentication = new Func<AuthenticationHeaderValue>(() => new AuthenticationHeaderValue(scheme));
-            return result;
-        }
-
-        /// <summary>
-        /// The Authorization header for an HTTP request (This method will be removed)
-        /// </summary>
-        /// <param name="scheme"></param>
-        /// <returns></returns>
-        [Obsolete("OnAuthentication: This method will be removed with 2.0.0 version.", false)]
-        public RestBuilder OnAuthentication(string scheme) => Authentication(scheme);
+            => Authentication(() => new AuthenticationHeaderValue(scheme));
 
         /// <summary>
         /// The Authorization header for an HTTP request
@@ -351,56 +237,32 @@ namespace RestClient
         /// <param name="scheme"></param>
         /// <param name="parameter"></param>
         /// <returns></returns>
-        public RestBuilder Authentication(string scheme, string parameter)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.onAuthentication = new Func<AuthenticationHeaderValue>(() => new AuthenticationHeaderValue(scheme, parameter));
-            return result;
-        }
-
-        /// <summary>
-        /// The Authorization header for an HTTP request (This method will be removed)
-        /// </summary>
-        /// <param name="scheme"></param>
-        /// <param name="parameter"></param>
-        /// <returns></returns>
-        [Obsolete("OnAuthentication: This method will be removed with 2.0.0 version.", false)]
-        public RestBuilder OnAuthentication(string scheme, string parameter) => Authentication(scheme, parameter);
+        public RestBuilder Authentication(string scheme, string? parameter)
+            => Authentication(() => new AuthenticationHeaderValue(scheme, parameter));
 
         #endregion
 
-        #region [ Timeout ]
+        #region [ Timeout & Buffer Size ]
 
         /// <summary>
-        /// Sets the timespan to wait before the request times out
+        /// Sets the timespan to wait before an attempt times out (System.Threading.Timeout.InfiniteTimeSpan to disable it).
+        /// For Stream results the timeout covers the response headers, not the reading of the stream.
         /// </summary>
         /// <param name="timeOut"></param>
         /// <returns></returns>
         public RestBuilder Timeout(TimeSpan timeOut)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.Properties.Timeout = timeOut;
-            return result;
-        }
+            => With(r => r.properties.Timeout = timeOut);
 
         /// <summary>
-        /// Sets the timespan to wait before the request times out
+        /// Sets the timespan to wait before an attempt times out
         /// </summary>
         /// <param name="milliseconds"></param>
         /// <returns></returns>
         public RestBuilder Timeout(double milliseconds)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.Properties.Timeout = TimeSpan.FromMilliseconds(milliseconds);
-            return result;
-        }
-
-        #endregion
-
-        #region [ Buffer Size ]
+            => Timeout(TimeSpan.FromMilliseconds(milliseconds));
 
         /// <summary>
-        /// Sets the buffer size. 
+        /// Sets the buffer size used to upload and download.
         /// </summary>
         /// <param name="bufferSize"></param>
         /// <returns></returns>
@@ -411,114 +273,85 @@ namespace RestClient
                 throw new ArgumentOutOfRangeException(nameof(bufferSize));
             }
 
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.Properties.BufferSize = bufferSize;
-            return result;
+            return With(r => r.properties.BufferSize = bufferSize);
         }
 
         #endregion
 
         #region [ Header ]
 
-        Action<HttpRequestHeaders> onDefaultRequestHeaders { get; set; }
+        /// <summary>
+        /// Sets the headers which should be sent with this or children requests.
+        /// Calling Header more than once combines the actions.
+        /// </summary>
+        /// <param name="requestHeaders"></param>
+        /// <returns></returns>
+        public RestBuilder Header(Action<HttpRequestHeaders> requestHeaders)
+            => With(r => r.onRequestHeaders = (Action<HttpRequestHeaders>?)Delegate.Combine(onRequestHeaders, requestHeaders));
 
         /// <summary>
-        ///  Sets the headers which should be sent with this o children requests
+        /// Adds a header which should be sent with this or children requests.
         /// </summary>
-        /// <param name="defaultRequestHeaders"></param>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
         /// <returns></returns>
-        public RestBuilder Header(Action<HttpRequestHeaders> defaultRequestHeaders)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.onDefaultRequestHeaders = defaultRequestHeaders;
-            return result;
-        }
+        public RestBuilder Header(string name, string? value)
+            => Header(h => h.TryAddWithoutValidation(name, value));
 
         #endregion
 
         #region [ Compression ]
 
         /// <summary>
-        /// true if gzip compression is enabled, false otherwise
-        /// </summary>
-        bool enabledGZipCompression { get; set; } = false;
-
-
-        /// <summary>
-        /// Enables gzip compression
+        /// Enables automatic response decompression (gzip, deflate and, on .NET 8+, brotli)
         /// </summary>
         /// <returns></returns>
-        public RestBuilder EnableGZipCompression(bool deflate = true)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.enabledGZipCompression = true;
-            return result;
-        }
-
-        /// <summary>
-        /// Enables gzip compression
-        /// </summary>
-        /// <returns></returns>
-        [Obsolete("Use: EnableGZipCompression(). This method will be removed with 2.0.0 version.", true)]
-        public RestBuilder Compression() => EnableGZipCompression();
+        public RestBuilder EnableGZipCompression()
+            => With(r => r.enabledCompression = true);
 
         #endregion
 
         #region [ Command ]
 
         /// <summary>
-        /// Adds the command to request
+        /// Adds the command (url segment) to request
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
         public RestBuilder Command(string command)
         {
-            if (command == null) { throw new ArgumentNullException(); }
-            var result = (RestBuilder)this.MemberwiseClone();
-            string prefix = !command.StartsWith("/") ? "/" : string.Empty;
-            result.Commands.Add($"{prefix}{command}");
-            return result;
+            if (command == null) { throw new ArgumentNullException(nameof(command)); }
+            string prefix = !command.StartsWith("/", StringComparison.Ordinal) ? "/" : string.Empty;
+            return With(r => r.commands.Add($"{prefix}{command}"));
         }
 
         /// <summary>
-        /// Adds the command to request
-        /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        public RestBuilder Command(uint command)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.Commands.Add($"/{command}");
-            return result;
-        }
-
-        /// <summary>
-        /// Adds the command to request
+        /// Adds the command (url segment) to request
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
         public RestBuilder Command(int command)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.Commands.Add($"/{command}");
-            return result;
-        }
+            => Command(command.ToString(CultureInfo.InvariantCulture));
 
         /// <summary>
-        /// Adds the command to request
+        /// Adds the command (url segment) to request
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        public RestBuilder Command(long command)
+            => Command(command.ToString(CultureInfo.InvariantCulture));
+
+        /// <summary>
+        /// Adds the command (url segment) to request
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
         public RestBuilder Command(Guid command)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.Commands.Add($"/{command}");
-            return result;
-        }
+            => Command(command.ToString());
 
         #endregion
 
-        #region [ Refresh Token Invoke ]
+        #region [ Refresh Token & Retry ]
 
         /// <summary>
         /// Enables refresh token: true if enabled, false when disabled
@@ -526,83 +359,131 @@ namespace RestClient
         /// <param name="refreshToken"></param>
         /// <returns></returns>
         public RestBuilder RefreshToken(bool refreshToken = true)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.RefreshTokenExecution = refreshToken;
-            return result;
-        }
+            => With(r => r.refreshTokenExecution = refreshToken);
 
         /// <summary>
-        /// Sets the func when the refresh token is invoked
+        /// Sets the func invoked when the response is 401 Unauthorized.
+        /// If the func returns a success status code the request is sent again (only once).
+        /// When many concurrent requests receive 401 the func is invoked only once.
         /// </summary>
         /// <param name="refreshTokenApi"></param>
         /// <returns></returns>
         public RestBuilder RefreshTokenInvoke(Func<RestResult> refreshTokenApi)
         {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.RefreshTokenApi = refreshTokenApi;
-            return result;
+            if (refreshTokenApi == null) { throw new ArgumentNullException(nameof(refreshTokenApi)); }
+            return With(r => r.refreshTokenCoordinator = new RefreshTokenCoordinator(refreshTokenApi, refreshTokenCoordinator?.RefreshTokenFuncAsync));
         }
 
         /// <summary>
-        /// Sets the func when the refresh token is invoked
+        /// Sets the func invoked when the response is 401 Unauthorized.
+        /// If the func returns a success status code the request is sent again (only once).
+        /// When many concurrent requests receive 401 the func is invoked only once.
         /// </summary>
         /// <param name="refreshTokenApi"></param>
         /// <returns></returns>
         public RestBuilder RefreshTokenInvoke(Func<Task<RestResult>> refreshTokenApi)
         {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.RefreshTokenApiAsync = refreshTokenApi;
-            return result;
+            if (refreshTokenApi == null) { throw new ArgumentNullException(nameof(refreshTokenApi)); }
+            return With(r => r.refreshTokenCoordinator = new RefreshTokenCoordinator(refreshTokenCoordinator?.RefreshTokenFunc, refreshTokenApi));
         }
+
+        /// <summary>
+        /// Retries the request when it fails with a transient error: network error, timeout,
+        /// 408 Request Timeout, 429 Too Many Requests, 500, 502, 503, 504.
+        /// The delay is exponential with jitter (delay, 2*delay, 4*delay, ...) or the one requested by the Retry-After header.
+        /// </summary>
+        /// <param name="maxRetries">Maximum number of retries (0 disables the retry)</param>
+        /// <param name="delay">Base delay, 200 milliseconds when null</param>
+        /// <param name="retryNonIdempotentMethods">
+        /// false (default) retries only idempotent methods (GET, HEAD, OPTIONS, PUT, DELETE, TRACE): a POST/PATCH could be executed twice.
+        /// </param>
+        /// <returns></returns>
+        public RestBuilder Retry(int maxRetries, TimeSpan? delay = null, bool retryNonIdempotentMethods = false)
+        {
+            if (maxRetries < 0) { throw new ArgumentOutOfRangeException(nameof(maxRetries)); }
+            if (delay < TimeSpan.Zero) { throw new ArgumentOutOfRangeException(nameof(delay)); }
+            return With(r => r.retrySettings = maxRetries == 0
+                ? null
+                : new RetrySettings(maxRetries, delay ?? TimeSpan.FromMilliseconds(200), retryNonIdempotentMethods));
+        }
+
+        #endregion
+
+        #region [ Logging ]
+
+        /// <summary>
+        /// Logs the requests (Debug), the responses (Information), the retries and the errors.
+        /// The query string is never logged because it can contain secrets.
+        /// </summary>
+        /// <param name="logger">The logger, null to disable logging</param>
+        /// <returns></returns>
+        public RestBuilder Logger(ILogger? logger)
+            => With(r => r.logger = logger);
 
         #endregion
 
         #region [ Serialization ]
 
-        object SerializeOptions { get; set; }
-        object DeserializeOptions { get; set; }
-
         /// <summary>
-        /// Sets xml as serialization
+        /// Sets xml as serialization. XmlSerializer is not compatible with trimming and Native AOT.
         /// </summary>
+        /// <param name="readerOptions">Settings used to read (deserialize) the response</param>
+        /// <param name="writerOptions">Settings used to write (serialize) the payload</param>
         /// <returns></returns>
-        public RestBuilder Xml(System.Xml.XmlReaderSettings readerOptions = null, System.Xml.XmlWriterSettings writerOptions = null)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.Serializer = new XML();
-            result.SerializeOptions = readerOptions;
-            result.DeserializeOptions = writerOptions;
-            return result;
-        }
-
-        /// <summary>
-        /// Sets json as serialization
-        /// </summary>
-        /// <returns></returns>
-#if NEWTONSOFT
-        public RestBuilder Json(Newtonsoft.Json.JsonSerializerSettings options = null)
-#else
-        public RestBuilder Json(System.Text.Json.JsonSerializerOptions options = null)
+#if NET
+        [RequiresUnreferencedCode(XML.ReflectionMessage)]
+        [RequiresDynamicCode(XML.ReflectionMessage)]
 #endif
+        public RestBuilder Xml(System.Xml.XmlReaderSettings? readerOptions = null, System.Xml.XmlWriterSettings? writerOptions = null)
         {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.Serializer = new JSON();
-            result.SerializeOptions = options;
-            result.DeserializeOptions = options;
-            return result;
+            XML xml = new XML();
+            return With(r =>
+            {
+                r.serializer = xml;
+                r.serializeOptions = writerOptions;
+                r.deserializeOptions = readerOptions;
+            });
         }
 
         /// <summary>
-        /// Sets custom serialization
+        /// Sets json as serialization (System.Text.Json). When options is null JSON.DefaultOptions (web defaults) are used.
+        /// </summary>
+        /// <returns></returns>
+        public RestBuilder Json(JsonSerializerOptions? options = null)
+            => With(r =>
+            {
+                r.serializer = new JSON();
+                r.serializeOptions = options;
+                r.deserializeOptions = options;
+            });
+
+        /// <summary>
+        /// Sets json as serialization using a System.Text.Json source generated context:
+        /// no reflection is used, so it is compatible with trimming and Native AOT.
+        /// </summary>
+        /// <param name="context">The JsonSerializerContext that contains all the types sent and received</param>
+        /// <returns></returns>
+        public RestBuilder Json(JsonSerializerContext context)
+        {
+            if (context == null) { throw new ArgumentNullException(nameof(context)); }
+            return Json(context.Options);
+        }
+
+        /// <summary>
+        /// Sets custom serialization. Implement IAsyncSerializerContent to deserialize directly from the response stream.
         /// </summary>
         /// <param name="serializer"></param>
+        /// <param name="options">Options passed to the serializer</param>
         /// <returns></returns>
-        public RestBuilder CustomSerializer(ISerializerContent serializer)
+        public RestBuilder CustomSerializer(ISerializerContent serializer, object? options = null)
         {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.Serializer = serializer;
-            return result;
+            if (serializer == null) { throw new ArgumentNullException(nameof(serializer)); }
+            return With(r =>
+            {
+                r.serializer = serializer;
+                r.serializeOptions = options;
+                r.deserializeOptions = options;
+            });
         }
 
         #endregion
@@ -610,71 +491,84 @@ namespace RestClient
         #region [ Parameter ]
 
         /// <summary>
-        /// Adds parameter to querystring
+        /// Sets a query string parameter, replacing the previous values of the key.
+        /// Key and value are url-encoded and the value is formatted with the invariant culture.
+        /// When the value is a collection (not a string) the key is repeated for each item: ?id=1&amp;id=2
         /// </summary>
         /// <param name="key"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public RestBuilder Parameter(string key, object value)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            if (result.Parameters.ContainsKey(key))
-            {
-                result.Parameters[key] = $"{value}";
-            }
-            else
-            {
-                result.Parameters.Add(key, $"{value}");
-            }
-            return result;
-        }
+        public RestBuilder Parameter(string key, object? value)
+            => Parameter(new RestParameter(key, value));
 
         /// <summary>
-        /// Adds list of rest parameter to querystring
+        /// Sets a list of query string parameters, replacing the previous values of the keys.
+        /// Parameters with the same key in the same call are all added: ?id=1&amp;id=2
         /// </summary>
         /// <param name="parameter"></param>
         /// <param name="others"></param>
         /// <returns></returns>
         public RestBuilder Parameter(RestParameter parameter, params RestParameter[] others)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.Parameters.Add(parameter.Key, parameter.Value.ToString());
-            foreach (RestParameter p in others)
-            {
-                if (result.Parameters.ContainsKey(p.Key))
-                {
-                    result.Parameters[p.Key] = $"{p.Value}";
-                }
-                else
-                {
-                    result.Parameters.Add(p.Key, $"{p.Value}");
-                }
-            }
-            return result;
-        }
+            => SetParameters(new[] { parameter }.Concat(others ?? Array.Empty<RestParameter>()).ToList());
 
         /// <summary>
-        /// Adds list of rest parameter to querystring
+        /// Sets a list of query string parameters, replacing the previous values of the keys.
+        /// Parameters with the same key in the same call are all added: ?id=1&amp;id=2
         /// </summary>
         /// <param name="parameters"></param>
         /// <returns></returns>
         public RestBuilder Parameter(Action<List<RestParameter>> parameters)
         {
-            var result = (RestBuilder)this.MemberwiseClone();
+            if (parameters == null) { throw new ArgumentNullException(nameof(parameters)); }
             List<RestParameter> list = new List<RestParameter>();
             parameters(list);
-            foreach (RestParameter p in list)
+            return SetParameters(list);
+        }
+
+        private RestBuilder SetParameters(List<RestParameter> list)
+        {
+            if (list.Any(p => !p.HasKey)) { throw new ArgumentException("The parameter key cannot be null."); }
+
+            var expanded = list.SelectMany(p => ExpandValues(p.Value).Select(v => new KeyValuePair<string, string>(p.Key!, v))).ToList();
+            var keys = new HashSet<string>(list.Select(p => p.Key!), StringComparer.Ordinal);
+
+            return With(r =>
             {
-                if (result.Parameters.ContainsKey(p.Key))
+                r.parameters.RemoveAll(p => keys.Contains(p.Key));
+                r.parameters.AddRange(expanded);
+            });
+        }
+
+        private static IEnumerable<string> ExpandValues(object? value)
+        {
+            if (value is IEnumerable enumerable && !(value is string))
+            {
+                foreach (object? item in enumerable)
                 {
-                    result.Parameters[p.Key] = $"{p.Value}";
-                }
-                else
-                {
-                    result.Parameters.Add(p.Key, $"{p.Value}");
+                    yield return FormatValue(item);
                 }
             }
-            return result;
+            else
+            {
+                yield return FormatValue(value);
+            }
+        }
+
+        /// <summary>
+        /// Formats a value using the invariant culture (dates as ISO 8601, booleans lowercase)
+        /// </summary>
+        private static string FormatValue(object? value)
+        {
+            switch (value)
+            {
+                case null: return string.Empty;
+                case string s: return s;
+                case bool b: return b ? "true" : "false";
+                case DateTime dt: return dt.ToString("O", CultureInfo.InvariantCulture);
+                case DateTimeOffset dto: return dto.ToString("O", CultureInfo.InvariantCulture);
+                case IFormattable f: return f.ToString(null, CultureInfo.InvariantCulture);
+                default: return value.ToString() ?? string.Empty;
+            }
         }
 
         #endregion
@@ -687,9 +581,7 @@ namespace RestClient
         /// <param name="url">The URL represents a base url</param>
         /// <returns></returns>
         public RestBuilder Url(string url)
-        {
-            return this.Url(new Uri(url));
-        }
+            => Url(new Uri(url));
 
         /// <summary>
         /// Sets Uri
@@ -698,27 +590,26 @@ namespace RestClient
         /// <returns></returns>
         public RestBuilder Url(Uri uri)
         {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.Properties.EndPoint = uri;
-            return result;
+            if (uri == null) { throw new ArgumentNullException(nameof(uri)); }
+            return With(r => r.properties.EndPoint = uri);
         }
 
         #endregion
 
-        #region [ Payload & FormUrlEncoded ]
+        #region [ Payload, FormUrlEncoded & Multipart ]
 
         /// <summary>
-        /// Sets payload as generic type
+        /// Sets the payload, serialized with the configured serializer (JSON by default)
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="payload"></param>
         /// <returns></returns>
         public RestBuilder Payload<T>(T payload)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.PayloadContent = payload;
-            return result;
-        }
+            => With(r =>
+            {
+                r.payloadContent = payload;
+                r.multipartFormData = null;
+            });
 
         /// <summary>
         /// Enable form Url Encoding
@@ -726,1134 +617,142 @@ namespace RestClient
         /// <param name="enableFormUrlEncoded"></param>
         /// <returns></returns>
         public RestBuilder EnableFormUrlEncoded(bool enableFormUrlEncoded = true)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.IsEnabledFormUrlEncoded = enableFormUrlEncoded;
-            return result;
-        }
+            => With(r => r.isEnabledFormUrlEncoded = enableFormUrlEncoded);
 
         /// <summary>
-        /// x-www-form-urlencoded key values
+        /// Sets x-www-form-urlencoded key values and enables form url encoding
         /// </summary>
         /// <param name="keyValues"></param>
         /// <returns></returns>
         public RestBuilder FormUrlEncoded(Dictionary<string, string> keyValues)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.FormUrlEncodedKeyValues = keyValues;
-            return result;
-        }
+            => FormUrlEncoded(true, keyValues);
 
         /// <summary>
-        /// x-www-form-urlencoded key values
+        /// Sets x-www-form-urlencoded key values
         /// </summary>
         /// <param name="enableFormUrlEncoded"></param>
         /// <param name="keyValues"></param>
         /// <returns></returns>
-        public RestBuilder FormUrlEncoded(bool enableFormUrlEncoded, Dictionary<string, string> keyValues)
+        public RestBuilder FormUrlEncoded(bool enableFormUrlEncoded, Dictionary<string, string>? keyValues)
         {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.IsEnabledFormUrlEncoded = enableFormUrlEncoded;
-            result.FormUrlEncodedKeyValues = keyValues;
-            return result;
+            var copy = keyValues == null ? null : new Dictionary<string, string>(keyValues);
+            return With(r =>
+            {
+                r.isEnabledFormUrlEncoded = enableFormUrlEncoded;
+                r.formUrlEncodedKeyValues = copy;
+                r.multipartFormData = null;
+            });
         }
 
         /// <summary>
-        /// x-www-form-urlencoded key values
+        /// Sets x-www-form-urlencoded key values and enables form url encoding
         /// </summary>
-        /// <param name="kesValues"></param>
+        /// <param name="keyValues"></param>
         /// <returns></returns>
-        public RestBuilder FormUrlEncoded(Action<Dictionary<string, string>> kesValues)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.FormUrlEncodedKeyValues = new Dictionary<string, string>();
-            kesValues(result.FormUrlEncodedKeyValues);
-            return result;
-        }
+        public RestBuilder FormUrlEncoded(Action<Dictionary<string, string>> keyValues)
+            => FormUrlEncoded(true, keyValues);
 
         /// <summary>
-        /// x-www-form-urlencoded key values
+        /// Sets x-www-form-urlencoded key values
         /// </summary>
         /// <param name="enableFormUrlEncoded"></param>
-        /// <param name="kesValues"></param>
+        /// <param name="keyValues"></param>
         /// <returns></returns>
-        public RestBuilder FormUrlEncoded(bool enableFormUrlEncoded, Action<Dictionary<string, string>> kesValues)
+        public RestBuilder FormUrlEncoded(bool enableFormUrlEncoded, Action<Dictionary<string, string>> keyValues)
         {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.IsEnabledFormUrlEncoded = enableFormUrlEncoded;
-            result.FormUrlEncodedKeyValues = new Dictionary<string, string>();
-            kesValues(result.FormUrlEncodedKeyValues);
-            return result;
+            if (keyValues == null) { throw new ArgumentNullException(nameof(keyValues)); }
+            var values = new Dictionary<string, string>();
+            keyValues(values);
+            return FormUrlEncoded(enableFormUrlEncoded, values);
+        }
+
+        /// <summary>
+        /// Sends a multipart/form-data content (fields and files).
+        /// </summary>
+        /// <param name="configure">Adds the fields and the files</param>
+        /// <returns></returns>
+        public RestBuilder Multipart(Action<MultipartFormData> configure)
+        {
+            if (configure == null) { throw new ArgumentNullException(nameof(configure)); }
+            MultipartFormData multipart = new MultipartFormData();
+            configure(multipart);
+            return With(r =>
+            {
+                r.multipartFormData = multipart;
+                r.isEnabledFormUrlEncoded = false;
+                r.payloadContent = null;
+            });
         }
 
         #endregion
 
-        #region [ OnStart ]
+        #region [ Events ]
 
         /// <summary>
         /// Sets onStart action and occurs when the request is started
         /// </summary>
         /// <param name="onStart"></param>
         /// <returns></returns>
-        public RestBuilder OnStart(Action<StartEventArgs> onStart)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.OnStartAction = onStart;
-            return result;
-        }
-
-        #endregion
-
-        #region [ OnPreviewContentRequestAsString ]
+        public RestBuilder OnStart(Action<StartEventArgs>? onStart)
+            => With(r => r.onStartAction = onStart);
 
         /// <summary>
-        ///  Sets OnPreviewContentRequestAsString, displays the response as string
+        ///  Sets OnPreviewContentRequestAsString, displays the request content as string
         /// </summary>
         /// <param name="onPreviewContent"></param>
         /// <returns></returns>
-        public RestBuilder OnPreviewContentRequestAsString(Action<PreviewContentAsStringEventArgs> onPreviewContent)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.OnPreviewContentRequestAsStringAction = onPreviewContent;
-            return result;
-        }
-
-        #endregion
-
-        #region [ OnUploadProgress & OnDownloadProgress ]
+        public RestBuilder OnPreviewContentRequestAsString(Action<PreviewContentAsStringEventArgs>? onPreviewContent)
+            => With(r => r.onPreviewContentRequestAsStringAction = onPreviewContent);
 
         /// <summary>
-        /// Sets onUploadProgress action, occurs when the request is processing 
+        /// Sets onUploadProgress action, occurs when the request is processing
         /// </summary>
         /// <param name="onProgress"></param>
         /// <returns></returns>
-        public RestBuilder OnUploadProgress(Action<ProgressEventArgs> onProgress)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.OnUploadProgressAction = onProgress;
-            return result;
-        }
+        public RestBuilder OnUploadProgress(Action<ProgressEventArgs>? onProgress)
+            => With(r => r.onUploadProgressAction = onProgress);
 
         /// <summary>
-        /// Sets onDownloadProgress action, occurs when the response is processing 
+        /// Sets onDownloadProgress action, occurs when the response is processing (also while reading a Stream result)
         /// </summary>
         /// <param name="onProgress"></param>
         /// <returns></returns>
-        public RestBuilder OnDownloadProgress(Action<ProgressEventArgs> onProgress)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.OnDownloadProgressAction = onProgress;
-            return result;
-        }
-
-        #endregion
-
-        #region [ OnPreCompleted ]
-
-        /// <summary>
-        /// Sets onPreResult, occurs when the result of request il builded and it isn't completed yet
-        /// </summary>
-        /// <param name="restResult"></param>
-        /// <returns></returns>
-        [Obsolete("Use: .OnPreCompleted((e)=> { var result = e.Result; }). OnPreResult method will be removed with 2.0.0 version.", true)]
-        public RestBuilder OnPreResult(Action<RestResult> restResult)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.OnPreResultAction = restResult;
-            return result;
-        }
+        public RestBuilder OnDownloadProgress(Action<ProgressEventArgs>? onProgress)
+            => With(r => r.onDownloadProgressAction = onProgress);
 
         /// <summary>
         /// Sets OnPreCompleted, occurs when the result of request il builded and it isn't completed yet
         /// </summary>
-        /// <param name="restResult"></param>
+        /// <param name="onPreCompleted"></param>
         /// <returns></returns>
-        public RestBuilder OnPreCompleted(Action<PreCompletedEventArgs> onPreCompleted)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.OnPreCompletedAction = onPreCompleted;
-            return result;
-        }
-
-        #endregion
-
-        #region [ OnPreviewContentResponseAsString ]
+        public RestBuilder OnPreCompleted(Action<PreCompletedEventArgs>? onPreCompleted)
+            => With(r => r.onPreCompletedAction = onPreCompleted);
 
         /// <summary>
-        ///  Sets OnPreviewContentResponseAsString, displays the response as string
+        /// Sets OnPreviewContentResponseAsString, displays the response as string.
+        /// When it is set the response is buffered as string before being deserialized.
         /// </summary>
         /// <param name="onPreviewContent"></param>
         /// <returns></returns>
-        public RestBuilder OnPreviewContentResponseAsString(Action<PreviewContentAsStringEventArgs> onPreviewContent)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.OnPreviewContentAsStringAction = onPreviewContent;
-            return result;
-        }
-
-        [Obsolete("Use: OnPreviewContentResponseAsString(onPreviewContent). OnPreviewContentAsString This method will be removed with 2.0.0 version.", true)]
-        public RestBuilder OnPreviewContentAsString(Action<PreviewContentAsStringEventArgs> onPreviewContent)
-            => OnPreviewContentResponseAsString(onPreviewContent);
-
-        #endregion
-
-        #region [ OnCompleted ]
+        public RestBuilder OnPreviewContentResponseAsString(Action<PreviewContentAsStringEventArgs>? onPreviewContent)
+            => With(r => r.onPreviewContentResponseAsStringAction = onPreviewContent);
 
         /// <summary>
         /// Sets onCompleted action, occurs when the call is completed.
         /// </summary>
         /// <param name="onCompleted"></param>
         /// <returns></returns>
-        public RestBuilder OnCompleted(Action<CompletedEventArgs> onCompleted)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.OnCompletedAction = onCompleted;
-            return result;
-        }
-
-        #endregion
-
-        #region [ OnException ]
+        public RestBuilder OnCompleted(Action<CompletedEventArgs>? onCompleted)
+            => With(r => r.onCompletedAction = onCompleted);
 
         /// <summary>
-        /// Sets onException, occurs when there is an exception during the call
+        /// Sets onException, occurs when there is an exception during the call or while reading the response
         /// </summary>
         /// <param name="exception"></param>
         /// <returns></returns>
-        public RestBuilder OnException(Action<Exception> exception)
-        {
-            var result = (RestBuilder)this.MemberwiseClone();
-            result.OnExceptionAction = exception;
-            return result;
-        }
+        public RestBuilder OnException(Action<Exception>? exception)
+            => With(r => r.onExceptionAction = exception);
 
-        #endregion
-
-        #region [ Http Methods ]
-
-        #region [ Get ]
-        /// <summary>
-        ///  Send a GET request to the specified Uri as an asynchronous operation
-        /// </summary>
-        /// <returns></returns>
-        public async Task<RestResult<string>> GetAsync(CancellationToken token = new CancellationToken())
-            => await SendAsStringAsync(HttpMethod.Get, token);
-
-        /// <summary>
-        ///  Send a GET request to the specified Uri as an asynchronous operation
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public async Task<RestResult<T>> GetAsync<T>(CancellationToken token = new CancellationToken()) where T : new()
-            => await SendAsync<T>(HttpMethod.Get, token);
-
-        /// <summary>
-        ///  Send a GET request to the specified Uri as an asynchronous operation
-        /// </summary>
-        /// <returns></returns>
-        public async Task<RestResult<byte[]>> GetAsByteArrayAsync(CancellationToken token = new CancellationToken())
-            => await SendAsByteArrayAsync(HttpMethod.Get, token);
-
-        /// <summary>
-        ///  Send a GET request to the specified Uri as an asynchronous operation
-        /// </summary>
-        /// <returns></returns>
-        public async Task<RestResult<Stream>> GetAsStreamAsync(CancellationToken token = new CancellationToken())
-            => await SendAsStreamAsync(HttpMethod.Get, token);
-
-        /// <summary>
-        /// Send a GET request to the specified Uri as an synchronous operation
-        /// </summary>
-        /// <returns></returns>
-        public RestResult<string> Get()
-            => GetAsync().GetAwaiter().GetResult();
-
-        /// <summary>
-        /// Send a GET request to the specified Uri as an synchronous operation
-        /// </summary>
-        /// <param name="url"></param>
-        /// <returns></returns>
-        public RestResult<string> Get(string url)
-            => Url(url).Get();
-
-        /// <summary>
-        /// Send a GET request to the specified Uri as an synchronous operation
-        /// </summary>
-        /// <param name="url"></param>
-        /// <returns></returns>
-        public RestResult<string> Get(Uri url)
-            => Url(url).Get();
-
-        /// <summary>
-        /// Send a GET request to the specified Uri as an synchronous operation
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public RestResult<T> Get<T>() where T : new()
-            => this.GetAsync<T>().GetAwaiter().GetResult();
-
-        /// <summary>
-        /// Send a GET request to the specified Uri as an synchronous operation
-        /// </summary>
-        /// <returns></returns>
-        public RestResult<byte[]> GetAsByteArray()
-            => GetAsByteArrayAsync().GetAwaiter().GetResult();
-
-        /// <summary>
-        /// Send a GET request to the specified Uri as an synchronous operation
-        /// </summary>
-        /// <returns></returns>
-        public RestResult<Stream> GetAsStream()
-            => GetAsStreamAsync().GetAwaiter().GetResult();
-        #endregion
-
-        #region [ Post ]
-
-        /// <summary>
-        /// Send a POST request to the specified Uri as an asynchronous operation
-        /// </summary>
-        /// <returns></returns>
-        public async Task<RestResult<string>> PostAsync(CancellationToken token = new CancellationToken())
-            => await SendAsStringAsync(HttpMethod.Post, token);
-
-        /// <summary>
-        /// Send a POST request to the specified Uri as an asynchronous operation
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public async Task<RestResult<T>> PostAsync<T>(CancellationToken token = new CancellationToken()) where T : new()
-            => await SendAsync<T>(HttpMethod.Post, token);
-
-        /// <summary>
-        /// Send a POST request to the specified Uri as an asynchronous operation
-        /// </summary>
-        /// <returns></returns>
-        public async Task<RestResult<byte[]>> PostAsByteArrayAsync(CancellationToken token = new CancellationToken())
-            => await SendAsByteArrayAsync(HttpMethod.Post, token);
-
-        /// <summary>
-        /// Send a POST request to the specified Uri as an asynchronous operation
-        /// </summary>
-        /// <returns></returns>
-        public async Task<RestResult<Stream>> PostAsStreamAsync(CancellationToken token = new CancellationToken())
-            => await SendAsStreamAsync(HttpMethod.Post, token);
-
-        /// <summary>
-        /// Send a POST request to the specified Uri as a synchronous operation
-        /// </summary>
-        /// <returns></returns>
-        public RestResult<string> Post()
-            => PostAsync().GetAwaiter().GetResult();
-
-        /// <summary>
-        /// Send a POST request to the specified Uri as a synchronous operation
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public RestResult<T> Post<T>() where T : new()
-            => PostAsync<T>().GetAwaiter().GetResult();
-
-        /// <summary>
-        /// Send a POST request to the specified Uri as a synchronous operation
-        /// </summary>
-        /// <returns></returns>
-        public RestResult<byte[]> PostAsByteArray()
-            => PostAsByteArrayAsync().GetAwaiter().GetResult();
-
-        /// <summary>
-        /// Send a POST request to the specified Uri as a synchronous operation
-        /// </summary>
-        /// <returns></returns>
-        public RestResult<Stream> PostAsStream()
-            => PostAsStreamAsync().GetAwaiter().GetResult();
-        #endregion
-
-        #region [ Put ]
-
-        /// <summary>
-        /// Send a PUT request to the specified Uri as an asynchronous operation.
-        /// </summary>
-        /// <returns></returns>
-        public async Task<RestResult<string>> PutAsync(CancellationToken token = new CancellationToken())
-            => await SendAsStringAsync(HttpMethod.Put, token);
-
-        /// <summary>
-        /// Send a PUT request to the specified Uri as an asynchronous operation.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public async Task<RestResult<T>> PutAsync<T>(CancellationToken token = new CancellationToken()) where T : new()
-            => await SendAsync<T>(HttpMethod.Put, token);
-
-        /// <summary>
-        /// Send a PUT request to the specified Uri as an asynchronous operation.
-        /// </summary>
-        /// <returns></returns>
-        public async Task<RestResult<byte[]>> PutAsByteArrayAsync(CancellationToken token = new CancellationToken())
-            => await SendAsByteArrayAsync(HttpMethod.Put, token);
-
-        /// <summary>
-        /// Send a PUT request to the specified Uri as an asynchronous operation.
-        /// </summary>
-        /// <returns></returns>
-        public async Task<RestResult<Stream>> PutAsStreamAsync(CancellationToken token = new CancellationToken())
-            => await SendAsStreamAsync(HttpMethod.Put, token);
-
-        /// <summary>
-        /// Send a PUT request to the specified Uri as a synchronous operation.
-        /// </summary>
-        /// <returns></returns>
-        public RestResult<string> Put()
-            => PutAsync().GetAwaiter().GetResult();
-
-        /// <summary>
-        /// Send a PUT request to the specified Uri as a synchronous operation.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public RestResult<T> Put<T>() where T : new()
-            => PutAsync<T>().GetAwaiter().GetResult();
-
-        /// <summary>
-        /// Send a PUT request to the specified Uri as a synchronous operation.
-        /// </summary>
-        /// <returns></returns>
-        public RestResult<byte[]> PutAsByteArray()
-            => PutAsByteArrayAsync().GetAwaiter().GetResult();
-
-        /// <summary>
-        /// Send a PUT request to the specified Uri as a synchronous operation.
-        /// </summary>
-        /// <returns></returns>
-        public RestResult<Stream> PutAsStream()
-            => PutAsStreamAsync().GetAwaiter().GetResult();
-        #endregion
-
-        #region [ Delete ]
-
-        /// <summary>
-        ///  Send a DELETE request to the specified Uri as an asynchronous operation.
-        /// </summary>
-        /// <returns></returns>
-        public async Task<RestResult<string>> DeleteAsync(CancellationToken token = new CancellationToken())
-            => await SendAsStringAsync(HttpMethod.Delete, token);
-
-        /// <summary>
-        ///  Send a DELETE request to the specified Uri as an asynchronous operation.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public async Task<RestResult<T>> DeleteAsync<T>(CancellationToken token = new CancellationToken()) where T : new()
-            => await SendAsync<T>(HttpMethod.Delete, token);
-
-        /// <summary>
-        ///  Send a DELETE request to the specified Uri as an asynchronous operation.
-        /// </summary>
-        /// <returns></returns>
-        public async Task<RestResult<byte[]>> DeleteAsByteArrayAsync(CancellationToken token = new CancellationToken())
-            => await SendAsByteArrayAsync(HttpMethod.Delete, token);
-
-        /// <summary>
-        ///  Send a DELETE request to the specified Uri as an asynchronous operation.
-        /// </summary>
-        /// <returns></returns>
-        public async Task<RestResult<Stream>> DeleteAsStreamAsync(CancellationToken token = new CancellationToken())
-            => await SendAsStreamAsync(HttpMethod.Delete, token);
-
-        /// <summary>
-        /// Send a DELETE request to the specified Uri as a synchronous operation.
-        /// </summary>
-        /// <returns></returns>
-        public RestResult<string> Delete()
-            => DeleteAsync().GetAwaiter().GetResult();
-
-        /// <summary>
-        /// Send a DELETE request to the specified Uri as a synchronous operation.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public RestResult<T> Delete<T>() where T : new()
-            => DeleteAsync<T>().GetAwaiter().GetResult();
-
-        /// <summary>
-        /// Send a DELETE request to the specified Uri as a synchronous operation.
-        /// </summary>
-        /// <returns></returns>
-        public RestResult<byte[]> DeleteAsByteArray()
-            => DeleteAsByteArrayAsync().GetAwaiter().GetResult();
-
-        /// <summary>
-        /// Send a DELETE request to the specified Uri as a synchronous operation.
-        /// </summary>
-        /// <returns></returns>
-        public RestResult<Stream> DeleteAsStream()
-            => DeleteAsStreamAsync().GetAwaiter().GetResult();
-        #endregion
-
-        #region [ Patch ]
-        HttpMethod PATCH = new HttpMethod("PATCH");
-
-        /// <summary>
-        /// Send a PATCH request to the specified Uri as an asynchronous operation
-        /// </summary>
-        /// <returns></returns>
-        public async Task<RestResult<string>> PatchAsync(CancellationToken token = new CancellationToken())
-            => await SendAsStringAsync(PATCH, token);
-
-        /// <summary>
-        /// Send a PATCH request to the specified Uri as an asynchronous operation
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public async Task<RestResult<T>> PatchAsync<T>(CancellationToken token = new CancellationToken()) where T : new()
-            => await SendAsync<T>(PATCH, token);
-
-        /// <summary>
-        /// Send a PATCH request to the specified Uri as an asynchronous operation
-        /// </summary>
-        /// <returns></returns>
-        public async Task<RestResult<byte[]>> PatchAsByteArrayAsync(CancellationToken token = new CancellationToken())
-            => await SendAsByteArrayAsync(PATCH, token);
-
-        /// <summary>
-        /// Send a PATCH request to the specified Uri as an asynchronous operation
-        /// </summary>
-        /// <returns></returns>
-        public async Task<RestResult<Stream>> PatchAsStreamAsync(CancellationToken token = new CancellationToken())
-            => await SendAsStreamAsync(PATCH, token);
-
-        /// <summary>
-        /// Send a PATCH request to the specified Uri as a synchronous operation
-        /// </summary>
-        /// <returns></returns>
-        public RestResult<string> Patch()
-            => PatchAsync().GetAwaiter().GetResult();
-
-        /// <summary>
-        /// Send a PATCH request to the specified Uri as a synchronous operation
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public RestResult<T> Patch<T>() where T : new()
-            => PatchAsync<T>().GetAwaiter().GetResult();
-
-        /// <summary>
-        /// Send a PATCH request to the specified Uri as a synchronous operation
-        /// </summary>
-        /// <returns></returns>
-        public RestResult<byte[]> PatchAsByteArray()
-            => PatchAsByteArrayAsync().GetAwaiter().GetResult();
-
-        /// <summary>
-        /// Send a PATCH request to the specified Uri as a synchronous operation
-        /// </summary>
-        /// <returns></returns>
-        public RestResult<Stream> PatchAsStream()
-            => PatchAsStreamAsync().GetAwaiter().GetResult();
-
-        #endregion
-
-        #region [ Custom Call ]
-
-        /// <summary>
-        /// Send a CUSTOM CALL request to the specified Uri as an asynchronous operation
-        /// </summary>
-        /// <returns></returns>
-        public async Task<RestResult<string>> CustomCallAsync(HttpMethod method, CancellationToken token = new CancellationToken())
-            => await SendAsStringAsync(method, token);
-
-        /// <summary>
-        /// Send a CUSTOM CALL request to the specified Uri as an asynchronous operation
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public async Task<RestResult<T>> CustomCallAsync<T>(HttpMethod method, CancellationToken token = new CancellationToken()) where T : new()
-            => await SendAsync<T>(method, token);
-
-        /// <summary>
-        /// Send a CUSTOM CALL request to the specified Uri as an asynchronous operation
-        /// </summary>
-        /// <returns></returns>
-        public async Task<RestResult<byte[]>> CustomCallAsByteArrayAsync(HttpMethod method, CancellationToken token = new CancellationToken())
-            => await SendAsByteArrayAsync(method, token);
-
-        /// <summary>
-        /// Send a CUSTOM CALL request to the specified Uri as an asynchronous operation
-        /// </summary>
-        /// <returns></returns>
-        public async Task<RestResult<Stream>> CustomCallAsStreamAsync(HttpMethod method, CancellationToken token = new CancellationToken())
-            => await SendAsStreamAsync(method, token);
-
-        /// <summary>
-        /// Send a CUSTOM CALL request to the specified Uri as a synchronous operation
-        /// </summary>
-        /// <returns></returns>
-        public RestResult<string> CustomCall(HttpMethod method)
-            => CustomCallAsync(method).GetAwaiter().GetResult();
-
-        /// <summary>
-        /// Send a CUSTOM CALL request to the specified Uri as a synchronous operation
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public RestResult<T> CustomCall<T>(HttpMethod method) where T : new()
-            => CustomCallAsync<T>(method).GetAwaiter().GetResult();
-
-        /// <summary>
-        /// Send a CUSTOM CALL request to the specified Uri as a synchronous operation
-        /// </summary>
-        /// <returns></returns>
-        public RestResult<byte[]> CustomCallAsByteArray(HttpMethod method)
-            => CustomCallAsByteArrayAsync(method).GetAwaiter().GetResult();
-
-        /// <summary>
-        /// Send a CUSTOM CALL request to the specified Uri as a synchronous operation
-        /// </summary>
-        /// <returns></returns>
-        public RestResult<Stream> CustomCallAsStream(HttpMethod method)
-            => CustomCallAsStreamAsync(method).GetAwaiter().GetResult();
-
-        #endregion
-
-        #region [ Download ]
-
-        /// <summary>
-        /// Send a GET request to download file from the specified Uri as an asynchronous operation
-        /// </summary>
-        /// <param name="url"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        public Task<RestResult<byte[]>> DownloadAsync(string url, CancellationToken token = new CancellationToken())
-            => Url(url).GetAsByteArrayAsync(token);
-
-        /// <summary>
-        /// Send a GET request to download file from the specified Uri as an asynchronous operation
-        /// </summary>
-        /// <param name="url"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        public Task<RestResult<byte[]>> DownloadAsync(Uri url, CancellationToken token = new CancellationToken())
-            => Url(url).GetAsByteArrayAsync(token);
-
-        /// <summary>
-        /// Send a GET request to download file from the specified Uri as a synchronous operation
-        /// </summary>
-        /// <param name="url"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        public RestResult<byte[]> Download(string url)
-            => DownloadAsync(url).GetAwaiter().GetResult();
-
-        /// <summary>
-        /// Send a GET request to download file from the specified Uri as a synchronous operation
-        /// </summary>
-        /// <param name="url"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        public RestResult<byte[]> Download(Uri url)
-            => DownloadAsync(url).GetAwaiter().GetResult();
-
-        #endregion
-
-        #endregion
-
-        #region [ Fetch ]
-
-        /// <summary>
-        ///  Send an HTTP request as an asynchronous operation.
-        /// </summary>
-        /// <param name="method"></param>
-        /// <returns></returns>
-        private async Task<RestResult<string>> SendAsStringAsync(HttpMethod method, CancellationToken cancellationToken = new CancellationToken())
-        {
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            RestResult<string> response = null;
-
-            try
-            {
-                string url = BuildFinalUrl();
-
-                StartEventArgs startEventArgs = new StartEventArgs()
-                {
-                    Cancel = false,
-                    Payload = PayloadContent,
-                    Url = url
-                };
-
-                OnStartAction?.Invoke(startEventArgs);
-
-                if (startEventArgs.Cancel)
-                {
-                    throw new OperationCanceledException();
-                }
-
-                using (HttpRequestMessage request = new HttpRequestMessage(method, url))
-                {
-                    HttpResponseMessage responseMessage = null;
-
-                    using (request.Content = MakeHttpContent())
-                    {
-                        using (HttpClient client = new HttpClient(new HttpClientCompressionHandler
-                        {
-                            EnabledGZipCompression = this.enabledGZipCompression,
-                            UploadingProgressChanged = (s, e) => OnUploadProgressAction?.Invoke(e),
-                            DownloadingProgressChanged = (s, e) => OnDownloadProgressAction?.Invoke(e),
-                            BufferSize = Properties.BufferSize,
-                            Credentials = Credentials,
-                            ClientCertificateOptions = Properties.CertificateOption,
-#if !(NET45 || NET451 || NET452)
-                            ServerCertificateCustomValidationCallback = CertificateCallback
-#endif
-                        })
-                        {
-                            Timeout = Properties.Timeout,
-                        })
-                        {
-                            this.OnConfigureHttpClientAction?.Invoke(client);
-
-                            if (enabledGZipCompression)
-                            {
-                                client.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
-                            }
-                            if (onAuthentication != null)
-                            {
-                                client.DefaultRequestHeaders.Authorization = onAuthentication();
-                            }
-
-                            onDefaultRequestHeaders?.Invoke(client.DefaultRequestHeaders);
-
-                            responseMessage = await client.SendAsync(request, cancellationToken);
-
-                            if (!IsAfterRefreshTokenCalled && responseMessage.StatusCode == HttpStatusCode.Unauthorized && RefreshTokenExecution)
-                            {
-                                stopwatch.Stop();
-
-                                IsAfterRefreshTokenCalled = true;
-
-                                if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
-                                {
-                                    return await SendAsStringAsync(method, cancellationToken);
-                                }
-
-                                if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
-                                {
-                                    return await SendAsStringAsync(method, cancellationToken);
-                                }
-                            }
-
-                            response = RestResult<string>.CreateInstanceFrom<string>(responseMessage);
-
-                            string serializedObject = await responseMessage.Content.ReadAsStringAsync();
-                            OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = serializedObject });
-                            response.Content = serializedObject;
-                        }
-                    }
-                }
-
-                OnPreResultAction?.Invoke(response);
-                OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
-
-                stopwatch.Stop();
-
-                OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
-                OnCompletedActionEA?.Invoke(new EventArgs());
-            }
-            catch (Exception ex)
-            {
-                OnExceptionAction?.Invoke(ex);
-                response = RestResult<string>.CreateFromException(ex);
-            }
-
-            return response;
-        }
-
-        /// <summary>
-        ///  Send an HTTP request as an asynchronous operation.
-        /// </summary>
-        /// <param name="method"></param>
-        /// <returns></returns>
-        private async Task<RestResult<Stream>> SendAsStreamAsync(HttpMethod method, CancellationToken cancellationToken = new CancellationToken())
-        {
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            RestResult<Stream> response = null;
-
-            try
-            {
-                string url = BuildFinalUrl();
-
-                StartEventArgs startEventArgs = new StartEventArgs()
-                {
-                    Cancel = false,
-                    Payload = PayloadContent,
-                    Url = url
-                };
-
-                OnStartAction?.Invoke(startEventArgs);
-
-                if (startEventArgs.Cancel)
-                {
-                    throw new OperationCanceledException();
-                }
-
-                using (HttpRequestMessage request = new HttpRequestMessage(method, url))
-                {
-                    HttpResponseMessage responseMessage = null;
-
-                    using (request.Content = MakeHttpContent())
-                    {
-                        using (HttpClient client = new HttpClient(new HttpClientCompressionHandler
-                        {
-                            EnabledGZipCompression = this.enabledGZipCompression,
-                            UploadingProgressChanged = (s, e) => OnUploadProgressAction?.Invoke(e),
-                            DownloadingProgressChanged = (s, e) => OnDownloadProgressAction?.Invoke(e),
-                            BufferSize = Properties.BufferSize,
-                            Credentials = Credentials,
-                            ClientCertificateOptions = Properties.CertificateOption,
-#if !(NET45 || NET451 || NET452)
-                            ServerCertificateCustomValidationCallback = CertificateCallback
-#endif
-                        })
-                        {
-                            Timeout = Properties.Timeout,
-                        })
-                        {
-                            this.OnConfigureHttpClientAction?.Invoke(client);
-
-                            if (enabledGZipCompression)
-                            {
-                                client.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
-                            }
-
-                            if (onAuthentication != null)
-                            {
-                                client.DefaultRequestHeaders.Authorization = onAuthentication();
-                            }
-
-                            onDefaultRequestHeaders?.Invoke(client.DefaultRequestHeaders);
-
-                            responseMessage = await client.SendAsync(request, cancellationToken);
-
-                            if (!IsAfterRefreshTokenCalled && responseMessage.StatusCode == HttpStatusCode.Unauthorized && RefreshTokenExecution)
-                            {
-                                stopwatch.Stop();
-
-                                IsAfterRefreshTokenCalled = true;
-
-                                if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
-                                {
-                                    return await SendAsStreamAsync(method, cancellationToken);
-                                }
-
-                                if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
-                                {
-                                    return await SendAsStreamAsync(method, cancellationToken);
-                                }
-                            }
-
-                            response = RestResult<Stream>.CreateInstanceFrom<Stream>(responseMessage);
-
-                            Stream stream = await responseMessage.Content.ReadAsStreamAsync();
-                            OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = string.Empty });
-                            response.Content = stream;
-                        }
-                    }
-                }
-
-                OnPreResultAction?.Invoke(response);
-                OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
-
-                stopwatch.Stop();
-
-                OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
-                OnCompletedActionEA?.Invoke(new EventArgs());
-            }
-            catch (Exception ex)
-            {
-                OnExceptionAction?.Invoke(ex);
-                response = RestResult<Stream>.CreateFromException(ex);
-            }
-
-            return response;
-        }
-
-        /// <summary>
-        ///  Send an HTTP request as an asynchronous operation.
-        /// </summary>
-        /// <param name="method"></param>
-        /// <returns></returns>
-        private async Task<RestResult<byte[]>> SendAsByteArrayAsync(HttpMethod method, CancellationToken cancellationToken = new CancellationToken())
-        {
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            RestResult<byte[]> response = null;
-
-            try
-            {
-                string url = BuildFinalUrl();
-
-                StartEventArgs startEventArgs = new StartEventArgs()
-                {
-                    Cancel = false,
-                    Payload = PayloadContent,
-                    Url = url
-                };
-
-                OnStartAction?.Invoke(startEventArgs);
-
-                if (startEventArgs.Cancel)
-                {
-                    throw new OperationCanceledException();
-                }
-
-                using (HttpRequestMessage request = new HttpRequestMessage(method, url))
-                {
-                    HttpResponseMessage responseMessage = null;
-
-                    using (request.Content = MakeHttpContent())
-                    {
-                        using (HttpClient client = new HttpClient(new HttpClientCompressionHandler
-                        {
-                            EnabledGZipCompression = this.enabledGZipCompression,
-                            UploadingProgressChanged = (s, e) => OnUploadProgressAction?.Invoke(e),
-                            DownloadingProgressChanged = (s, e) => OnDownloadProgressAction?.Invoke(e),
-                            BufferSize = Properties.BufferSize,
-                            Credentials = Credentials,
-                            ClientCertificateOptions = Properties.CertificateOption,
-#if !(NET45 || NET451 || NET452)
-                            ServerCertificateCustomValidationCallback = CertificateCallback
-#endif
-                        })
-                        {
-                            Timeout = Properties.Timeout,
-                        })
-                        {
-                            this.OnConfigureHttpClientAction?.Invoke(client);
-
-                            if (enabledGZipCompression)
-                            {
-                                client.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
-                            }
-
-                            if (onAuthentication != null)
-                            {
-                                client.DefaultRequestHeaders.Authorization = onAuthentication();
-                            }
-
-                            onDefaultRequestHeaders?.Invoke(client.DefaultRequestHeaders);
-
-                            responseMessage = await client.SendAsync(request, cancellationToken);
-
-                            if (!IsAfterRefreshTokenCalled && responseMessage.StatusCode == HttpStatusCode.Unauthorized && RefreshTokenExecution)
-                            {
-                                stopwatch.Stop();
-
-                                IsAfterRefreshTokenCalled = true;
-
-                                if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
-                                {
-                                    return await SendAsByteArrayAsync(method, cancellationToken);
-                                }
-
-                                if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
-                                {
-                                    return await SendAsByteArrayAsync(method, cancellationToken);
-                                }
-                            }
-
-                            response = RestResult<byte[]>.CreateInstanceFrom<byte[]>(responseMessage);
-                            response.Content = await responseMessage.Content.ReadAsByteArrayAsync();
-                        }
-                    }
-                }
-
-                OnPreResultAction?.Invoke(response);
-                OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
-
-                stopwatch.Stop();
-
-                OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
-                OnCompletedActionEA?.Invoke(new EventArgs());
-            }
-            catch (Exception ex)
-            {
-                OnExceptionAction?.Invoke(ex);
-                response = RestResult<byte[]>.CreateFromException(ex);
-            }
-
-            return response;
-        }
-
-        /// <summary>
-        ///  Send an HTTP request as an asynchronous operation.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="method"></param>
-        /// <returns></returns>
-        private async Task<RestResult<T>> SendAsync<T>(HttpMethod method, CancellationToken cancellationToken = new CancellationToken())
-            where T : new()
-        {
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            RestResult<T> response = null;
-
-            try
-            {
-                string url = BuildFinalUrl();
-
-                StartEventArgs startEventArgs = new StartEventArgs()
-                {
-                    Cancel = false,
-                    Payload = PayloadContent,
-                    Url = url
-                };
-
-                OnStartAction?.Invoke(startEventArgs);
-
-                if (startEventArgs.Cancel)
-                {
-                    throw new OperationCanceledException();
-                }
-
-                using (HttpRequestMessage request = new HttpRequestMessage(method, url))
-                {
-                    HttpResponseMessage responseMessage = null;
-
-                    using (request.Content = MakeHttpContent())
-                    {
-                        using (HttpClient client = new HttpClient(new HttpClientCompressionHandler
-                        {
-                            EnabledGZipCompression = this.enabledGZipCompression,
-                            UploadingProgressChanged = (s, e) => OnUploadProgressAction?.Invoke(e),
-                            DownloadingProgressChanged = (s, e) => OnDownloadProgressAction?.Invoke(e),
-                            BufferSize = Properties.BufferSize,
-                            Credentials = Credentials,
-                            ClientCertificateOptions = Properties.CertificateOption,
-#if !(NET45 || NET451 || NET452)
-                            ServerCertificateCustomValidationCallback = CertificateCallback
-#endif
-                        })
-                        {
-                            Timeout = Properties.Timeout,
-                        })
-                        {
-                            this.OnConfigureHttpClientAction?.Invoke(client);
-
-                            if (enabledGZipCompression)
-                            {
-                                client.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
-                            }
-
-                            if (onAuthentication != null)
-                            {
-                                client.DefaultRequestHeaders.Authorization = onAuthentication();
-                            }
-
-                            onDefaultRequestHeaders?.Invoke(client.DefaultRequestHeaders);
-
-                            responseMessage = await client.SendAsync(request, cancellationToken);
-
-                            if (!IsAfterRefreshTokenCalled && responseMessage.StatusCode == HttpStatusCode.Unauthorized && RefreshTokenExecution)
-                            {
-                                stopwatch.Stop();
-
-                                IsAfterRefreshTokenCalled = true;
-
-                                if (RefreshTokenApi != null && RefreshTokenApi().StatusCode == HttpStatusCode.OK)
-                                {
-                                    return await SendAsync<T>(method, cancellationToken);
-                                }
-
-                                if (RefreshTokenApiAsync != null && (await RefreshTokenApiAsync()).StatusCode == HttpStatusCode.OK)
-                                {
-                                    return await SendAsync<T>(method, cancellationToken);
-                                }
-                            }
-
-                            response = RestResult<T>.CreateInstanceFrom<T>(responseMessage);
-
-                            string serializedObject = await responseMessage.Content.ReadAsStringAsync();
-                            OnPreviewContentAsStringAction?.Invoke(new PreviewContentAsStringEventArgs { ContentAsString = serializedObject });
-                            response.Content = (T)Serializer.DeserializeObject(serializedObject, typeof(T), DeserializeOptions);
-                        }
-                    }
-                }
-
-                OnPreResultAction?.Invoke(response);
-                OnPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = response });
-
-                stopwatch.Stop();
-
-                OnCompletedAction?.Invoke(new CompletedEventArgs { Result = response, ExecutionTime = stopwatch.Elapsed });
-                OnCompletedActionEA?.Invoke(new EventArgs());
-            }
-            catch (Exception ex)
-            {
-                OnExceptionAction?.Invoke(ex);
-                response = RestResult<T>.CreateFromException(ex);
-            }
-
-            return response;
-        }
-
-        /// <summary>
-        /// Builder final url
-        /// </summary>
-        /// <returns></returns>
-        private string BuildFinalUrl()
-        {
-            StringBuilder urlBuilder = new StringBuilder();
-
-            urlBuilder.Append(Properties.EndPoint.OriginalString);
-
-            urlBuilder.Append(string.Join("", Commands.Select(c => $"{c}")));
-
-            if (Parameters.Count > 0)
-            {
-                urlBuilder.Append($"?");
-                urlBuilder.Append(string.Join("&", Parameters.Select(q => $"{q.Key}={q.Value}")));
-            }
-
-            return urlBuilder.ToString();
-        }
-
-        #endregion
-
-        #region [ Make Http Content ]
-
-        /// <summary>
-        /// Make Http Contenxt
-        /// </summary>
-        /// <returns></returns>
-        private HttpContent MakeHttpContent(CancellationToken cancellationToken = new CancellationToken())
-        {
-            if (!IsEnabledFormUrlEncoded && PayloadContent != null)
-            {
-                var serializedObject = Serializer.SerializeObject(PayloadContent, PayloadContent.GetType(), SerializeOptions);
-                OnPreviewContentRequestAsStringAction?.Invoke(new PreviewContentAsStringEventArgs
-                {
-                    ContentAsString = serializedObject,
-                    ContentType = PayloadContent.GetType()
-                });
-                return new StringContent(serializedObject, Encoding.UTF8, Serializer.MediaTypeAsString);
-            }
-            else if (IsEnabledFormUrlEncoded && FormUrlEncodedKeyValues != null)
-            {
-                var serializedObject = Serializer.SerializeObject(FormUrlEncodedKeyValues, FormUrlEncodedKeyValues.GetType(), SerializeOptions);
-                OnPreviewContentRequestAsStringAction?.Invoke(new PreviewContentAsStringEventArgs
-                {
-                    ContentAsString = serializedObject,
-                    ContentType = FormUrlEncodedKeyValues.GetType()
-                });
-                return new FormUrlEncodedContent(FormUrlEncodedKeyValues);
-            }
-            return null;
-        }
         #endregion
     }
 }

@@ -1,31 +1,63 @@
 name: Publish on NuGet
- 
+
+# Publishes Mafe.RestClient and Mafe.RestClient.Extensions.DependencyInjection when a version tag is pushed:
+#   git tag v2.0.0-rc.1 && git push origin v2.0.0-rc.1
+# The tag must match the version in src/Directory.Build.props (VersionPrefix + VersionSuffix).
+# Merging into master does NOT publish anything.
+
 on:
   push:
-    branches: [ master ]
-    paths: [ 'src/**' ]
-  workflow_dispatch:
-  
+    tags: [ 'v*' ]
+
+permissions:
+  contents: read
+
 jobs:
-  build:
+  publish:
 
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+
     - name: Setup .NET
-      uses: actions/setup-dotnet@v2
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.0.x
-        
+        dotnet-version: |
+          8.0.x
+          10.0.x
+
+    - name: Check that the tag matches the project version
+      run: |
+        TAG_VERSION="${GITHUB_REF_NAME#v}"
+        PROJECT_VERSION="$(dotnet msbuild src/RestClient/RestClient.csproj -getProperty:Version)"
+        echo "tag: $TAG_VERSION, project: $PROJECT_VERSION"
+        if [ "$TAG_VERSION" != "$PROJECT_VERSION" ]; then
+          echo "::error::The tag $GITHUB_REF_NAME does not match the project version $PROJECT_VERSION"
+          exit 1
+        fi
+
     - name: Restore dependencies
-      run: dotnet restore src/RestClient/RestClient.csproj 
-      
+      run: dotnet restore src/RestClient.sln
+
     - name: Build
-      run: dotnet build --no-restore src/RestClient/RestClient.csproj 
-        
+      run: dotnet build -c Release --no-restore src/RestClient.sln
+
+    - name: Test
+      run: |
+        dotnet test -c Release --no-build -f net10.0 tests/RestClient.Tests/RestClient.Tests.csproj
+        dotnet test -c Release --no-build -f net8.0 tests/RestClient.Tests/RestClient.Tests.csproj
+
+    - name: Install the Native AOT prerequisites
+      run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev
+
+    - name: Native AOT smoke test
+      run: |
+        dotnet publish -c Release -r linux-x64 -o ./aot tests/RestClient.AotSmokeTest/RestClient.AotSmokeTest.csproj
+        ./aot/RestClient.AotSmokeTest
+
     - name: Package
-      run: dotnet pack -c Release -o . src/RestClient/RestClient.csproj 
-      
+      run: dotnet pack -c Release --no-build -o ./artifacts src/RestClient.sln
+
     - name: Publish on NuGet
-      run: dotnet nuget push ./*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
