@@ -2,7 +2,8 @@ name: Publish on NuGet
 
 # Publishes Mafe.RestClient and Mafe.RestClient.Extensions.DependencyInjection when a version tag is pushed:
 #   git tag v2.0.0-rc.1 && git push origin v2.0.0-rc.1
-# The tag must match the version in src/Directory.Build.props (VersionPrefix + VersionSuffix).
+# The tag must match <Version> in both src/RestClient/RestClient.csproj and
+# src/RestClient.Extensions.DependencyInjection/RestClient.Extensions.DependencyInjection.csproj.
 # Merging into master does NOT publish anything.
 
 on:
@@ -30,12 +31,14 @@ jobs:
     - name: Check that the tag matches the project version
       run: |
         TAG_VERSION="${GITHUB_REF_NAME#v}"
-        PROJECT_VERSION="$(dotnet msbuild src/RestClient/RestClient.csproj -getProperty:Version)"
-        echo "tag: $TAG_VERSION, project: $PROJECT_VERSION"
-        if [ "$TAG_VERSION" != "$PROJECT_VERSION" ]; then
-          echo "::error::The tag $GITHUB_REF_NAME does not match the project version $PROJECT_VERSION"
-          exit 1
-        fi
+        for PROJECT in src/RestClient/RestClient.csproj src/RestClient.Extensions.DependencyInjection/RestClient.Extensions.DependencyInjection.csproj; do
+          PROJECT_VERSION="$(dotnet msbuild "$PROJECT" -getProperty:Version)"
+          echo "tag: $TAG_VERSION, $PROJECT: $PROJECT_VERSION"
+          if [ "$TAG_VERSION" != "$PROJECT_VERSION" ]; then
+            echo "::error::The tag $GITHUB_REF_NAME does not match the version $PROJECT_VERSION of $PROJECT"
+            exit 1
+          fi
+        done
 
     - name: Restore dependencies
       run: dotnet restore src/RestClient.sln
