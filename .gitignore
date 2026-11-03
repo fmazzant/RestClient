@@ -34,3 +34,10 @@ src/.vs/RestClient/xs/UserPrefs.xml
 /samples/.vs/RestClient.Samples/v17
 /src/.vs/RestClient/FileContentIndex
 /src/.vs
+
+# build output and IDE state
+.vs/
+bin/
+obj/
+*.user
+TestResults/
