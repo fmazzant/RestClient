@@ -18,6 +18,7 @@ Highlights:
 * `IHttpClientFactory` integration with the [Mafe.RestClient.Extensions.DependencyInjection](#dependency-injection) package
 
 > Upgrading from 1.x? Read [Migrating to 2.0](#migrating-to-20): version 2.0.0 contains breaking changes.
+> The release candidate is available with `dotnet add package Mafe.RestClient --prerelease`. See the [CHANGELOG](CHANGELOG.md).
 
 ### What is RestClient?
 
