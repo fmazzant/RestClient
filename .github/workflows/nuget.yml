@@ -17,8 +17,11 @@ name: Publish on NuGet
 # no long-lived API key. The NuGet/login step exchanges the GitHub OIDC token for a temporary API key (valid 1 hour).
 # Requires:
 # - on nuget.org (Account > Trusted Publishing) a policy with repository owner "fmazzant", repository "RestClient"
-#   and workflow file "nuget.yml" (renaming this file breaks publishing);
-# - the repository secret NUGET_USER: the nuget.org profile name (not the email) of the policy owner.
+#   workflow file "nuget.yml" (renaming this file breaks publishing) and environment "production"
+#   (it must match the "environment" of the publish job below);
+# - the repository secret NUGET_USER: the nuget.org username (not the email) of the user who created the policy.
+# If the login fails with "No matching trust policy owned by user '***' was found", the policy does not match
+# this run (owner, repository, workflow file or environment) or NUGET_USER is not the policy creator.
 
 on:
   push:
@@ -39,6 +42,8 @@ jobs:
   publish:
 
     runs-on: ubuntu-latest
+    # Must match the Environment of the NuGet Trusted Publishing policy
+    environment: production
 
     steps:
     - uses: actions/checkout@v7
