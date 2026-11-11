@@ -2,14 +2,22 @@
 
   <PropertyGroup>
     <TargetFrameworks>net10.0;net8.0;netstandard2.0</TargetFrameworks>
-    <AssemblyName>Mafe.RestClient.Extensions.DependencyInjection</AssemblyName>
-    <RootNamespace>RestClient.Extensions.DependencyInjection</RootNamespace>
-    <PackageId>Mafe.RestClient.Extensions.DependencyInjection</PackageId>
+    <AssemblyName>Mafesoft.$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>Mafesoft.RestClient.Extensions.DependencyInjection</RootNamespace>
+    <PackageId>Mafesoft.RestClient.Extensions.DependencyInjection</PackageId>
+    <!-- Package validation baseline: the last release was published with the old package ID -->
+    <PackageValidationBaselineName>Mafe.RestClient.Extensions.DependencyInjection</PackageValidationBaselineName>
     <Product>RestClient</Product>
-    <Version>2.0.0</Version>
-    <Description>Registers Mafe.RestClient builders in the dependency injection container, on top of IHttpClientFactory (pooled handlers, delegating handlers, resilience).</Description>
-    <PackageTags>rest-client, restclient, mafe, dependency-injection, httpclientfactory, fluent</PackageTags>
+    <Title>Mafesoft.RestClient.Extensions.DependencyInjection</Title>
+    <Version>3.0.0</Version>
+    <Description>Registers Mafesoft.RestClient builders in the dependency injection container, on top of IHttpClientFactory (pooled handlers, delegating handlers, resilience).</Description>
+    <PackageTags>rest-client, restclient, mafesoft, dependency-injection, httpclientfactory, fluent</PackageTags>
     <PackageReleaseNotes>
+      3.0.0 (breaking changes: see README "Migrating from Mafe.RestClient")
+      - Package renamed from Mafe.RestClient.Extensions.DependencyInjection to Mafesoft.RestClient.Extensions.DependencyInjection
+      - IRestClientFactory moved from the RestClient namespace to Mafesoft.RestClient
+      - Logger category renamed from "Mafe.RestClient.{name}" to "Mafesoft.RestClient.{name}"
+
       2.0.0
       - First release: AddRestClient(name, ...), AddRestClient&lt;TClient&gt;(...), IRestClientFactory
     </PackageReleaseNotes>
