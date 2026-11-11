@@ -2,8 +2,10 @@ name: CI
 
 on:
   pull_request:
+    paths-ignore: [ '**.md' ]
   push:
     branches: [ main ]
+    paths-ignore: [ '**.md' ]
   workflow_dispatch:
 
 permissions:
@@ -11,13 +13,19 @@ permissions:
 
 jobs:
   test:
-    runs-on: windows-latest
+    name: test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        # the tests run on net10.0 and net8.0 everywhere, and on net48 on Windows only
+        os: [ windows-latest, ubuntu-latest, macos-latest ]
+    runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: |
           8.0.x
@@ -26,20 +34,40 @@ jobs:
     - name: Build
       run: dotnet build -c Release src/RestClient.sln
 
-    - name: Test (net10.0, net8.0, net48)
-      run: dotnet test -c Release --no-build tests/RestClient.Tests/RestClient.Tests.csproj
+    - name: Test
+      run: >
+        dotnet test -c Release --no-build tests/RestClient.Tests/RestClient.Tests.csproj
+        --collect:"XPlat Code Coverage" --results-directory ./coverage
+
+    - name: Coverage report
+      if: matrix.os == 'ubuntu-latest'
+      uses: danielpalme/ReportGenerator-GitHub-Action@v5
+      with:
+        reports: coverage/**/coverage.cobertura.xml
+        targetdir: coverage-report
+        reporttypes: MarkdownSummaryGithub
+        assemblyfilters: +Mafesoft.RestClient*
+
+    - name: Publish the coverage in the job summary
+      if: matrix.os == 'ubuntu-latest'
+      shell: bash
+      run: cat coverage-report/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
+
+    - name: Build the samples
+      run: dotnet build -c Release samples/RestClient.Samples.sln
 
     - name: Package (package validation)
+      if: matrix.os == 'windows-latest'
       run: dotnet pack -c Release --no-build -o ./artifacts src/RestClient.sln
 
   native-aot:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: 10.0.x
 
