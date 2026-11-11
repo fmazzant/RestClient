@@ -2,9 +2,9 @@
 
 RestClient library provides a simple connector to consume REST services.
 
-To use it in your project, add the Mafe.RestClient NuGet package to your project.
+To use it in your project, add the Mafesoft.RestClient NuGet package to your project.
 
-[![Nuget](https://img.shields.io/nuget/v/Mafe.RestClient?style=flat-square)](https://www.nuget.org/packages/Mafe.RestClient)
+[![Nuget](https://img.shields.io/nuget/v/Mafesoft.RestClient?style=flat-square)](https://www.nuget.org/packages/Mafesoft.RestClient)
 
 Supported target frameworks: `net10.0`, `net8.0`, `netstandard2.1`, `netstandard2.0` (.NET Framework 4.6.2+, Xamarin, Unity, ...).
 
@@ -15,15 +15,22 @@ Highlights:
 * JSON (System.Text.Json, Native AOT ready), XML or custom serialization, `multipart/form-data`, form-url-encoded
 * real streaming for downloads, upload/download progress
 * `ILogger` logging and OpenTelemetry tracing
-* `IHttpClientFactory` integration with the [Mafe.RestClient.Extensions.DependencyInjection](#dependency-injection) package
+* `IHttpClientFactory` integration with the [Mafesoft.RestClient.Extensions.DependencyInjection](#dependency-injection) package
 
-> Upgrading from 1.x? Read [Migrating to 2.0](#migrating-to-20): version 2.0.0 contains breaking changes.
-> Install it with `dotnet add package Mafe.RestClient`. See the [CHANGELOG](CHANGELOG.md).
+> Upgrading from `Mafe.RestClient` 2.x? Read [Migrating from Mafe.RestClient](#migrating-from-maferestclient): in 3.0.0 the package and the namespaces have been renamed.
+> Upgrading from 1.x? Read also [Migrating to 2.0](#migrating-to-20): version 2.0.0 contains breaking changes.
+> Install it with `dotnet add package Mafesoft.RestClient`. See the [CHANGELOG](CHANGELOG.md).
 
 ### What is RestClient?
 
 The goal of RestClient is to enable developers to easily connect to any server in a really easy way. 
 Just define your Data Transfer Object (Dto) and start playing with the client!
+
+All the types are in the `Mafesoft.RestClient` namespace (and its sub-namespaces, e.g. `Mafesoft.RestClient.Serialization.Json`):
+
+```c#
+using Mafesoft.RestClient;
+```
 
 Use Build() method to create a RestBuilder from Rest:
 
@@ -125,7 +132,7 @@ Headers, authentication, timeout, retry, serialization, progress and all the eve
 
 ### Dependency Injection
 
-The `Mafe.RestClient.Extensions.DependencyInjection` package registers the builders on top of `IHttpClientFactory`:
+The `Mafesoft.RestClient.Extensions.DependencyInjection` package registers the builders on top of `IHttpClientFactory`:
 
 ```c#
 // named client
@@ -147,7 +154,7 @@ services.AddRestClient<UsersClient>((provider, builder) => builder
     .Url(provider.GetRequiredService<IConfiguration>()["Api:Url"]!));
 ```
 
-The builders created by `IRestClientFactory` log with the category `Mafe.RestClient.{name}`.
+The builders created by `IRestClientFactory` log with the category `Mafesoft.RestClient.{name}`.
 
 ### Certificate Validation
 
@@ -769,7 +776,7 @@ var result = await Rest.Build()
 
 ### Tracing (OpenTelemetry)
 
-Every request creates an `Activity` named `RestClient {METHOD}` from the `ActivitySource` `Mafe.RestClient`, with the tags
+Every request creates an `Activity` named `RestClient {METHOD}` from the `ActivitySource` `Mafesoft.RestClient`, with the tags
 `http.request.method`, `url.full` (without query string), `http.response.status_code`, `rest_client.retry_count` and
 `error.type`. The activities of `HttpClient` (one for each attempt) are its children.
 
@@ -936,6 +943,37 @@ public class NetworkService {
             .PostAsync<EventDetailResponse>();
 }
 ```
+
+## Migrating from Mafe.RestClient
+
+In 3.0.0 the packages, the assemblies and the namespaces have been renamed to `Mafesoft.*`. Apart from the names below,
+the public API is the same as 2.0.0.
+
+1. Replace the package references (the `Mafe.*` packages are deprecated and will not receive new versions):
+
+   ```
+   dotnet remove package Mafe.RestClient
+   dotnet add package Mafesoft.RestClient
+
+   dotnet remove package Mafe.RestClient.Extensions.DependencyInjection
+   dotnet add package Mafesoft.RestClient.Extensions.DependencyInjection
+   ```
+
+2. Update the `using` directives:
+
+   | 2.x | 3.0 |
+   |---|---|
+   | `using RestClient;` | `using Mafesoft.RestClient;` |
+   | `using RestClient.Http;` | `using Mafesoft.RestClient.Http;` |
+   | `using RestClient.Serialization;` | `using Mafesoft.RestClient.Serialization;` |
+   | `using RestClient.Serialization.Json;` | `using Mafesoft.RestClient.Serialization.Json;` |
+   | `using RestClient.Serialization.Xml;` | `using Mafesoft.RestClient.Serialization.Xml;` |
+
+   `IRestClientFactory` is now in `Mafesoft.RestClient`. `AddRestClient(...)` is still in `Microsoft.Extensions.DependencyInjection`.
+
+3. If you listen to the traces or filter the logs, update the names:
+   * `ActivitySource`: `Mafe.RestClient` → `Mafesoft.RestClient` (or use `RestClientTelemetry.ActivitySourceName`);
+   * logger category of the builders created by `IRestClientFactory`: `Mafe.RestClient.{name}` → `Mafesoft.RestClient.{name}`.
 
 ## Migrating to 2.0
 

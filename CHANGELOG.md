@@ -1,5 +1,28 @@
 # Changelog
 
+## 3.0.0
+
+The packages have a new name. Read [Migrating from Mafe.RestClient](README.md#migrating-from-maferestclient) before upgrading.
+
+```
+dotnet add package Mafesoft.RestClient
+dotnet add package Mafesoft.RestClient.Extensions.DependencyInjection
+```
+
+### Changed (breaking)
+- Packages and assemblies renamed: `Mafe.RestClient` → `Mafesoft.RestClient`,
+  `Mafe.RestClient.Extensions.DependencyInjection` → `Mafesoft.RestClient.Extensions.DependencyInjection`.
+  The `Mafe.*` packages are deprecated.
+- Root namespace renamed: `RestClient` → `Mafesoft.RestClient`, and the same for the sub-namespaces
+  (`Mafesoft.RestClient.Http`, `Mafesoft.RestClient.Serialization`, `.Json`, `.Xml`). `IRestClientFactory` is now in `Mafesoft.RestClient`.
+- `ActivitySource` renamed: `Mafe.RestClient` → `Mafesoft.RestClient`.
+- Logger category of the builders created by `IRestClientFactory`: `Mafe.RestClient.{name}` → `Mafesoft.RestClient.{name}`.
+
+### Other
+- The 2.0.0 public API is frozen in `PublicAPI.Shipped.txt` and the packages are validated against the 2.0.0 release;
+  the intentional breaks are recorded in `CompatibilitySuppressions.xml`.
+- Pushing a `v*` tag also creates the GitHub Release, with the notes of the matching CHANGELOG section.
+
 ## 2.0.0
 
 A major update with **breaking changes**. Read [Migrating to 2.0](README.md#migrating-to-20) before upgrading.
