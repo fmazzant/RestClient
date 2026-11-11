@@ -27,11 +27,11 @@
 // 
 // </summary>
 
-namespace RestClient
+namespace Mafesoft.RestClient
 {
-    using RestClient.Http;
-    using RestClient.Internal;
-    using RestClient.Serialization;
+    using Mafesoft.RestClient.Http;
+    using Mafesoft.RestClient.Internal;
+    using Mafesoft.RestClient.Serialization;
     using System;
     using System.Diagnostics;
     using System.IO;
@@ -64,6 +64,7 @@ namespace RestClient
 
         /// <summary>
         /// Sends an HTTP request as a synchronous operation. It never throws: errors are reported by the result.
+        /// Prefer SendAsync: this method blocks the calling thread until the response is received (sync-over-async).
         /// </summary>
         /// <typeparam name="T">Type of the content, see SendAsync</typeparam>
         /// <param name="method">The HTTP method</param>
@@ -142,7 +143,6 @@ namespace RestClient
 
                         if (response.StatusCode == HttpStatusCode.Unauthorized
                             && !refreshAttempted
-                            && refreshTokenExecution
                             && refreshTokenCoordinator != null
                             && !RefreshTokenCoordinator.IsRefreshing)
                         {

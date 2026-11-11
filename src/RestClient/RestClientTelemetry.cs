@@ -27,7 +27,7 @@
 // 
 // </summary>
 
-namespace RestClient
+namespace Mafesoft.RestClient
 {
     /// <summary>
     /// Names used by RestClient for tracing.
@@ -40,6 +40,6 @@ namespace RestClient
         /// Every request creates an activity "RestClient {METHOD}" that contains the HttpClient activities
         /// of the attempts (retries and refresh token included).
         /// </summary>
-        public const string ActivitySourceName = "Mafe.RestClient";
+        public const string ActivitySourceName = "Mafesoft.RestClient";
     }
 }

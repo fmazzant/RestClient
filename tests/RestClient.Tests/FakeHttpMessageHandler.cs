@@ -1,4 +1,4 @@
-namespace RestClient.Tests
+namespace Mafesoft.RestClient.Tests
 {
     using System.Net;
     using System.Net.Http;

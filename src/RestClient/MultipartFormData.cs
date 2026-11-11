@@ -27,9 +27,9 @@
 // 
 // </summary>
 
-namespace RestClient
+namespace Mafesoft.RestClient
 {
-    using RestClient.Http;
+    using Mafesoft.RestClient.Http;
     using System;
     using System.Collections.Generic;
     using System.IO;

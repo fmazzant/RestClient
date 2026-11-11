@@ -27,7 +27,7 @@
 // 
 // </summary>
 
-namespace RestClient.Serialization.Json
+namespace Mafesoft.RestClient.Serialization.Json
 {
     using System;
     using System.IO;
@@ -38,7 +38,7 @@ namespace RestClient.Serialization.Json
     using System.Threading.Tasks;
 
     /// <summary>
-    /// Implements a RestClient.Serialization.ISerializerContent for JSON object serialization based on System.Text.Json.
+    /// Implements a Mafesoft.RestClient.Serialization.ISerializerContent for JSON object serialization based on System.Text.Json.
     /// The type metadata is always resolved with JsonSerializerOptions.GetTypeInfo: pass the options of a
     /// JsonSerializerContext (source generator) to be Native AOT and trimming safe.
     /// </summary>
@@ -53,7 +53,7 @@ namespace RestClient.Serialization.Json
         private static readonly object resolverLock = new object();
 
         /// <summary>
-        /// Initializes a new instance of the RestClient.Serialization.Json.JSON class.
+        /// Initializes a new instance of the Mafesoft.RestClient.Serialization.Json.JSON class.
         /// </summary>
         public JSON() : base() { }
 

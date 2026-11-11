@@ -27,7 +27,7 @@
 // 
 // </summary>
 
-namespace RestClient.Internal
+namespace Mafesoft.RestClient.Internal
 {
     using System;
     using System.Collections.Concurrent;

@@ -27,7 +27,7 @@
 // 
 // </summary>
 
-namespace RestClient
+namespace Mafesoft.RestClient
 {
     using System;
     using System.Net.Http;
@@ -43,31 +43,6 @@ namespace RestClient
         /// <returns></returns>
         public static RestBuilder Build()
             => new RestBuilder();
-
-        /// <summary>
-        /// Creates a RestBuilder instance to build the connection command.
-        /// The properties are copied: later changes to <paramref name="restProperties"/> do not affect the builder.
-        /// </summary>
-        /// <param name="restProperties">Rest properties</param>
-        /// <returns></returns>
-        public static RestBuilder Build(RestProperties restProperties)
-        {
-            if (restProperties == null) { throw new ArgumentNullException(nameof(restProperties)); }
-            return new RestBuilder(restProperties.Clone());
-        }
-
-        /// <summary>
-        /// Creates a RestBuilder instance to build the connection command
-        /// </summary>
-        /// <param name="properties">Rest properties action</param>
-        /// <returns></returns>
-        public static RestBuilder Build(Action<RestProperties> properties)
-        {
-            if (properties == null) { throw new ArgumentNullException(nameof(properties)); }
-            RestProperties restProperties = new RestProperties();
-            properties(restProperties);
-            return new RestBuilder(restProperties);
-        }
 
         /// <summary>
         /// Creates a RestBuilder instance that sends the requests using an existing HttpClient

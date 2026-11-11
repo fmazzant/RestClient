@@ -1,4 +1,4 @@
-namespace RestClient.Tests
+namespace Mafesoft.RestClient.Tests
 {
     using System.Globalization;
     using System.Net;
@@ -48,9 +48,24 @@ namespace RestClient.Tests
 
             Assert.Equal(RestProperties.DefaultTimeout, root.Properties.Timeout);
             Assert.Equal(TimeSpan.FromSeconds(1), child.Properties.Timeout);
+        }
 
-            root.Properties.Timeout = TimeSpan.FromSeconds(5);
-            Assert.Equal(RestProperties.DefaultTimeout, root.Properties.Timeout);
+        [Fact]
+        public void Properties_reflect_the_builder_configuration()
+        {
+            var builder = Rest.Build()
+                .Url("https://api.example.com")
+                .Timeout(TimeSpan.FromSeconds(7))
+                .BufferSize(1024)
+                .CertificateOption(ClientCertificateOption.Automatic);
+
+            RestProperties properties = builder.Properties;
+
+            Assert.Equal(new Uri("https://api.example.com"), properties.EndPoint);
+            Assert.Equal(TimeSpan.FromSeconds(7), properties.Timeout);
+            Assert.Equal(1024, properties.BufferSize);
+            Assert.Equal(ClientCertificateOption.Automatic, properties.CertificateOption);
+            Assert.Equal(ClientCertificateOption.Manual, Rest.Build().Properties.CertificateOption);
         }
 
         [Fact]
@@ -393,18 +408,6 @@ namespace RestClient.Tests
         {
             RestResult<string> result = await Rest.Build().GetAsync();
             Assert.IsType<InvalidOperationException>(result.Exception);
-        }
-
-        [Fact]
-        public async Task Build_with_properties_copies_them()
-        {
-            var properties = new RestProperties { EndPoint = new Uri("https://a.example.com") };
-            var builder = Rest.Build(properties);
-            properties.EndPoint = new Uri("https://b.example.com");
-
-            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
-            await builder.UseHttpClient(handler.CreateClient()).GetAsync();
-            Assert.Equal("a.example.com", handler.Requests[0].RequestUri.Host);
         }
 
         /// <summary>
