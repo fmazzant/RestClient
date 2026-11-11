@@ -10,6 +10,13 @@ name: Publish on NuGet
 # A tag push also creates the GitHub Release of the tag, with the notes of the matching
 # "## x.y.z" section of CHANGELOG.md (the manual run publishes only the packages).
 # Merging into main does NOT publish anything.
+#
+# Authentication: NuGet Trusted Publishing (https://learn.microsoft.com/nuget/nuget-org/trusted-publishing),
+# no long-lived API key. The NuGet/login step exchanges the GitHub OIDC token for a temporary API key (valid 1 hour).
+# Requires:
+# - on nuget.org (Account > Trusted Publishing) a policy with repository owner "fmazzant", repository "RestClient"
+#   and workflow file "nuget.yml" (renaming this file breaks publishing);
+# - the repository secret NUGET_USER: the nuget.org profile name (not the email) of the policy owner.
 
 on:
   push:
@@ -18,6 +25,7 @@ on:
 
 permissions:
   contents: write # needed to create the GitHub Release
+  id-token: write # needed by NuGet/login (Trusted Publishing)
 
 jobs:
   publish:
@@ -95,7 +103,23 @@ jobs:
         dotnet test -c Release --no-build -f net8.0 tests/RestClient.Tests/RestClient.Tests.csproj
 
     - name: Install the Native AOT prerequisites
-      run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev
+      timeout-minutes: 10
+      run: |
+        # clang and zlib1g-dev are usually preinstalled on the GitHub runners: skip apt when they are there.
+        if command -v clang > /dev/null && dpkg -s zlib1g-dev > /dev/null 2>&1; then
+          echo "clang and zlib1g-dev already installed: $(clang --version | head -n 1)"
+          exit 0
+        fi
+        # The Ubuntu mirrors sometimes fail (DNS, timeouts): retry the whole update + install a few times.
+        for ATTEMPT in 1 2 3; do
+          if sudo apt-get -o Acquire::Retries=3 update && sudo apt-get -o Acquire::Retries=3 install -y clang zlib1g-dev; then
+            exit 0
+          fi
+          echo "::warning::apt-get failed (attempt $ATTEMPT of 3)"
+          sleep $((ATTEMPT * 20))
+        done
+        echo "::error::Cannot install clang and zlib1g-dev"
+        exit 1
 
     - name: Native AOT smoke test
       run: |
@@ -105,8 +129,15 @@ jobs:
     - name: Package
       run: dotnet pack -c Release --no-build -o ./artifacts src/RestClient.sln
 
+    # Right before the push: the temporary API key expires after 1 hour.
+    - name: NuGet login (Trusted Publishing)
+      id: nuget-login
+      uses: NuGet/login@v1
+      with:
+        user: ${{ secrets.NUGET_USER }}
+
     - name: Publish on NuGet
-      run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
 
     - name: Create the GitHub Release
       if: github.ref_type == 'tag'
