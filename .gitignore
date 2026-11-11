@@ -9,9 +9,6 @@
 /src/Net.Http.Rest/bin/Debug
 /src/Net.Http.Rest/bin/Release
 /src/.vs/RestClient/DesignTimeBuild
-/src/Mafe.RestClient/bin
-/src/Mafe.RestClient/obj
-/src/.vs/Mafe.RestClient/DesignTimeBuild
 /src/RestClient/bin
 /src/RestClient/obj
 src/.vs/RestClient/xs/project-cache/RestClient-Debug.json

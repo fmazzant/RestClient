@@ -1,8 +1,8 @@
 name: Publish on NuGet
 
-# Publishes Mafe.RestClient and Mafe.RestClient.Extensions.DependencyInjection:
+# Publishes Mafesoft.RestClient and Mafesoft.RestClient.Extensions.DependencyInjection:
 # - when a version tag is pushed:
-#     git tag v2.0.0 && git push origin v2.0.0
+#     git tag v3.0.0 && git push origin v3.0.0
 #   the tag must match <Version> in both src/RestClient/RestClient.csproj and
 #   src/RestClient.Extensions.DependencyInjection/RestClient.Extensions.DependencyInjection.csproj;
 # - manually, from GitHub: Actions > Publish on NuGet > Run workflow (publishes the <Version> of the selected branch,
@@ -37,8 +37,8 @@ jobs:
     - name: Check the project versions
       id: version
       run: |
-        # Tag push: the expected version comes from the tag (v2.0.0 -> 2.0.0).
-        # Manual run: the expected version is the one of Mafe.RestClient, the other packages must match it.
+        # Tag push: the expected version comes from the tag (v3.0.0 -> 3.0.0).
+        # Manual run: the expected version is the one of Mafesoft.RestClient, the other packages must match it.
         if [ "$GITHUB_REF_TYPE" = "tag" ]; then
           EXPECTED_VERSION="${GITHUB_REF_NAME#v}"
         else
