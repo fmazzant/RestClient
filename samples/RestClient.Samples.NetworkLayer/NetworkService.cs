@@ -36,10 +36,8 @@ namespace Mafesoft.RestClient.Samples.NetworkLayer
     public class NetworkService
     {
         protected RestBuilder Root() => Rest
-            .Build((p) =>
-            {
-                p.EndPoint = new Uri("https://reqres.in/api");
-            })
+            .Build()
+            .Url("https://reqres.in/api")
             .OnConfigureHttpClient((c) =>
             {
                 c.Timeout = TimeSpan.FromSeconds(10);
