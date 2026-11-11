@@ -15,6 +15,7 @@
     <Version>3.0.0</Version>
     <Description>RestClient is a fluent library for .NET that helps you to consume REST services.</Description>
     <PackageTags>rest-client, c-sharp, dotnet-standard, dotnet-core, dotnet-framework, http-client, restclient, mafesoft, xml, json, rest, fluent</PackageTags>
+    <!-- Only the current version: the full history is in CHANGELOG.md -->
     <PackageReleaseNotes>
       3.0.0 (breaking changes: see README "Migrating to 3.0")
       - Package renamed from Mafe.RestClient to Mafesoft.RestClient (assembly Mafesoft.RestClient)
@@ -23,108 +24,7 @@
       - RefreshToken(Func&lt;CancellationToken, Task&lt;RestResult&gt;&gt;) replaces RefreshToken(bool) + RefreshTokenInvoke(...)
       - RestProperties is read-only, Rest.Build(RestProperties/Action&lt;RestProperties&gt;) removed, new CertificateOption(...)
 
-      2.0.0 (breaking changes: see README "Migrating to 2.0")
-      - Target frameworks: net10.0, net8.0, netstandard2.1, netstandard2.0 (.NET Framework 4.6.2+ via netstandard2.0)
-      - Removed EOL targets and Newtonsoft.Json, removed all [Obsolete] members
-      - Pooled HTTP handlers: connections are reused across requests (no more socket exhaustion)
-      - Removed the global ServicePointManager callback that disabled TLS certificate validation for the whole process
-      - Immutable builder: every fluent call returns an independent copy
-      - Smaller API: SendAsync&lt;T&gt;(method) + Get/Post/Put/Patch/Delete/Head/Options; T can be string, byte[], Stream or a DTO
-      - Real streaming for Stream results, streaming JSON deserialization
-      - RestResult&lt;T&gt; moved to the RestClient namespace
-      - Query string: url-encoded, invariant culture, repeated keys
-      - Built-in retry policy, refresh token de-duplicated across concurrent requests
-      - multipart/form-data uploads
-      - Native AOT and trimming friendly JSON (JsonSerializerContext)
-      - ILogger logging and OpenTelemetry tracing (ActivitySource "Mafe.RestClient")
-      - Nullable reference types annotations
-      - New package Mafe.RestClient.Extensions.DependencyInjection (IHttpClientFactory integration)
-
-      1.9.5
-      - Target .NET 8.0 (net8.0)
-      - Upgrade all dependences
-
-      1.9.3
-      - Target .NET 7.0 (net7.0)
-      - Upgrade all dependences
-
-      1.9.2
-      - Upgrade all dependences
-
-      1.9.1
-      - Improper Handling of Exceptional Conditions in Newtonsoft.Json #1
-
-      1.9.0
-      - Target .NET 6.0 (net6.0)
-      - Upgrade all dependences
-
-      1.8.1
-      - Removing .Result
-      - Removed unsupported target frameworks
-
-      1.8.0
-      - Target .NET 5.0 (net5.0)
-      - Removed unsupported target frameworks
-
-      1.7.7
-      - managing fluent httpclient
-
-      1.7.6
-      - hotfix catch exeception
-
-      1.7.5
-      - hotfix
-
-      1.7.4
-      - hotfix on parameters.
-
-      1.7.3
-      - json and xml settings during serialization and deserialization of an object.
-
-      1.7.2
-      - Target .NET Core 3.1 (netcoreapp3.1)
-
-      1.7.1
-      - Target .NET Core 3.0 (netcoreapp3.0)
-      - Target .NET Core 2.2 (netcoreapp2.2)
-      - Target .NET Core 2.1 (netcoreapp2.1)
-      - Target .NET Core 2.0 (netcoreapp2.0)
-      - Target .NET Framework 4.7    (net47)
-      - Target .NET Framework 4.7.1  (net471)
-      - Target .NET Framework 4.7.2  (net472)
-      - Target .NET Framework 4.8    (net48)
-
-      1.7.0
-      - Optimization and Refactoring HttpClientCompressionHandler
-
-      1.6.0
-      - Target .NET Framework 4.6    (net46)
-      - Target .NET Framework 4.6.1  (net461)
-      - Target .NET Framework 4.6.2  (net462)
-      - Target .NET Framework 4.5    (net45)
-      - Target .NET Framework 4.5.1  (net451)
-      - Target .NET Framework 4.5.2  (net452)
-
-      1.5.3
-      - Enabled gzip compression
-      - Refactoring HttpContentStream
-
-      1.5.2
-      - Target .NET Standard 1.3 (netstandatd1.3)
-
-      1.5.1
-      - Target .NET Standard 2.1 (netstandatd2.1)
-      - Target .NET Standard 2.0 (netstandatd2.0)
-
-      1.5.0
-      - Refactoring builder
-      - Parameter bugfix
-      - General bugfix
-
-      1.4.0
-      - Added OnPreCompleted, OnCompleted and OnPreviewContentAsString
-      - Refactoring some methods.
-      - Added BufferSize and check on buffer size value
+      Full changelog: https://github.com/fmazzant/RestClient/blob/main/CHANGELOG.md
     </PackageReleaseNotes>
   </PropertyGroup>
 
