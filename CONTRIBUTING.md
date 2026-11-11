@@ -18,6 +18,12 @@ dotnet pack -c Release -o ./artifacts src/RestClient.sln
 
 `dotnet pack` also runs the package validation against the last released version (see below).
 
+The samples reference the libraries as projects, so they must keep building after every change:
+
+```
+dotnet build samples/RestClient.Samples.sln
+```
+
 The Native AOT smoke test needs the platform C++ toolchain (on Linux `clang` and `zlib1g-dev`), so it is not part of
 the solution; CI runs it on every pull request:
 
