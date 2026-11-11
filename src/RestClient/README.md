@@ -37,6 +37,8 @@ To register the builders in the dependency injection container, on top of `IHttp
 ## Links
 
 - [Documentation](https://github.com/fmazzant/RestClient#readme)
+- [Why Mafesoft.RestClient](https://github.com/fmazzant/RestClient#why-mafesoftrestclient) and
+  [comparison with HttpClient, RestSharp, Refit and Flurl](https://github.com/fmazzant/RestClient#comparison-with-the-alternatives)
 - [Migrating to 3.0](https://github.com/fmazzant/RestClient#migrating-to-30) (from `Mafe.RestClient`)
 - [Changelog](https://github.com/fmazzant/RestClient/blob/main/CHANGELOG.md)
 - [Issues](https://github.com/fmazzant/RestClient/issues)
