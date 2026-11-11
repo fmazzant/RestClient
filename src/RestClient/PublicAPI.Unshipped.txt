@@ -210,6 +210,7 @@ Mafesoft.RestClient.RestBuilder.Authentication(System.Func<System.Net.Http.Heade
 Mafesoft.RestClient.RestBuilder.Authentication(string! scheme) -> Mafesoft.RestClient.RestBuilder!
 Mafesoft.RestClient.RestBuilder.Authentication(string! scheme, string? parameter) -> Mafesoft.RestClient.RestBuilder!
 Mafesoft.RestClient.RestBuilder.BufferSize(int bufferSize) -> Mafesoft.RestClient.RestBuilder!
+Mafesoft.RestClient.RestBuilder.CertificateOption(System.Net.Http.ClientCertificateOption certificateOption) -> Mafesoft.RestClient.RestBuilder!
 Mafesoft.RestClient.RestBuilder.CertificateValidation(System.Func<object!, System.Security.Cryptography.X509Certificates.X509Certificate?, System.Security.Cryptography.X509Certificates.X509Chain?, System.Net.Security.SslPolicyErrors, bool>? callback) -> Mafesoft.RestClient.RestBuilder!
 Mafesoft.RestClient.RestBuilder.Command(System.Guid command) -> Mafesoft.RestClient.RestBuilder!
 Mafesoft.RestClient.RestBuilder.Command(int command) -> Mafesoft.RestClient.RestBuilder!
@@ -294,15 +295,9 @@ Mafesoft.RestClient.RestParameter.Value.get -> object?
 Mafesoft.RestClient.RestParameter.Value.set -> void
 Mafesoft.RestClient.RestProperties
 Mafesoft.RestClient.RestProperties.BufferSize.get -> int
-Mafesoft.RestClient.RestProperties.BufferSize.set -> void
 Mafesoft.RestClient.RestProperties.CertificateOption.get -> System.Net.Http.ClientCertificateOption
-Mafesoft.RestClient.RestProperties.CertificateOption.set -> void
-Mafesoft.RestClient.RestProperties.Clone() -> Mafesoft.RestClient.RestProperties!
 Mafesoft.RestClient.RestProperties.EndPoint.get -> System.Uri?
-Mafesoft.RestClient.RestProperties.EndPoint.set -> void
-Mafesoft.RestClient.RestProperties.RestProperties() -> void
 Mafesoft.RestClient.RestProperties.Timeout.get -> System.TimeSpan
-Mafesoft.RestClient.RestProperties.Timeout.set -> void
 Mafesoft.RestClient.RestResult
 Mafesoft.RestClient.RestResult.Content.get -> object?
 Mafesoft.RestClient.RestResult.Dispose() -> void
@@ -346,8 +341,6 @@ Mafesoft.RestClient.StartEventArgs.Url.get -> string!
 const Mafesoft.RestClient.RestClientTelemetry.ActivitySourceName = "Mafesoft.RestClient" -> string!
 const Mafesoft.RestClient.RestProperties.DefaultBufferSize = 81920 -> int
 static Mafesoft.RestClient.Rest.Build() -> Mafesoft.RestClient.RestBuilder!
-static Mafesoft.RestClient.Rest.Build(Mafesoft.RestClient.RestProperties! restProperties) -> Mafesoft.RestClient.RestBuilder!
-static Mafesoft.RestClient.Rest.Build(System.Action<Mafesoft.RestClient.RestProperties!>! properties) -> Mafesoft.RestClient.RestBuilder!
 static Mafesoft.RestClient.Rest.Build(System.Net.Http.HttpClient! httpClient) -> Mafesoft.RestClient.RestBuilder!
 static Mafesoft.RestClient.Serialization.Json.JSON.DefaultOptions.get -> System.Text.Json.JsonSerializerOptions!
 static readonly Mafesoft.RestClient.RestProperties.DefaultTimeout -> System.TimeSpan

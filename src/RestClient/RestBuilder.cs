@@ -60,7 +60,7 @@ namespace Mafesoft.RestClient
         #region [ State ]
 
         /// <summary>
-        /// Rest Properties (a copy: changing it does not change the builder)
+        /// The connection properties of the builder (read-only: use Url, Timeout, BufferSize and CertificateOption to change them)
         /// </summary>
         public RestProperties Properties => properties.Clone();
 
@@ -275,6 +275,15 @@ namespace Mafesoft.RestClient
 
             return With(r => r.properties.BufferSize = bufferSize);
         }
+
+        /// <summary>
+        /// Specifies how the client certificates are provided (default Manual).
+        /// It is not applied when an external HttpClient is used (see UseHttpClient).
+        /// </summary>
+        /// <param name="certificateOption"></param>
+        /// <returns></returns>
+        public RestBuilder CertificateOption(ClientCertificateOption certificateOption)
+            => With(r => r.properties.CertificateOption = certificateOption);
 
         #endregion
 

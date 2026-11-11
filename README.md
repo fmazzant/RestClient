@@ -71,26 +71,17 @@ var result = Root()
 
 ### RestProperties
 
-To use RestProperties to configure yuor rest root point. To create a simple configuration, just like this:
+The connection properties are set with the builder methods:
 
 ```c#
-RestProperties properties = new RestProperties
-{
-    EndPoint = new Uri("[URL]"), //if you use .Url("[URL]") you override it
-    BufferSize = 4096,
-    CertificateOption = ClientCertificateOption.Manual,
-    Timeout = TimeSpan.FromMinutes(2)
-};
+var rest = Rest.Build()
+    .Url("[URL]")
+    .BufferSize(4096)
+    .CertificateOption(ClientCertificateOption.Manual)
+    .Timeout(TimeSpan.FromMinutes(2));
 ```
 
-Use Build() method with properties to create a RestBuilder from Rest:
-
-```c#
-var rest = Rest.Build(properties);
-```
-
-The properties are copied: changing `properties` after `Build` does not affect the builder.
-`RestBuilder.Properties` returns a copy too: use the builder methods (`Url`, `Timeout`, `BufferSize`) to change them.
+`RestBuilder.Properties` returns them as a read-only `RestProperties` (`EndPoint`, `Timeout`, `BufferSize`, `CertificateOption`).
 
 ### Immutable builder
 
@@ -126,7 +117,7 @@ var result = await Rest.Build(httpClient)       // or Rest.Build().UseHttpClient
 ```
 
 The external `HttpClient` is never disposed by RestClient. `NetworkCredential`, `CertificateValidation`,
-`RestProperties.CertificateOption`, `EnableGZipCompression` and `OnConfigureHttpClient` configure the `HttpClient` managed
+`CertificateOption`, `EnableGZipCompression` and `OnConfigureHttpClient` configure the `HttpClient` managed
 by RestClient, so they are not applied to an external one: configure them on your handler.
 Headers, authentication, timeout, retry, serialization, progress and all the events work in both cases.
 
@@ -982,6 +973,10 @@ APIs have been cleaned up (step 4).
    | `.RefreshToken().RefreshTokenInvoke(async () => await RefreshAsync())` | `.RefreshToken(async ct => await RefreshAsync(ct))` |
    | `.RefreshTokenInvoke(() => Refresh())` (synchronous func) | `.RefreshToken(async ct => await RefreshAsync(ct))` |
    | `.RefreshToken(false)` | `.RefreshToken(null)` |
+   | `Rest.Build(new RestProperties { EndPoint = ..., Timeout = ..., BufferSize = ..., CertificateOption = ... })` | `Rest.Build().Url(...).Timeout(...).BufferSize(...).CertificateOption(...)` |
+   | `Rest.Build(p => p.Timeout = ...)` | `Rest.Build().Timeout(...)` |
+
+   `RestProperties` is read-only: it can no longer be created or changed, `RestBuilder.Properties` still returns it to read the configuration.
 
 ## Migrating to 2.0
 

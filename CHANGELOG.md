@@ -20,6 +20,8 @@ dotnet add package Mafesoft.RestClient.Extensions.DependencyInjection
 - `RefreshToken(bool)` + `RefreshTokenInvoke(Func<RestResult>)` / `RefreshTokenInvoke(Func<Task<RestResult>>)` replaced by
   `RefreshToken(Func<CancellationToken, Task<RestResult>>)`: one call enables the feature, the func receives the
   `CancellationToken` of the request and there is no more synchronous (sync-over-async) refresh func. `RefreshToken(null)` disables it.
+- `RestProperties` is read-only (sealed, no public constructor, setters and `Clone()`): `Rest.Build(RestProperties)` and
+  `Rest.Build(Action<RestProperties>)` have been removed, use the builder methods. New `CertificateOption(ClientCertificateOption)`.
 
 ### Other
 - The 2.0.0 public API is frozen in `PublicAPI.Shipped.txt` and the packages are validated against the 2.0.0 release;

@@ -30,6 +30,7 @@
       - Root namespace renamed from RestClient to Mafesoft.RestClient (RestClient.Http becomes Mafesoft.RestClient.Http, etc.)
       - ActivitySource renamed from "Mafe.RestClient" to "Mafesoft.RestClient"
       - RefreshToken(Func&lt;CancellationToken, Task&lt;RestResult&gt;&gt;) replaces RefreshToken(bool) + RefreshTokenInvoke(...)
+      - RestProperties is read-only, Rest.Build(RestProperties/Action&lt;RestProperties&gt;) removed, new CertificateOption(...)
 
       2.0.0 (breaking changes: see README "Migrating to 2.0")
       - Target frameworks: net10.0, net8.0, netstandard2.1, netstandard2.0 (.NET Framework 4.6.2+ via netstandard2.0)
