@@ -142,7 +142,6 @@ namespace Mafesoft.RestClient
 
                         if (response.StatusCode == HttpStatusCode.Unauthorized
                             && !refreshAttempted
-                            && refreshTokenExecution
                             && refreshTokenCoordinator != null
                             && !RefreshTokenCoordinator.IsRefreshing)
                         {

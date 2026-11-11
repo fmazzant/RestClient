@@ -95,12 +95,12 @@ namespace Mafesoft.RestClient.Tests
 
             var api = Root(handler)
                 .Authentication(() => new AuthenticationHeaderValue("Bearer", token))
-                .RefreshTokenInvoke(async () =>
+                .RefreshToken(async ct =>
                 {
                     Interlocked.Increment(ref refreshCalls);
-                    await Task.Delay(50);
+                    await Task.Delay(50, ct);
                     token = "valid";
-                    return await Root(refreshHandler).PostAsync();
+                    return await Root(refreshHandler).PostAsync(ct);
                 });
 
             RestResult<string>[] results = await Task.WhenAll(Enumerable.Range(0, 10).Select(_ => api.Command("data").GetAsync()));
@@ -119,21 +119,74 @@ namespace Mafesoft.RestClient.Tests
 
             var api = Root(handler)
                 .Authentication(() => new AuthenticationHeaderValue("Bearer", token))
-                .RefreshTokenInvoke(() =>
+                .RefreshToken(async ct =>
                 {
                     refreshCalls++;
                     token = "valid";
-                    // the refresh request uses the same builder: it must not trigger another refresh
-                    return api_refresh(handler, token);
+                    return await Root(handler).Authentication("Bearer", token).GetAsync(ct);
                 });
 
             Assert.Equal(HttpStatusCode.OK, (await api.GetAsync()).StatusCode);
             token = "expired-again";
             Assert.Equal(HttpStatusCode.OK, (await api.GetAsync()).StatusCode);
             Assert.Equal(2, refreshCalls);
+        }
 
-            static RestResult api_refresh(FakeHttpMessageHandler handler, string token)
-                => Root(handler).Authentication("Bearer", token).Get();
+        [Fact]
+        public void Refresh_token_works_with_synchronous_requests()
+        {
+            string token = "expired";
+            var handler = new FakeHttpMessageHandler((r, i) =>
+                new HttpResponseMessage(r.Headers.Authorization.Parameter == "valid" ? HttpStatusCode.OK : HttpStatusCode.Unauthorized));
+
+            var api = Root(handler)
+                .Authentication(() => new AuthenticationHeaderValue("Bearer", token))
+                .RefreshToken(async ct =>
+                {
+                    token = "valid";
+                    return await Root(handler).Authentication("Bearer", token).GetAsync(ct);
+                });
+
+            Assert.Equal(HttpStatusCode.OK, api.Get().StatusCode);
+        }
+
+        [Fact]
+        public async Task Refresh_func_receives_the_cancellation_token_of_the_request()
+        {
+            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.Unauthorized);
+            using var cts = new CancellationTokenSource();
+            CancellationToken received = default;
+
+            await Root(handler)
+                .RefreshToken(async ct =>
+                {
+                    received = ct;
+                    return await Root(handler).PostAsync(ct);   // 401: the refresh fails
+                })
+                .GetAsync(cts.Token);
+
+            Assert.True(received.CanBeCanceled);
+            cts.Cancel();
+            Assert.True(received.IsCancellationRequested);
+        }
+
+        [Fact]
+        public async Task Refresh_token_null_disables_the_refresh_on_the_derived_builder()
+        {
+            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.Unauthorized);
+            int refreshCalls = 0;
+            var api = Root(handler).RefreshToken(async ct =>
+            {
+                refreshCalls++;
+                return await Root(handler).PostAsync(ct);   // 401: the refresh fails
+            });
+
+            RestResult<string> result = await api.RefreshToken(null).GetAsync();
+
+            Assert.Equal(HttpStatusCode.Unauthorized, result.StatusCode);
+            Assert.Equal(0, refreshCalls);
+            await api.GetAsync();
+            Assert.Equal(1, refreshCalls);
         }
 
         [Fact]
@@ -142,10 +195,10 @@ namespace Mafesoft.RestClient.Tests
             var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.Unauthorized);
             int refreshCalls = 0;
             RestBuilder api = null;
-            api = Root(handler).RefreshTokenInvoke(async () =>
+            api = Root(handler).RefreshToken(async ct =>
             {
                 refreshCalls++;
-                return await api.Command("refresh").PostAsync();   // same coordinator, receives 401 too
+                return await api.Command("refresh").PostAsync(ct);   // same coordinator, receives 401 too
             });
 
             RestResult<string> result = await api.GetAsync();

@@ -267,13 +267,11 @@ Mafesoft.RestClient.RestBuilder.Post<T>(System.Threading.CancellationToken cance
 Mafesoft.RestClient.RestBuilder.PostAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Mafesoft.RestClient.RestResult<string!>!>!
 Mafesoft.RestClient.RestBuilder.PostAsync<T>(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Mafesoft.RestClient.RestResult<T>!>!
 Mafesoft.RestClient.RestBuilder.Properties.get -> Mafesoft.RestClient.RestProperties!
+Mafesoft.RestClient.RestBuilder.RefreshToken(System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<Mafesoft.RestClient.RestResult!>!>? refreshToken) -> Mafesoft.RestClient.RestBuilder!
 Mafesoft.RestClient.RestBuilder.Put(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> Mafesoft.RestClient.RestResult<string!>!
 Mafesoft.RestClient.RestBuilder.Put<T>(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> Mafesoft.RestClient.RestResult<T>!
 Mafesoft.RestClient.RestBuilder.PutAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Mafesoft.RestClient.RestResult<string!>!>!
 Mafesoft.RestClient.RestBuilder.PutAsync<T>(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Mafesoft.RestClient.RestResult<T>!>!
-Mafesoft.RestClient.RestBuilder.RefreshToken(bool refreshToken = true) -> Mafesoft.RestClient.RestBuilder!
-Mafesoft.RestClient.RestBuilder.RefreshTokenInvoke(System.Func<Mafesoft.RestClient.RestResult!>! refreshTokenApi) -> Mafesoft.RestClient.RestBuilder!
-Mafesoft.RestClient.RestBuilder.RefreshTokenInvoke(System.Func<System.Threading.Tasks.Task<Mafesoft.RestClient.RestResult!>!>! refreshTokenApi) -> Mafesoft.RestClient.RestBuilder!
 Mafesoft.RestClient.RestBuilder.Retry(int maxRetries, System.TimeSpan? delay = null, bool retryNonIdempotentMethods = false) -> Mafesoft.RestClient.RestBuilder!
 Mafesoft.RestClient.RestBuilder.Send<T>(System.Net.Http.HttpMethod! method, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> Mafesoft.RestClient.RestResult<T>!
 Mafesoft.RestClient.RestBuilder.SendAsync<T>(System.Net.Http.HttpMethod! method, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Mafesoft.RestClient.RestResult<T>!>!

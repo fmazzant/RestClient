@@ -17,7 +17,7 @@ Highlights:
 * `ILogger` logging and OpenTelemetry tracing
 * `IHttpClientFactory` integration with the [Mafesoft.RestClient.Extensions.DependencyInjection](#dependency-injection) package
 
-> Upgrading from `Mafe.RestClient` 2.x? Read [Migrating from Mafe.RestClient](#migrating-from-maferestclient): in 3.0.0 the package and the namespaces have been renamed.
+> Upgrading from `Mafe.RestClient` 2.x? Read [Migrating to 3.0](#migrating-to-30): in 3.0.0 the packages and the namespaces have been renamed and a few APIs changed.
 > Upgrading from 1.x? Read also [Migrating to 2.0](#migrating-to-20): version 2.0.0 contains breaking changes.
 > Install it with `dotnet add package Mafesoft.RestClient`. See the [CHANGELOG](CHANGELOG.md).
 
@@ -212,31 +212,32 @@ var result = Rest.Build()
 A valid bearer token (with active access_token or refresh_token properties) keeps the user's authentication alive without requiring him or her to re-enter their credentials frequently.
 The access_token can be used for as long as it’s active, which is up to one hour after login or renewal. The refresh_token is active for 336 hours (14 days). After the access_token expires, an active refresh_token can be used to get a new access_token / refresh_token pair as shown in the following example. This cycle can continue for up to 90 days after which the user must log in again. If the refresh_token expires, the tokens cannot be renewed and the user must log in again.
 
-To refresh a token, use "RefreshTokenInvoke" automatically.
+To refresh the token automatically, pass the refresh func to `RefreshToken`: the same call enables the feature.
+The func receives the `CancellationToken` of the request.
 
 ```c#
 var url = "[URL]";
-var result = Rest.Build()
+var result = await Rest.Build()
     .Authentication(() => new AuthenticationHeaderValue("Bearer", "[Token]"))
-    .RefreshToken(true)
-    .RefreshTokenInvoke(async () =>
+    .RefreshToken(async cancellationToken =>
     {
         var result = await rest
             .Url(url)
             .Command("/refresh")
-            .GetAsync<TokenObjectResponse>();   
+            .GetAsync<TokenObjectResponse>(cancellationToken);
         doSomethings(); //store the token inside your env.
         return result;
     })
     .Command("/detail")
     .Url(url)
-    .Get();
+    .GetAsync();
 ```
 
 When the response is `401 Unauthorized` the refresh func is invoked and, if it returns a 2xx result, the request is sent again
 (once). The `Authentication` func is evaluated for every attempt, so the new token is used.
 When many concurrent requests of the same builder receive 401, the refresh func is invoked **only once** and the other
 requests wait for it. The requests sent from inside the refresh func never trigger another refresh.
+`RefreshToken(null)` disables the refresh token on a derived builder.
 
 A refresh_token should be revoked:
 * If a user is no longer permitted to make requests on the API, or
@@ -899,8 +900,7 @@ public class NetworkService {
     public RestBuilder RootAuthentication() 
         => Root()
              .Authentication(() => new AuthenticationHeaderValue("Bearer", "[Token]"))
-             .RefreshToken()
-             .RefreshTokenInvoke(async () => await PostRefreshAsync(new RefreshRequest { }));
+             .RefreshToken(async cancellationToken => await PostRefreshAsync(new RefreshRequest { }));
     
     public RestBuilder UsersRoot() 
         => Root().Command("/Users");
@@ -944,10 +944,10 @@ public class NetworkService {
 }
 ```
 
-## Migrating from Mafe.RestClient
+## Migrating to 3.0
 
-In 3.0.0 the packages, the assemblies and the namespaces have been renamed to `Mafesoft.*`. Apart from the names below,
-the public API is the same as 2.0.0.
+In 3.0.0 the packages, the assemblies and the namespaces have been renamed to `Mafesoft.*` (steps 1-3) and a few
+APIs have been cleaned up (step 4).
 
 1. Replace the package references (the `Mafe.*` packages are deprecated and will not receive new versions):
 
@@ -974,6 +974,14 @@ the public API is the same as 2.0.0.
 3. If you listen to the traces or filter the logs, update the names:
    * `ActivitySource`: `Mafe.RestClient` → `Mafesoft.RestClient` (or use `RestClientTelemetry.ActivitySourceName`);
    * logger category of the builders created by `IRestClientFactory`: `Mafe.RestClient.{name}` → `Mafesoft.RestClient.{name}`.
+
+4. Update the calls to the changed APIs:
+
+   | 2.x | 3.0 |
+   |---|---|
+   | `.RefreshToken().RefreshTokenInvoke(async () => await RefreshAsync())` | `.RefreshToken(async ct => await RefreshAsync(ct))` |
+   | `.RefreshTokenInvoke(() => Refresh())` (synchronous func) | `.RefreshToken(async ct => await RefreshAsync(ct))` |
+   | `.RefreshToken(false)` | `.RefreshToken(null)` |
 
 ## Migrating to 2.0
 

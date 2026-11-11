@@ -13,7 +13,7 @@
     <Description>Registers Mafesoft.RestClient builders in the dependency injection container, on top of IHttpClientFactory (pooled handlers, delegating handlers, resilience).</Description>
     <PackageTags>rest-client, restclient, mafesoft, dependency-injection, httpclientfactory, fluent</PackageTags>
     <PackageReleaseNotes>
-      3.0.0 (breaking changes: see README "Migrating from Mafe.RestClient")
+      3.0.0 (breaking changes: see README "Migrating to 3.0")
       - Package renamed from Mafe.RestClient.Extensions.DependencyInjection to Mafesoft.RestClient.Extensions.DependencyInjection
       - IRestClientFactory moved from the RestClient namespace to Mafesoft.RestClient
       - Logger category renamed from "Mafe.RestClient.{name}" to "Mafesoft.RestClient.{name}"

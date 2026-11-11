@@ -2,7 +2,7 @@
 
 ## 3.0.0
 
-The packages have a new name. Read [Migrating from Mafe.RestClient](README.md#migrating-from-maferestclient) before upgrading.
+The packages have a new name and a few APIs changed. Read [Migrating to 3.0](README.md#migrating-to-30) before upgrading.
 
 ```
 dotnet add package Mafesoft.RestClient
@@ -17,6 +17,9 @@ dotnet add package Mafesoft.RestClient.Extensions.DependencyInjection
   (`Mafesoft.RestClient.Http`, `Mafesoft.RestClient.Serialization`, `.Json`, `.Xml`). `IRestClientFactory` is now in `Mafesoft.RestClient`.
 - `ActivitySource` renamed: `Mafe.RestClient` → `Mafesoft.RestClient`.
 - Logger category of the builders created by `IRestClientFactory`: `Mafe.RestClient.{name}` → `Mafesoft.RestClient.{name}`.
+- `RefreshToken(bool)` + `RefreshTokenInvoke(Func<RestResult>)` / `RefreshTokenInvoke(Func<Task<RestResult>>)` replaced by
+  `RefreshToken(Func<CancellationToken, Task<RestResult>>)`: one call enables the feature, the func receives the
+  `CancellationToken` of the request and there is no more synchronous (sync-over-async) refresh func. `RefreshToken(null)` disables it.
 
 ### Other
 - The 2.0.0 public API is frozen in `PublicAPI.Shipped.txt` and the packages are validated against the 2.0.0 release;
