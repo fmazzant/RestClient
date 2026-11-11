@@ -5,12 +5,10 @@ name: Publish on NuGet
 #     git tag v3.0.0 && git push origin v3.0.0
 #   the tag must match <Version> in both src/RestClient/RestClient.csproj and
 #   src/RestClient.Extensions.DependencyInjection/RestClient.Extensions.DependencyInjection.csproj;
-# - manually, from GitHub: Actions > Publish on NuGet > Run workflow, on a branch (not on a tag):
-#   - "version" empty: publishes the <Version> of the selected branch (the two projects must have the same version);
-#   - "version" filled in (e.g. 3.0.0 or 3.1.0-beta.1): publishes both packages with that version, overriding <Version>.
-#   CLI: gh workflow run nuget.yml --ref main -f version=3.0.0
+# - manually, from GitHub: Actions > Publish on NuGet > Run workflow (publishes the <Version> of the selected branch,
+#   the two projects must have the same version).
 # A tag push also creates the GitHub Release of the tag, with the notes of the matching
-# "## x.y.z" section of CHANGELOG.md (the manual run publishes only the packages and does not check CHANGELOG.md).
+# "## x.y.z" section of CHANGELOG.md (the manual run publishes only the packages).
 # Merging into main does NOT publish anything.
 #
 # Authentication: NuGet Trusted Publishing (https://learn.microsoft.com/nuget/nuget-org/trusted-publishing),
@@ -24,12 +22,6 @@ on:
   push:
     tags: [ 'v*' ]
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to publish (e.g. 3.0.0 or 3.1.0-beta.1). Empty = the <Version> in the csproj files.'
-        type: string
-        required: false
-        default: ''
 
 permissions:
   contents: write # needed to create the GitHub Release
@@ -50,40 +42,18 @@ jobs:
           8.0.x
           10.0.x
 
-    # The overriding version goes in PACKAGE_VERSION, never in VERSION: MSBuild reads the environment variables
-    # as properties, so a VERSION variable would silently change the package version.
     - name: Check the project versions
       id: version
-      env:
-        INPUT_VERSION: ${{ inputs.version }}
       run: |
-        # Tag push: the expected version comes from the tag (v3.0.0 -> 3.0.0), the projects must match it.
-        # Manual run with the version input: that version overrides <Version> in build and pack.
-        # Manual run without it: the expected version is the one of Mafesoft.RestClient, the other packages must match it.
-        INPUT_VERSION="${INPUT_VERSION// /}"
-        INPUT_VERSION="${INPUT_VERSION#v}"
+        # Tag push: the expected version comes from the tag (v3.0.0 -> 3.0.0).
+        # Manual run: the expected version is the one of Mafesoft.RestClient, the other packages must match it.
         if [ "$GITHUB_REF_TYPE" = "tag" ]; then
-          if [ -n "$INPUT_VERSION" ]; then
-            echo "::error::The version input is for manual runs on a branch, this run is on the tag $GITHUB_REF_NAME"
-            exit 1
-          fi
           EXPECTED_VERSION="${GITHUB_REF_NAME#v}"
-        elif [ -n "$INPUT_VERSION" ]; then
-          if [[ ! "$INPUT_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
-            echo "::error::'$INPUT_VERSION' is not a valid version (expected 3.0.0 or 3.1.0-beta.1)"
-            exit 1
-          fi
-          echo "publishing version $INPUT_VERSION (version input, overrides <Version>)"
-          echo "version=$INPUT_VERSION" >> "$GITHUB_OUTPUT"
-          echo "PACKAGE_VERSION=$INPUT_VERSION" >> "$GITHUB_ENV"
-          echo "### Version $INPUT_VERSION (manual run)" >> "$GITHUB_STEP_SUMMARY"
-          exit 0
         else
           EXPECTED_VERSION="$(dotnet msbuild src/RestClient/RestClient.csproj -getProperty:Version)"
         fi
         echo "expected version: $EXPECTED_VERSION"
         echo "version=$EXPECTED_VERSION" >> "$GITHUB_OUTPUT"
-        echo "### Version $EXPECTED_VERSION ($GITHUB_REF_TYPE $GITHUB_REF_NAME)" >> "$GITHUB_STEP_SUMMARY"
         for PROJECT in src/RestClient/RestClient.csproj src/RestClient.Extensions.DependencyInjection/RestClient.Extensions.DependencyInjection.csproj; do
           PROJECT_VERSION="$(dotnet msbuild "$PROJECT" -getProperty:Version)"
           echo "$PROJECT: $PROJECT_VERSION"
@@ -125,7 +95,7 @@ jobs:
       run: dotnet restore src/RestClient.sln
 
     - name: Build
-      run: dotnet build -c Release --no-restore ${PACKAGE_VERSION:+"-p:Version=$PACKAGE_VERSION"} src/RestClient.sln
+      run: dotnet build -c Release --no-restore src/RestClient.sln
 
     - name: Test
       run: |
@@ -157,7 +127,7 @@ jobs:
         ./aot/RestClient.AotSmokeTest
 
     - name: Package
-      run: dotnet pack -c Release --no-build ${PACKAGE_VERSION:+"-p:Version=$PACKAGE_VERSION"} -o ./artifacts src/RestClient.sln
+      run: dotnet pack -c Release --no-build -o ./artifacts src/RestClient.sln
 
     # Right before the push: the temporary API key expires after 1 hour.
     - name: NuGet login (Trusted Publishing)
