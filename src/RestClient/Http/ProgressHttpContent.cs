@@ -27,7 +27,7 @@
 // 
 // </summary>
 
-namespace RestClient.Http
+namespace Mafesoft.RestClient.Http
 {
     using System;
     using System.IO;
@@ -62,7 +62,7 @@ namespace RestClient.Http
         private readonly CancellationToken cancellationToken;
 
         /// <summary>
-        /// Initializes a new instance of the RestClient.Http.ProgressHttpContent class.
+        /// Initializes a new instance of the Mafesoft.RestClient.Http.ProgressHttpContent class.
         /// </summary>
         /// <param name="content">Http entity body and content headers</param>
         /// <param name="bufferSize">Buffer size</param>

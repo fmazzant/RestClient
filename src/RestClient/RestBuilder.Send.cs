@@ -27,11 +27,11 @@
 // 
 // </summary>
 
-namespace RestClient
+namespace Mafesoft.RestClient
 {
-    using RestClient.Http;
-    using RestClient.Internal;
-    using RestClient.Serialization;
+    using Mafesoft.RestClient.Http;
+    using Mafesoft.RestClient.Internal;
+    using Mafesoft.RestClient.Serialization;
     using System;
     using System.Diagnostics;
     using System.IO;

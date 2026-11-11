@@ -1,5 +1,5 @@
 #if NET
-namespace RestClient.Tests
+namespace Mafesoft.RestClient.Tests
 {
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;

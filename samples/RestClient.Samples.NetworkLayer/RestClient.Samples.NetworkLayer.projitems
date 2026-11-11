@@ -6,7 +6,7 @@
     <SharedGUID>a8f8896c-c212-4dfb-ab5a-9d0498002004</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>RestClient.Samples.NetworkLayer</Import_RootNamespace>
+    <Import_RootNamespace>Mafesoft.RestClient.Samples.NetworkLayer</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Models\Ad.cs" />

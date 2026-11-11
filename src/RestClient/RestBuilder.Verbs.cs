@@ -27,7 +27,7 @@
 // 
 // </summary>
 
-namespace RestClient
+namespace Mafesoft.RestClient
 {
     using System.Net.Http;
     using System.Threading;

@@ -27,9 +27,9 @@
 /// 
 /// </summary>
 
-namespace RestClient.Samples.ConsoleTest
+namespace Mafesoft.RestClient.Samples.ConsoleTest
 {
-    using RestClient.Samples.NetworkLayer;
+    using Mafesoft.RestClient.Samples.NetworkLayer;
     using System;
 
     static class Program

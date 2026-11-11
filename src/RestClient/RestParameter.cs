@@ -27,7 +27,7 @@
 // 
 // </summary>
 
-namespace RestClient
+namespace Mafesoft.RestClient
 {
     /// <summary>
     /// Provides a class the represents the querystring parameter

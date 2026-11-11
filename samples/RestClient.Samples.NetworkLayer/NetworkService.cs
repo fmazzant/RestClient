@@ -27,9 +27,9 @@
 /// 
 /// </summary>
 
-namespace RestClient.Samples.NetworkLayer
+namespace Mafesoft.RestClient.Samples.NetworkLayer
 {
-    using RestClient.Samples.NetworkLayer.Models;
+    using Mafesoft.RestClient.Samples.NetworkLayer.Models;
     using System;
     using System.Threading.Tasks;
 

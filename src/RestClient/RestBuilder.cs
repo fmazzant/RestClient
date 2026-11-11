@@ -27,13 +27,13 @@
 // 
 // </summary>
 
-namespace RestClient
+namespace Mafesoft.RestClient
 {
     using Microsoft.Extensions.Logging;
-    using RestClient.Internal;
-    using RestClient.Serialization;
-    using RestClient.Serialization.Json;
-    using RestClient.Serialization.Xml;
+    using Mafesoft.RestClient.Internal;
+    using Mafesoft.RestClient.Serialization;
+    using Mafesoft.RestClient.Serialization.Json;
+    using Mafesoft.RestClient.Serialization.Xml;
     using System;
     using System.Collections;
     using System.Collections.Generic;

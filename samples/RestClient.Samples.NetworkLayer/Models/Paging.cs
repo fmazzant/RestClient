@@ -27,7 +27,7 @@
 /// 
 /// </summary>
 
-namespace RestClient.Samples.NetworkLayer.Models
+namespace Mafesoft.RestClient.Samples.NetworkLayer.Models
 {
     public class Paging<T>
     {
