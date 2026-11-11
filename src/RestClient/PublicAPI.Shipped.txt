@@ -1,1 +1,178 @@
 #nullable enable
+const RestClient.RestClientTelemetry.ActivitySourceName = "Mafe.RestClient" -> string!
+const RestClient.RestProperties.DefaultBufferSize = 81920 -> int
+RestClient.CompletedEventArgs
+RestClient.CompletedEventArgs.CompletedEventArgs() -> void
+RestClient.CompletedEventArgs.ExecutionTime.get -> System.TimeSpan
+RestClient.CompletedEventArgs.Result.get -> RestClient.RestResult!
+RestClient.IRestResult
+RestClient.IRestResult.Content.get -> object?
+RestClient.IRestResult<T>
+RestClient.IRestResult<T>.Content.get -> T?
+RestClient.MultipartFormData
+RestClient.MultipartFormData.Add(string! name, string! value) -> RestClient.MultipartFormData!
+RestClient.MultipartFormData.AddFile(string! name, byte[]! content, string! fileName, string? contentType = null) -> RestClient.MultipartFormData!
+RestClient.MultipartFormData.AddFile(string! name, string! filePath, string? contentType = null) -> RestClient.MultipartFormData!
+RestClient.MultipartFormData.AddFile(string! name, System.Func<System.IO.Stream!>! contentFactory, string! fileName, string? contentType = null) -> RestClient.MultipartFormData!
+RestClient.MultipartFormData.AddFile(string! name, System.IO.Stream! content, string! fileName, string? contentType = null) -> RestClient.MultipartFormData!
+RestClient.PreCompletedEventArgs
+RestClient.PreCompletedEventArgs.IsCompleted.get -> bool
+RestClient.PreCompletedEventArgs.PreCompletedEventArgs() -> void
+RestClient.PreCompletedEventArgs.Result.get -> RestClient.RestResult!
+RestClient.PreviewContentAsStringEventArgs
+RestClient.PreviewContentAsStringEventArgs.ContentAsString.get -> string?
+RestClient.PreviewContentAsStringEventArgs.ContentType.get -> System.Type?
+RestClient.PreviewContentAsStringEventArgs.PreviewContentAsStringEventArgs() -> void
+RestClient.ProgressEventArgs
+RestClient.ProgressEventArgs.CurrentBytes.get -> long
+RestClient.ProgressEventArgs.ProgressEventArgs() -> void
+RestClient.ProgressEventArgs.ProgressFloat.get -> float
+RestClient.ProgressEventArgs.ProgressPercentage.get -> int
+RestClient.ProgressEventArgs.TotalBytes.get -> long
+RestClient.Rest
+RestClient.RestBuilder
+RestClient.RestBuilder.Authentication(string! scheme) -> RestClient.RestBuilder!
+RestClient.RestBuilder.Authentication(string! scheme, string? parameter) -> RestClient.RestBuilder!
+RestClient.RestBuilder.Authentication(System.Func<System.Net.Http.Headers.AuthenticationHeaderValue!>? authentication) -> RestClient.RestBuilder!
+RestClient.RestBuilder.BufferSize(int bufferSize) -> RestClient.RestBuilder!
+RestClient.RestBuilder.CertificateValidation(System.Func<object!, System.Security.Cryptography.X509Certificates.X509Certificate?, System.Security.Cryptography.X509Certificates.X509Chain?, System.Net.Security.SslPolicyErrors, bool>? callback) -> RestClient.RestBuilder!
+RestClient.RestBuilder.Command(int command) -> RestClient.RestBuilder!
+RestClient.RestBuilder.Command(long command) -> RestClient.RestBuilder!
+RestClient.RestBuilder.Command(string! command) -> RestClient.RestBuilder!
+RestClient.RestBuilder.Command(System.Guid command) -> RestClient.RestBuilder!
+RestClient.RestBuilder.CustomSerializer(RestClient.Serialization.ISerializerContent! serializer, object? options = null) -> RestClient.RestBuilder!
+RestClient.RestBuilder.Delete(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> RestClient.RestResult<string!>!
+RestClient.RestBuilder.Delete<T>(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> RestClient.RestResult<T>!
+RestClient.RestBuilder.DeleteAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<RestClient.RestResult<string!>!>!
+RestClient.RestBuilder.DeleteAsync<T>(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<RestClient.RestResult<T>!>!
+RestClient.RestBuilder.EnableFormUrlEncoded(bool enableFormUrlEncoded = true) -> RestClient.RestBuilder!
+RestClient.RestBuilder.EnableGZipCompression() -> RestClient.RestBuilder!
+RestClient.RestBuilder.FormUrlEncoded(bool enableFormUrlEncoded, System.Action<System.Collections.Generic.Dictionary<string!, string!>!>! keyValues) -> RestClient.RestBuilder!
+RestClient.RestBuilder.FormUrlEncoded(bool enableFormUrlEncoded, System.Collections.Generic.Dictionary<string!, string!>? keyValues) -> RestClient.RestBuilder!
+RestClient.RestBuilder.FormUrlEncoded(System.Action<System.Collections.Generic.Dictionary<string!, string!>!>! keyValues) -> RestClient.RestBuilder!
+RestClient.RestBuilder.FormUrlEncoded(System.Collections.Generic.Dictionary<string!, string!>! keyValues) -> RestClient.RestBuilder!
+RestClient.RestBuilder.Get(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> RestClient.RestResult<string!>!
+RestClient.RestBuilder.Get<T>(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> RestClient.RestResult<T>!
+RestClient.RestBuilder.GetAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<RestClient.RestResult<string!>!>!
+RestClient.RestBuilder.GetAsync<T>(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<RestClient.RestResult<T>!>!
+RestClient.RestBuilder.Head(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> RestClient.RestResult<string!>!
+RestClient.RestBuilder.HeadAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<RestClient.RestResult<string!>!>!
+RestClient.RestBuilder.Header(string! name, string? value) -> RestClient.RestBuilder!
+RestClient.RestBuilder.Header(System.Action<System.Net.Http.Headers.HttpRequestHeaders!>! requestHeaders) -> RestClient.RestBuilder!
+RestClient.RestBuilder.Json(System.Text.Json.JsonSerializerOptions? options = null) -> RestClient.RestBuilder!
+RestClient.RestBuilder.Json(System.Text.Json.Serialization.JsonSerializerContext! context) -> RestClient.RestBuilder!
+RestClient.RestBuilder.Logger(Microsoft.Extensions.Logging.ILogger? logger) -> RestClient.RestBuilder!
+RestClient.RestBuilder.Multipart(System.Action<RestClient.MultipartFormData!>! configure) -> RestClient.RestBuilder!
+RestClient.RestBuilder.NetworkCredential(string! username, string! password) -> RestClient.RestBuilder!
+RestClient.RestBuilder.NetworkCredential(string! username, string! password, string! domain) -> RestClient.RestBuilder!
+RestClient.RestBuilder.NetworkCredential(string! username, System.Security.SecureString! password) -> RestClient.RestBuilder!
+RestClient.RestBuilder.NetworkCredential(string! username, System.Security.SecureString! password, string! domain) -> RestClient.RestBuilder!
+RestClient.RestBuilder.NetworkCredential(System.Func<System.Net.ICredentials?>! credential) -> RestClient.RestBuilder!
+RestClient.RestBuilder.OnCompleted(System.Action<RestClient.CompletedEventArgs!>? onCompleted) -> RestClient.RestBuilder!
+RestClient.RestBuilder.OnConfigureHttpClient(System.Action<System.Net.Http.HttpClient!>? onHttpClient) -> RestClient.RestBuilder!
+RestClient.RestBuilder.OnDownloadProgress(System.Action<RestClient.ProgressEventArgs!>? onProgress) -> RestClient.RestBuilder!
+RestClient.RestBuilder.OnException(System.Action<System.Exception!>? exception) -> RestClient.RestBuilder!
+RestClient.RestBuilder.OnPreCompleted(System.Action<RestClient.PreCompletedEventArgs!>? onPreCompleted) -> RestClient.RestBuilder!
+RestClient.RestBuilder.OnPreviewContentRequestAsString(System.Action<RestClient.PreviewContentAsStringEventArgs!>? onPreviewContent) -> RestClient.RestBuilder!
+RestClient.RestBuilder.OnPreviewContentResponseAsString(System.Action<RestClient.PreviewContentAsStringEventArgs!>? onPreviewContent) -> RestClient.RestBuilder!
+RestClient.RestBuilder.OnStart(System.Action<RestClient.StartEventArgs!>? onStart) -> RestClient.RestBuilder!
+RestClient.RestBuilder.OnUploadProgress(System.Action<RestClient.ProgressEventArgs!>? onProgress) -> RestClient.RestBuilder!
+RestClient.RestBuilder.Options(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> RestClient.RestResult<string!>!
+RestClient.RestBuilder.OptionsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<RestClient.RestResult<string!>!>!
+RestClient.RestBuilder.Parameter(RestClient.RestParameter parameter, params RestClient.RestParameter[]! others) -> RestClient.RestBuilder!
+RestClient.RestBuilder.Parameter(string! key, object? value) -> RestClient.RestBuilder!
+RestClient.RestBuilder.Parameter(System.Action<System.Collections.Generic.List<RestClient.RestParameter>!>! parameters) -> RestClient.RestBuilder!
+RestClient.RestBuilder.Patch(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> RestClient.RestResult<string!>!
+RestClient.RestBuilder.Patch<T>(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> RestClient.RestResult<T>!
+RestClient.RestBuilder.PatchAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<RestClient.RestResult<string!>!>!
+RestClient.RestBuilder.PatchAsync<T>(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<RestClient.RestResult<T>!>!
+RestClient.RestBuilder.Payload<T>(T payload) -> RestClient.RestBuilder!
+RestClient.RestBuilder.Post(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> RestClient.RestResult<string!>!
+RestClient.RestBuilder.Post<T>(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> RestClient.RestResult<T>!
+RestClient.RestBuilder.PostAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<RestClient.RestResult<string!>!>!
+RestClient.RestBuilder.PostAsync<T>(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<RestClient.RestResult<T>!>!
+RestClient.RestBuilder.Properties.get -> RestClient.RestProperties!
+RestClient.RestBuilder.Put(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> RestClient.RestResult<string!>!
+RestClient.RestBuilder.Put<T>(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> RestClient.RestResult<T>!
+RestClient.RestBuilder.PutAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<RestClient.RestResult<string!>!>!
+RestClient.RestBuilder.PutAsync<T>(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<RestClient.RestResult<T>!>!
+RestClient.RestBuilder.RefreshToken(bool refreshToken = true) -> RestClient.RestBuilder!
+RestClient.RestBuilder.RefreshTokenInvoke(System.Func<RestClient.RestResult!>! refreshTokenApi) -> RestClient.RestBuilder!
+RestClient.RestBuilder.RefreshTokenInvoke(System.Func<System.Threading.Tasks.Task<RestClient.RestResult!>!>! refreshTokenApi) -> RestClient.RestBuilder!
+RestClient.RestBuilder.Retry(int maxRetries, System.TimeSpan? delay = null, bool retryNonIdempotentMethods = false) -> RestClient.RestBuilder!
+RestClient.RestBuilder.Send<T>(System.Net.Http.HttpMethod! method, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> RestClient.RestResult<T>!
+RestClient.RestBuilder.SendAsync<T>(System.Net.Http.HttpMethod! method, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<RestClient.RestResult<T>!>!
+RestClient.RestBuilder.Timeout(double milliseconds) -> RestClient.RestBuilder!
+RestClient.RestBuilder.Timeout(System.TimeSpan timeOut) -> RestClient.RestBuilder!
+RestClient.RestBuilder.Url(string! url) -> RestClient.RestBuilder!
+RestClient.RestBuilder.Url(System.Uri! uri) -> RestClient.RestBuilder!
+RestClient.RestBuilder.UseHttpClient(System.Net.Http.HttpClient? httpClient) -> RestClient.RestBuilder!
+RestClient.RestBuilder.Xml(System.Xml.XmlReaderSettings? readerOptions = null, System.Xml.XmlWriterSettings? writerOptions = null) -> RestClient.RestBuilder!
+RestClient.RestClientTelemetry
+RestClient.RestParameter
+RestClient.RestParameter.HasKey.get -> bool
+RestClient.RestParameter.HasValue.get -> bool
+RestClient.RestParameter.IsValid.get -> bool
+RestClient.RestParameter.Key.get -> string?
+RestClient.RestParameter.Key.set -> void
+RestClient.RestParameter.RestParameter() -> void
+RestClient.RestParameter.RestParameter(string? key, object? value) -> void
+RestClient.RestParameter.Value.get -> object?
+RestClient.RestParameter.Value.set -> void
+RestClient.RestProperties
+RestClient.RestProperties.BufferSize.get -> int
+RestClient.RestProperties.BufferSize.set -> void
+RestClient.RestProperties.CertificateOption.get -> System.Net.Http.ClientCertificateOption
+RestClient.RestProperties.CertificateOption.set -> void
+RestClient.RestProperties.Clone() -> RestClient.RestProperties!
+RestClient.RestProperties.EndPoint.get -> System.Uri?
+RestClient.RestProperties.EndPoint.set -> void
+RestClient.RestProperties.RestProperties() -> void
+RestClient.RestProperties.Timeout.get -> System.TimeSpan
+RestClient.RestProperties.Timeout.set -> void
+RestClient.RestResult
+RestClient.RestResult.Content.get -> object?
+RestClient.RestResult.Dispose() -> void
+RestClient.RestResult.EnsureSuccessStatusCode() -> RestClient.RestResult!
+RestClient.RestResult.Exception.get -> System.Exception?
+RestClient.RestResult.Headers.get -> System.Net.Http.Headers.HttpResponseHeaders?
+RestClient.RestResult.IsCancellationRequested.get -> bool
+RestClient.RestResult.IsSuccessStatusCode.get -> bool
+RestClient.RestResult.IsTimedOut.get -> bool
+RestClient.RestResult.ReasonPhrase.get -> string?
+RestClient.RestResult.Response.get -> System.Net.Http.HttpResponseMessage?
+RestClient.RestResult.RetryCount.get -> int
+RestClient.RestResult.StatusCode.get -> System.Net.HttpStatusCode
+RestClient.RestResult.Version.get -> System.Version?
+RestClient.RestResult<T>
+RestClient.RestResult<T>.Content.get -> T?
+RestClient.RestResult<T>.EnsureSuccessStatusCode() -> RestClient.RestResult<T>!
+RestClient.Serialization.IAsyncSerializerContent
+RestClient.Serialization.IAsyncSerializerContent.DeserializeObjectAsync(System.IO.Stream! stream, System.Type! typeOf, object? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<object?>!
+RestClient.Serialization.ISerializerContent
+RestClient.Serialization.ISerializerContent.DeserializeObject(string! value, System.Type! typeOf, object? options = null) -> object?
+RestClient.Serialization.ISerializerContent.MediaTypeAsString.get -> string!
+RestClient.Serialization.ISerializerContent.SerializeObject(object? value, System.Type! typeOf, object? options = null) -> string!
+RestClient.Serialization.Json.JSON
+RestClient.Serialization.Json.JSON.DeserializeObject(string! value, System.Type! typeOf, object? options = null) -> object?
+RestClient.Serialization.Json.JSON.DeserializeObjectAsync(System.IO.Stream! stream, System.Type! typeOf, object? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<object?>!
+RestClient.Serialization.Json.JSON.JSON() -> void
+RestClient.Serialization.Json.JSON.MediaTypeAsString.get -> string!
+RestClient.Serialization.Json.JSON.SerializeObject(object? value, System.Type! typeOf, object? options = null) -> string!
+RestClient.Serialization.Xml.XML
+RestClient.Serialization.Xml.XML.DeserializeObject(string! value, System.Type! typeOf, object? options = null) -> object?
+RestClient.Serialization.Xml.XML.MediaTypeAsString.get -> string!
+RestClient.Serialization.Xml.XML.SerializeObject(object? value, System.Type! typeOf, object? options = null) -> string!
+RestClient.Serialization.Xml.XML.XML() -> void
+RestClient.StartEventArgs
+RestClient.StartEventArgs.Cancel.get -> bool
+RestClient.StartEventArgs.Cancel.set -> void
+RestClient.StartEventArgs.Payload.get -> object?
+RestClient.StartEventArgs.StartEventArgs() -> void
+RestClient.StartEventArgs.Url.get -> string!
+static readonly RestClient.RestProperties.DefaultTimeout -> System.TimeSpan
+static RestClient.Rest.Build() -> RestClient.RestBuilder!
+static RestClient.Rest.Build(RestClient.RestProperties! restProperties) -> RestClient.RestBuilder!
+static RestClient.Rest.Build(System.Action<RestClient.RestProperties!>! properties) -> RestClient.RestBuilder!
+static RestClient.Rest.Build(System.Net.Http.HttpClient! httpClient) -> RestClient.RestBuilder!
+static RestClient.Serialization.Json.JSON.DefaultOptions.get -> System.Text.Json.JsonSerializerOptions!
