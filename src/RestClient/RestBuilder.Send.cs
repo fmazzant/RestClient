@@ -64,6 +64,7 @@ namespace Mafesoft.RestClient
 
         /// <summary>
         /// Sends an HTTP request as a synchronous operation. It never throws: errors are reported by the result.
+        /// Prefer SendAsync: this method blocks the calling thread until the response is received (sync-over-async).
         /// </summary>
         /// <typeparam name="T">Type of the content, see SendAsync</typeparam>
         /// <param name="method">The HTTP method</param>

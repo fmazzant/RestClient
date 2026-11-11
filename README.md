@@ -51,6 +51,9 @@ var rest = Rest.Build();
 var result = await rest.Url("[URL]").GetAsync();
 ```
 
+> Prefer the async methods (`GetAsync`, `PostAsync`, `SendAsync`, ...). The synchronous ones (`Get`, `Post`, `Send`, ...)
+> block the calling thread until the response is received (sync-over-async): use them only where you cannot `await`.
+
 Whenever you find the word "[URL]" in this document it reffers to the base URL definition of the webAPI.
 
 We can define a Root() endpoint and use it to build the request.
