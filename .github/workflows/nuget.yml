@@ -7,6 +7,8 @@ name: Publish on NuGet
 #   src/RestClient.Extensions.DependencyInjection/RestClient.Extensions.DependencyInjection.csproj;
 # - manually, from GitHub: Actions > Publish on NuGet > Run workflow (publishes the <Version> of the selected branch,
 #   the two projects must have the same version).
+# A tag push also creates the GitHub Release of the tag, with the notes of the matching
+# "## x.y.z" section of CHANGELOG.md (the manual run publishes only the packages).
 # Merging into master does NOT publish anything.
 
 on:
@@ -15,7 +17,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write # needed to create the GitHub Release
 
 jobs:
   publish:
@@ -33,6 +35,7 @@ jobs:
           10.0.x
 
     - name: Check the project versions
+      id: version
       run: |
         # Tag push: the expected version comes from the tag (v2.0.0 -> 2.0.0).
         # Manual run: the expected version is the one of Mafe.RestClient, the other packages must match it.
@@ -42,6 +45,7 @@ jobs:
           EXPECTED_VERSION="$(dotnet msbuild src/RestClient/RestClient.csproj -getProperty:Version)"
         fi
         echo "expected version: $EXPECTED_VERSION"
+        echo "version=$EXPECTED_VERSION" >> "$GITHUB_OUTPUT"
         for PROJECT in src/RestClient/RestClient.csproj src/RestClient.Extensions.DependencyInjection/RestClient.Extensions.DependencyInjection.csproj; do
           PROJECT_VERSION="$(dotnet msbuild "$PROJECT" -getProperty:Version)"
           echo "$PROJECT: $PROJECT_VERSION"
@@ -50,6 +54,24 @@ jobs:
             exit 1
           fi
         done
+
+    # Checked before publishing, so a missing CHANGELOG section does not leave the packages without a release.
+    - name: Extract the release notes from CHANGELOG.md
+      if: github.ref_type == 'tag'
+      env:
+        VERSION: ${{ steps.version.outputs.version }}
+      run: |
+        # Prints the lines between "## $VERSION" and the next "## " heading.
+        awk -v heading="## $VERSION" '
+          { sub(/\r$/, "") }
+          $0 == heading { found = 1; next }
+          found && /^## / { exit }
+          found { print }
+        ' CHANGELOG.md > "$RUNNER_TEMP/release-notes.md"
+        if ! grep -q '[^[:space:]]' "$RUNNER_TEMP/release-notes.md"; then
+          echo "::error::CHANGELOG.md has no '## $VERSION' section"
+          exit 1
+        fi
 
     - name: Restore dependencies
       run: dotnet restore src/RestClient.sln
@@ -75,3 +97,13 @@ jobs:
 
     - name: Publish on NuGet
       run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+
+    - name: Create the GitHub Release
+      if: github.ref_type == 'tag'
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh release create "$GITHUB_REF_NAME" ./artifacts/*.nupkg ./artifacts/*.snupkg \
+          --title "$GITHUB_REF_NAME" \
+          --notes-file "$RUNNER_TEMP/release-notes.md" \
+          --verify-tag
