@@ -27,7 +27,7 @@
 // 
 // </summary>
 
-namespace RestClient.Extensions.DependencyInjection
+namespace Mafesoft.RestClient.Extensions.DependencyInjection
 {
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
@@ -48,7 +48,7 @@ namespace RestClient.Extensions.DependencyInjection
     /// </summary>
     internal sealed class RestClientFactory : IRestClientFactory
     {
-        internal const string LoggerCategoryPrefix = "Mafe.RestClient.";
+        internal const string LoggerCategoryPrefix = "Mafesoft.RestClient.";
 
         private readonly IServiceProvider services;
         private readonly IHttpClientFactory httpClientFactory;

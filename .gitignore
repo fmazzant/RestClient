@@ -1,43 +1,11 @@
-﻿################################################################################
-# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
-################################################################################
-
-/.vs
-*.suo
-/src/Net.Http.Rest/bin/Debug/netstandard2.0
-/src/Net.Http.Rest/obj
-/src/Net.Http.Rest/bin/Debug
-/src/Net.Http.Rest/bin/Release
-/src/.vs/RestClient/DesignTimeBuild
-/src/Mafe.RestClient/bin
-/src/Mafe.RestClient/obj
-/src/.vs/Mafe.RestClient/DesignTimeBuild
-/src/RestClient/bin
-/src/RestClient/obj
-src/.vs/RestClient/xs/project-cache/RestClient-Debug.json
-src/.vs/RestClient/xs/UserPrefs.xml
-/src/RestClient.Samples.ConsoleTest/bin/Debug/netcoreapp3.1
-/src/RestClient.Samples.ConsoleTest/obj
-/src/RestClient.Samples.ConsoleTest/bin/Release/netcoreapp3.1
-/samples/RestClient.Samples.ConsoleTest/obj
-/samples/RestClient.Samples.ConsoleTest/bin/Debug/netcoreapp3.1
-/samples/.vs/RestClient.Samples/DesignTimeBuild/.dtbcache.v2
-/samples/RestClient.Samples.ConsoleTest/bin/Debug/net5.0
-*.v1
-/samples/.vs/RestClient.Samples/FileContentIndex
-/samples/.vs/ProjectEvaluation
-/samples/RestClient.Samples.ConsoleTest/bin/Release/net5.0
-/samples/.vs/RestClient.Samples/v17/.futdcache.v2
-/samples/RestClient.Samples.ConsoleTest/bin/Release/net6.0
-/samples/RestClient.Samples.ConsoleTest/bin/Debug/net6.0
-/samples/RestClient.Samples.ConsoleTest/bin/Debug/net8.0
-/samples/.vs/RestClient.Samples/v17
-/src/.vs/RestClient/FileContentIndex
-/src/.vs
-
-# build output and IDE state
-.vs/
+# build output
 bin/
 obj/
-*.user
+artifacts/
+aot/
 TestResults/
+
+# IDE state
+.vs/
+*.user
+*.suo

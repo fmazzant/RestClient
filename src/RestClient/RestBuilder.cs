@@ -27,13 +27,13 @@
 // 
 // </summary>
 
-namespace RestClient
+namespace Mafesoft.RestClient
 {
     using Microsoft.Extensions.Logging;
-    using RestClient.Internal;
-    using RestClient.Serialization;
-    using RestClient.Serialization.Json;
-    using RestClient.Serialization.Xml;
+    using Mafesoft.RestClient.Internal;
+    using Mafesoft.RestClient.Serialization;
+    using Mafesoft.RestClient.Serialization.Json;
+    using Mafesoft.RestClient.Serialization.Xml;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -47,6 +47,7 @@ namespace RestClient
     using System.Security.Cryptography.X509Certificates;
     using System.Text.Json;
     using System.Text.Json.Serialization;
+    using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -59,7 +60,7 @@ namespace RestClient
         #region [ State ]
 
         /// <summary>
-        /// Rest Properties (a copy: changing it does not change the builder)
+        /// The connection properties of the builder (read-only: use Url, Timeout, BufferSize and CertificateOption to change them)
         /// </summary>
         public RestProperties Properties => properties.Clone();
 
@@ -75,7 +76,6 @@ namespace RestClient
         private Func<AuthenticationHeaderValue>? onAuthentication;
         private Action<HttpRequestHeaders>? onRequestHeaders;
         private bool enabledCompression;
-        private bool refreshTokenExecution = true;
         private RefreshTokenCoordinator? refreshTokenCoordinator;
         private RetrySettings? retrySettings;
         private ILogger? logger;
@@ -276,6 +276,15 @@ namespace RestClient
             return With(r => r.properties.BufferSize = bufferSize);
         }
 
+        /// <summary>
+        /// Specifies how the client certificates are provided (default Manual).
+        /// It is not applied when an external HttpClient is used (see UseHttpClient).
+        /// </summary>
+        /// <param name="certificateOption"></param>
+        /// <returns></returns>
+        public RestBuilder CertificateOption(ClientCertificateOption certificateOption)
+            => With(r => r.properties.CertificateOption = certificateOption);
+
         #endregion
 
         #region [ Header ]
@@ -354,38 +363,18 @@ namespace RestClient
         #region [ Refresh Token & Retry ]
 
         /// <summary>
-        /// Enables refresh token: true if enabled, false when disabled
+        /// Enables the refresh token: when the response is 401 Unauthorized the func is invoked and,
+        /// if it returns a success status code, the request is sent again (only once).
+        /// When many concurrent requests of this builder (and of the builders derived from it) receive 401
+        /// the func is invoked only once. The requests sent from inside the func never trigger another refresh.
         /// </summary>
-        /// <param name="refreshToken"></param>
+        /// <param name="refreshToken">
+        /// The func that refreshes the token; it receives the cancellation token of the request.
+        /// null disables the refresh token for this builder and the builders derived from it.
+        /// </param>
         /// <returns></returns>
-        public RestBuilder RefreshToken(bool refreshToken = true)
-            => With(r => r.refreshTokenExecution = refreshToken);
-
-        /// <summary>
-        /// Sets the func invoked when the response is 401 Unauthorized.
-        /// If the func returns a success status code the request is sent again (only once).
-        /// When many concurrent requests receive 401 the func is invoked only once.
-        /// </summary>
-        /// <param name="refreshTokenApi"></param>
-        /// <returns></returns>
-        public RestBuilder RefreshTokenInvoke(Func<RestResult> refreshTokenApi)
-        {
-            if (refreshTokenApi == null) { throw new ArgumentNullException(nameof(refreshTokenApi)); }
-            return With(r => r.refreshTokenCoordinator = new RefreshTokenCoordinator(refreshTokenApi, refreshTokenCoordinator?.RefreshTokenFuncAsync));
-        }
-
-        /// <summary>
-        /// Sets the func invoked when the response is 401 Unauthorized.
-        /// If the func returns a success status code the request is sent again (only once).
-        /// When many concurrent requests receive 401 the func is invoked only once.
-        /// </summary>
-        /// <param name="refreshTokenApi"></param>
-        /// <returns></returns>
-        public RestBuilder RefreshTokenInvoke(Func<Task<RestResult>> refreshTokenApi)
-        {
-            if (refreshTokenApi == null) { throw new ArgumentNullException(nameof(refreshTokenApi)); }
-            return With(r => r.refreshTokenCoordinator = new RefreshTokenCoordinator(refreshTokenCoordinator?.RefreshTokenFunc, refreshTokenApi));
-        }
+        public RestBuilder RefreshToken(Func<CancellationToken, Task<RestResult>>? refreshToken)
+            => With(r => r.refreshTokenCoordinator = refreshToken == null ? null : new RefreshTokenCoordinator(refreshToken));
 
         /// <summary>
         /// Retries the request when it fails with a transient error: network error, timeout,

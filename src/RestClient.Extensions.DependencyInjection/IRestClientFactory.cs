@@ -27,7 +27,7 @@
 // 
 // </summary>
 
-namespace RestClient
+namespace Mafesoft.RestClient
 {
     /// <summary>
     /// Creates the RestBuilder registered with AddRestClient.

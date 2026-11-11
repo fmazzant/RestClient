@@ -27,16 +27,19 @@
 // 
 // </summary>
 
-namespace RestClient
+namespace Mafesoft.RestClient
 {
     using System;
     using System.Net.Http;
 
     /// <summary>
-    /// Provides a class for rest connection properties
+    /// The connection properties of a RestBuilder (read-only: use the builder methods Url, Timeout, BufferSize
+    /// and CertificateOption to change them)
     /// </summary>
-    public class RestProperties
+    public sealed class RestProperties
     {
+        internal RestProperties() { }
+
         /// <summary>
         /// Default buffer size (80kb)
         /// </summary>
@@ -50,27 +53,27 @@ namespace RestClient
         /// <summary>
         /// End Point
         /// </summary>
-        public Uri? EndPoint { get; set; }
+        public Uri? EndPoint { get; internal set; }
 
         /// <summary>
         /// Specifies how client certificated are provided. Default is "Manual"
         /// </summary>
-        public ClientCertificateOption CertificateOption { get; set; } = ClientCertificateOption.Manual;
+        public ClientCertificateOption CertificateOption { get; internal set; } = ClientCertificateOption.Manual;
 
         /// <summary>
         /// Specifies timeout. Default 100 seconds. Use System.Threading.Timeout.InfiniteTimeSpan to disable it.
         /// </summary>
-        public TimeSpan Timeout { get; set; } = DefaultTimeout;
+        public TimeSpan Timeout { get; internal set; } = DefaultTimeout;
 
         /// <summary>
         /// Specifies Buffer Size used for upload and download. Default 80kb.
         /// </summary>
-        public int BufferSize { get; set; } = DefaultBufferSize;
+        public int BufferSize { get; internal set; } = DefaultBufferSize;
 
         /// <summary>
         /// Creates a copy of the properties
         /// </summary>
         /// <returns></returns>
-        public RestProperties Clone() => (RestProperties)MemberwiseClone();
+        internal RestProperties Clone() => (RestProperties)MemberwiseClone();
     }
 }

@@ -1,4 +1,4 @@
-namespace RestClient.Tests
+namespace Mafesoft.RestClient.Tests
 {
     using Microsoft.Extensions.DependencyInjection;
     using System.Net;

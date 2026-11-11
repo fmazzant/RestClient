@@ -27,7 +27,7 @@
 // 
 // </summary>
 
-namespace RestClient.Internal
+namespace Mafesoft.RestClient.Internal
 {
     using System;
     using System.Threading;
@@ -35,7 +35,7 @@ namespace RestClient.Internal
 
     /// <summary>
     /// Runs the refresh token func once for all the concurrent requests that received 401 Unauthorized.
-    /// The instance is shared by all the builders derived from the one where RefreshTokenInvoke was called.
+    /// The instance is shared by all the builders derived from the one where RefreshToken was called.
     /// </summary>
     internal sealed class RefreshTokenCoordinator
     {
@@ -47,17 +47,14 @@ namespace RestClient.Internal
 
         private readonly SemaphoreSlim gate = new SemaphoreSlim(1, 1);
 
+        private readonly Func<CancellationToken, Task<RestResult>> refreshToken;
+
         private int generation;
 
-        public RefreshTokenCoordinator(Func<RestResult>? refreshToken, Func<Task<RestResult>>? refreshTokenAsync)
+        public RefreshTokenCoordinator(Func<CancellationToken, Task<RestResult>> refreshToken)
         {
-            RefreshTokenFunc = refreshToken;
-            RefreshTokenFuncAsync = refreshTokenAsync;
+            this.refreshToken = refreshToken;
         }
-
-        public Func<RestResult>? RefreshTokenFunc { get; }
-
-        public Func<Task<RestResult>>? RefreshTokenFuncAsync { get; }
 
         /// <summary>
         /// true when the current code is running inside a refresh func
@@ -87,8 +84,7 @@ namespace RestClient.Internal
                 refreshing.Value = true;
                 try
                 {
-                    bool refreshed = (RefreshTokenFunc != null && IsSuccess(RefreshTokenFunc()))
-                        || (RefreshTokenFuncAsync != null && IsSuccess(await RefreshTokenFuncAsync().ConfigureAwait(false)));
+                    bool refreshed = IsSuccess(await refreshToken(cancellationToken).ConfigureAwait(false));
 
                     if (refreshed)
                     {

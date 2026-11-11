@@ -30,15 +30,15 @@
 namespace Microsoft.Extensions.DependencyInjection
 {
     using Microsoft.Extensions.DependencyInjection.Extensions;
-    using RestClient;
-    using RestClient.Extensions.DependencyInjection;
+    using Mafesoft.RestClient;
+    using Mafesoft.RestClient.Extensions.DependencyInjection;
     using System;
 #if NET
     using System.Diagnostics.CodeAnalysis;
 #endif
 
     /// <summary>
-    /// Registers Mafe.RestClient in the service collection.
+    /// Registers Mafesoft.RestClient in the service collection.
     /// </summary>
     public static class RestClientServiceCollectionExtensions
     {

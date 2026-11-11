@@ -27,7 +27,7 @@
 // 
 // </summary>
 
-namespace RestClient.Serialization.Xml
+namespace Mafesoft.RestClient.Serialization.Xml
 {
     using System;
     using System.Collections.Concurrent;
@@ -38,7 +38,7 @@ namespace RestClient.Serialization.Xml
     using Serializer = System.Xml.Serialization;
 
     /// <summary>
-    /// Implements a RestClient.Serialization.ISerializerContent for XML object serialization.
+    /// Implements a Mafesoft.RestClient.Serialization.ISerializerContent for XML object serialization.
     /// XmlSerializer uses reflection and it is not compatible with trimming and Native AOT.
     /// </summary>
     public sealed class XML : ISerializerContent
@@ -52,7 +52,7 @@ namespace RestClient.Serialization.Xml
             = new ConcurrentDictionary<Type, Serializer.XmlSerializer>();
 
         /// <summary>
-        /// Initializes a new instance of the RestClient.Serialization.Xml.XML class.
+        /// Initializes a new instance of the Mafesoft.RestClient.Serialization.Xml.XML class.
         /// </summary>
 #if NET
         [RequiresUnreferencedCode(ReflectionMessage)]

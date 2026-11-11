@@ -1,13 +1,15 @@
 name: Publish on NuGet
 
-# Publishes Mafe.RestClient and Mafe.RestClient.Extensions.DependencyInjection:
+# Publishes Mafesoft.RestClient and Mafesoft.RestClient.Extensions.DependencyInjection:
 # - when a version tag is pushed:
-#     git tag v2.0.0 && git push origin v2.0.0
+#     git tag v3.0.0 && git push origin v3.0.0
 #   the tag must match <Version> in both src/RestClient/RestClient.csproj and
 #   src/RestClient.Extensions.DependencyInjection/RestClient.Extensions.DependencyInjection.csproj;
 # - manually, from GitHub: Actions > Publish on NuGet > Run workflow (publishes the <Version> of the selected branch,
 #   the two projects must have the same version).
-# Merging into master does NOT publish anything.
+# A tag push also creates the GitHub Release of the tag, with the notes of the matching
+# "## x.y.z" section of CHANGELOG.md (the manual run publishes only the packages).
+# Merging into main does NOT publish anything.
 
 on:
   push:
@@ -15,7 +17,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write # needed to create the GitHub Release
 
 jobs:
   publish:
@@ -23,25 +25,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: |
           8.0.x
           10.0.x
 
     - name: Check the project versions
+      id: version
       run: |
-        # Tag push: the expected version comes from the tag (v2.0.0 -> 2.0.0).
-        # Manual run: the expected version is the one of Mafe.RestClient, the other packages must match it.
+        # Tag push: the expected version comes from the tag (v3.0.0 -> 3.0.0).
+        # Manual run: the expected version is the one of Mafesoft.RestClient, the other packages must match it.
         if [ "$GITHUB_REF_TYPE" = "tag" ]; then
           EXPECTED_VERSION="${GITHUB_REF_NAME#v}"
         else
           EXPECTED_VERSION="$(dotnet msbuild src/RestClient/RestClient.csproj -getProperty:Version)"
         fi
         echo "expected version: $EXPECTED_VERSION"
+        echo "version=$EXPECTED_VERSION" >> "$GITHUB_OUTPUT"
         for PROJECT in src/RestClient/RestClient.csproj src/RestClient.Extensions.DependencyInjection/RestClient.Extensions.DependencyInjection.csproj; do
           PROJECT_VERSION="$(dotnet msbuild "$PROJECT" -getProperty:Version)"
           echo "$PROJECT: $PROJECT_VERSION"
@@ -50,6 +54,34 @@ jobs:
             exit 1
           fi
         done
+
+    # Checked before publishing, so a missing CHANGELOG section does not leave the packages without a release.
+    - name: Extract the release notes from CHANGELOG.md
+      if: github.ref_type == 'tag'
+      env:
+        VERSION: ${{ steps.version.outputs.version }}
+      run: |
+        # Keep a Changelog headings: "## [3.0.0] - 2026-12-01" (also accepted: "## 3.0.0").
+        HEADING="$(grep -E "^## \[?${VERSION//./\\.}\]?( |$)" CHANGELOG.md | head -n 1 | tr -d '\r')"
+        if [ -z "$HEADING" ]; then
+          echo "::error::CHANGELOG.md has no '## [$VERSION]' section"
+          exit 1
+        fi
+        if echo "$HEADING" | grep -qi 'unreleased'; then
+          echo "::error::The CHANGELOG.md section of $VERSION is still 'Unreleased': set the release date ($HEADING)"
+          exit 1
+        fi
+        # Prints the lines between the heading and the next "## " heading.
+        awk -v heading="$HEADING" '
+          { sub(/\r$/, "") }
+          $0 == heading { found = 1; next }
+          found && /^## / { exit }
+          found { print }
+        ' CHANGELOG.md > "$RUNNER_TEMP/release-notes.md"
+        if ! grep -q '[^[:space:]]' "$RUNNER_TEMP/release-notes.md"; then
+          echo "::error::The CHANGELOG.md section of $VERSION is empty"
+          exit 1
+        fi
 
     - name: Restore dependencies
       run: dotnet restore src/RestClient.sln
@@ -75,3 +107,13 @@ jobs:
 
     - name: Publish on NuGet
       run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+
+    - name: Create the GitHub Release
+      if: github.ref_type == 'tag'
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh release create "$GITHUB_REF_NAME" ./artifacts/*.nupkg ./artifacts/*.snupkg \
+          --title "$GITHUB_REF_NAME" \
+          --notes-file "$RUNNER_TEMP/release-notes.md" \
+          --verify-tag

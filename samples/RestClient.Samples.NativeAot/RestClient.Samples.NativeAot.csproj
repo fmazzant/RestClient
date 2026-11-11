@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Native AOT: publish with
+      dotnet publish -c Release -r win-x64      (or linux-x64, osx-arm64, ...)
+    The platform C++ toolchain is required (Visual Studio "Desktop development with C++" on Windows, clang on Linux).
+    A normal build already reports the trimming/AOT warnings, and they are errors.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <PublishAot>true</PublishAot>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <!-- reflection-based JSON is disabled: every type must be in the JsonSerializerContext -->
+    <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\RestClient\RestClient.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -27,7 +27,7 @@
 // 
 // </summary>
 
-namespace RestClient
+namespace Mafesoft.RestClient
 {
     using System.Net.Http;
     using System.Threading;
@@ -37,6 +37,8 @@ namespace RestClient
     /// HTTP verbs. Every method is a shortcut of SendAsync/Send:
     /// the non generic methods return the body as string, the generic ones return T
     /// (string, byte[], Stream or a type deserialized with the configured serializer).
+    /// Prefer the async methods: the synchronous ones block the calling thread until the response is received
+    /// (sync-over-async), which wastes thread pool threads under load.
     /// </summary>
     public sealed partial class RestBuilder
     {
