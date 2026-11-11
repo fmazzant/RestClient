@@ -13,16 +13,7 @@
     <Product>RestClient</Product>
     <Title>Mafesoft.RestClient</Title>
     <Version>3.0.0</Version>
-    <Authors>Federico Mazzanti</Authors>
-    <Company />
-    <Copyright>Copyright (c) 2020-2026 Federico Mazzanti</Copyright>
-    <NeutralLanguage>en</NeutralLanguage>
     <Description>RestClient is a fluent library for .NET that helps you to consume REST services.</Description>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/fmazzant/RestClient</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/fmazzant/RestClient</PackageProjectUrl>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>rest-client, c-sharp, dotnet-standard, dotnet-core, dotnet-framework, http-client, restclient, mafesoft, xml, json, rest, fluent</PackageTags>
     <PackageReleaseNotes>
       3.0.0 (breaking changes: see README "Migrating to 3.0")
