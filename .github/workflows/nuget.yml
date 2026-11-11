@@ -9,7 +9,7 @@ name: Publish on NuGet
 #   the two projects must have the same version).
 # A tag push also creates the GitHub Release of the tag, with the notes of the matching
 # "## x.y.z" section of CHANGELOG.md (the manual run publishes only the packages).
-# Merging into master does NOT publish anything.
+# Merging into main does NOT publish anything.
 
 on:
   push:
