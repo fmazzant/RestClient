@@ -777,9 +777,14 @@ Every request creates an `Activity` named `RestClient {METHOD}` from the `Activi
 
 ```c#
 builder.Services.AddOpenTelemetry().WithTracing(tracing => tracing
+    .AddAspNetCoreInstrumentation()   // in ASP.NET Core, see below
     .AddSource(RestClientTelemetry.ActivitySourceName)
     .AddHttpClientInstrumentation());
 ```
+
+In ASP.NET Core add also `AddAspNetCoreInstrumentation()` (package `OpenTelemetry.Instrumentation.AspNetCore`):
+ASP.NET Core always creates an activity for the incoming request, and when it is not recorded the default sampler
+(parent based) drops its children, the RestClient activities included.
 
 ### OnStart
 
