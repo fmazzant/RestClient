@@ -34,6 +34,10 @@ dotnet add package Mafesoft.RestClient.Extensions.DependencyInjection
   methods to configure the connection. ([#17](https://github.com/fmazzant/RestClient/issues/17))
 - Each package shows its own short readme on nuget.org; the release notes of the packages link to this file.
   ([#19](https://github.com/fmazzant/RestClient/issues/19))
+- README rewritten: why Mafesoft.RestClient, comparison with HttpClient, RestSharp, Refit and Flurl, quick start,
+  reference grouped by topic; every snippet compiles against 3.0.0. ([#21](https://github.com/fmazzant/RestClient/issues/21))
+- New samples: console, ASP.NET Core (typed client, resilience, OpenTelemetry) and Native AOT.
+  ([#20](https://github.com/fmazzant/RestClient/issues/20))
 
 ### Added
 
@@ -56,6 +60,11 @@ dotnet add package Mafesoft.RestClient.Extensions.DependencyInjection
   ([#17](https://github.com/fmazzant/RestClient/issues/17))
 - **Breaking:** `Rest.Build(RestProperties)` and `Rest.Build(Action<RestProperties>)`.
   ([#17](https://github.com/fmazzant/RestClient/issues/17))
+
+### Fixed
+
+- The OpenTelemetry example of the README exported no RestClient activity in ASP.NET Core: it needs
+  `AddAspNetCoreInstrumentation()`. ([#37](https://github.com/fmazzant/RestClient/issues/37))
 
 ## [2.0.0] - 2026-11-04
 
