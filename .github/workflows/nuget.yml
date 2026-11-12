@@ -10,7 +10,7 @@ name: Publish on NuGet
 #   - "version" filled in (e.g. 3.0.0 or 3.1.0-beta.1): publishes both packages with that version, overriding <Version>.
 #   CLI: gh workflow run nuget.yml --ref main -f version=3.0.0
 # A tag push also creates the GitHub Release of the tag, with the notes of the matching
-# "## x.y.z" section of CHANGELOG.md (the manual run publishes only the packages and does not check CHANGELOG.md).
+# "## x.y.z" section of CHANGELOG.md, if any (the CHANGELOG never stops the publish; the manual run does not read it).
 # Merging into main does NOT publish anything.
 #
 # Authentication: NuGet Trusted Publishing (https://learn.microsoft.com/nuget/nuget-org/trusted-publishing),
@@ -98,32 +98,29 @@ jobs:
           fi
         done
 
-    # Checked before publishing, so a missing CHANGELOG section does not leave the packages without a release.
+    # Never blocks the publish: the date of the heading is not checked ("## [3.0.0] - Unreleased" is fine),
+    # and a missing or empty section only gives a warning and a release with a link to CHANGELOG.md.
     - name: Extract the release notes from CHANGELOG.md
       if: github.ref_type == 'tag'
       env:
         VERSION: ${{ steps.version.outputs.version }}
       run: |
-        # Keep a Changelog headings: "## [3.0.0] - 2026-12-01" (also accepted: "## 3.0.0").
+        # Keep a Changelog headings: "## [3.0.0] - 2026-12-01", "## [3.0.0] - Unreleased", "## 3.0.0", ...
         HEADING="$(grep -E "^## \[?${VERSION//./\\.}\]?( |$)" CHANGELOG.md | head -n 1 | tr -d '\r')"
-        if [ -z "$HEADING" ]; then
-          echo "::error::CHANGELOG.md has no '## [$VERSION]' section"
-          exit 1
+        NOTES="$RUNNER_TEMP/release-notes.md"
+        : > "$NOTES"
+        if [ -n "$HEADING" ]; then
+          # Prints the lines between the heading and the next "## " heading.
+          awk -v heading="$HEADING" '
+            { sub(/\r$/, "") }
+            $0 == heading { found = 1; next }
+            found && /^## / { exit }
+            found { print }
+          ' CHANGELOG.md > "$NOTES"
         fi
-        if echo "$HEADING" | grep -qi 'unreleased'; then
-          echo "::error::The CHANGELOG.md section of $VERSION is still 'Unreleased': set the release date ($HEADING)"
-          exit 1
-        fi
-        # Prints the lines between the heading and the next "## " heading.
-        awk -v heading="$HEADING" '
-          { sub(/\r$/, "") }
-          $0 == heading { found = 1; next }
-          found && /^## / { exit }
-          found { print }
-        ' CHANGELOG.md > "$RUNNER_TEMP/release-notes.md"
-        if ! grep -q '[^[:space:]]' "$RUNNER_TEMP/release-notes.md"; then
-          echo "::error::The CHANGELOG.md section of $VERSION is empty"
-          exit 1
+        if ! grep -q '[^[:space:]]' "$NOTES"; then
+          echo "::warning::CHANGELOG.md has no notes for $VERSION: the release links to CHANGELOG.md"
+          echo "See [CHANGELOG.md](https://github.com/$GITHUB_REPOSITORY/blob/main/CHANGELOG.md)." > "$NOTES"
         fi
 
     - name: Restore dependencies
