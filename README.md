@@ -1,8 +1,13 @@
 # RestClient
 
-[![Nuget](https://img.shields.io/nuget/v/Mafesoft.RestClient?style=flat-square)](https://www.nuget.org/packages/Mafesoft.RestClient)
-[![CI](https://github.com/fmazzant/RestClient/actions/workflows/ci.yml/badge.svg)](https://github.com/fmazzant/RestClient/actions/workflows/ci.yml)
+[![NuGet](https://img.shields.io/nuget/v/Mafesoft.RestClient?style=flat-square&label=nuget)](https://www.nuget.org/packages/Mafesoft.RestClient)
+[![Downloads](https://img.shields.io/nuget/dt/Mafesoft.RestClient?style=flat-square&label=downloads)](https://www.nuget.org/packages/Mafesoft.RestClient)
+[![Build](https://img.shields.io/github/actions/workflow/status/fmazzant/RestClient/ci.yml?branch=main&style=flat-square&label=build)](https://github.com/fmazzant/RestClient/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
+[![CodeQL](https://img.shields.io/github/actions/workflow/status/fmazzant/RestClient/codeql.yml?branch=main&style=flat-square&label=codeql)](https://github.com/fmazzant/RestClient/actions/workflows/codeql.yml)
+[![.NET](https://img.shields.io/badge/.NET-10%20%7C%208%20%7C%20Standard%202.1%20%7C%20Standard%202.0-512BD4?style=flat-square)](#packages)
+
+[![Mafe.RestClient downloads](https://img.shields.io/nuget/dt/Mafe.RestClient?style=flat-square&label=Mafe.RestClient%20downloads)](https://www.nuget.org/packages/Mafe.RestClient)
 
 **Mafesoft.RestClient** is a fluent and immutable builder over `HttpClient` to consume REST services. You configure a
 root once — URL, authentication, serialization, retry — and derive every request from it, safely, also from many
@@ -112,10 +117,12 @@ comparison is not one-sided.
 
 ## Packages
 
-| Package | Target frameworks | NuGet |
-|---|---|---|
-| [Mafesoft.RestClient](src/RestClient/README.md) | `net10.0`, `net8.0`, `netstandard2.1`, `netstandard2.0` | [![Nuget](https://img.shields.io/nuget/v/Mafesoft.RestClient?style=flat-square)](https://www.nuget.org/packages/Mafesoft.RestClient) |
-| [Mafesoft.RestClient.Extensions.DependencyInjection](src/RestClient.Extensions.DependencyInjection/README.md) | `net10.0`, `net8.0`, `netstandard2.0` | [![Nuget](https://img.shields.io/nuget/v/Mafesoft.RestClient.Extensions.DependencyInjection?style=flat-square)](https://www.nuget.org/packages/Mafesoft.RestClient.Extensions.DependencyInjection) |
+<!-- markdownlint-disable MD013 -->
+| Package | Target frameworks | NuGet | Downloads | Legacy downloads |
+|---|---|---|---|---|
+| [Mafesoft.RestClient](src/RestClient/README.md) | `net10.0`, `net8.0`, `netstandard2.1`, `netstandard2.0` | [![NuGet](https://img.shields.io/nuget/v/Mafesoft.RestClient?style=flat-square&label=nuget)](https://www.nuget.org/packages/Mafesoft.RestClient) | [![Downloads](https://img.shields.io/nuget/dt/Mafesoft.RestClient?style=flat-square&label=downloads)](https://www.nuget.org/packages/Mafesoft.RestClient) | [![Mafe.RestClient downloads](https://img.shields.io/nuget/dt/Mafe.RestClient?style=flat-square&label=Mafe.RestClient)](https://www.nuget.org/packages/Mafe.RestClient) |
+| [Mafesoft.RestClient.Extensions.DependencyInjection](src/RestClient.Extensions.DependencyInjection/README.md) | `net10.0`, `net8.0`, `netstandard2.0` | [![NuGet](https://img.shields.io/nuget/v/Mafesoft.RestClient.Extensions.DependencyInjection?style=flat-square&label=nuget)](https://www.nuget.org/packages/Mafesoft.RestClient.Extensions.DependencyInjection) | [![Downloads](https://img.shields.io/nuget/dt/Mafesoft.RestClient.Extensions.DependencyInjection?style=flat-square&label=downloads)](https://www.nuget.org/packages/Mafesoft.RestClient.Extensions.DependencyInjection) | [![Mafe.RestClient.Extensions.DependencyInjection downloads](https://img.shields.io/nuget/dt/Mafe.RestClient.Extensions.DependencyInjection?style=flat-square&label=Mafe.RestClient.Extensions.DependencyInjection)](https://www.nuget.org/packages/Mafe.RestClient.Extensions.DependencyInjection) |
+<!-- markdownlint-enable MD013 -->
 
 ## Installation
 

@@ -1,11 +1,11 @@
-name: Publish on NuGet
+name: NuGet
 
 # Publishes Mafesoft.RestClient and Mafesoft.RestClient.Extensions.DependencyInjection:
 # - when a version tag is pushed:
 #     git tag v3.0.0 && git push origin v3.0.0
 #   the tag must match <Version> in both src/RestClient/RestClient.csproj and
 #   src/RestClient.Extensions.DependencyInjection/RestClient.Extensions.DependencyInjection.csproj;
-# - manually, from GitHub: Actions > Publish on NuGet > Run workflow, on a branch (not on a tag):
+# - manually, from GitHub: Actions > NuGet > Run workflow, on a branch (not on a tag):
 #   - "version" empty: publishes the <Version> of the selected branch (the two projects must have the same version);
 #   - "version" filled in (e.g. 3.0.0 or 3.1.0-beta.1): publishes both packages with that version, overriding <Version>.
 #   CLI: gh workflow run nuget.yml --ref main -f version=3.0.0
