@@ -73,12 +73,12 @@ error handling, progress bars, logging. Mafesoft.RestClient puts that code in on
 | Typed client from an interface | to evaluate ([#32](https://github.com/fmazzant/RestClient/issues/32)) | ❌ | ❌ | ✅ | ❌ |
 | Test helpers | planned ([#33](https://github.com/fmazzant/RestClient/issues/33)) | ❌ | ❌ | ✅ `Refit.Testing` | ✅ `HttpTest` |
 | `netstandard2.0` (.NET Framework 4.6.2+, Xamarin, Unity) | ✅ | ✅ | ✅ | ⚠️ `net462`+ and `net8.0`+ only | ✅ |
-| URL templates / path parameters (`users/{id}`) | ⚠️ path segments with `Command`, no templates | ❌ | ✅ `AddUrlSegment` | ✅ route attributes | ⚠️ `AppendPathSegment`, no templates |
-| OAuth1 / OAuth2 flows | ❌ bearer/basic header and refresh token only | ❌ | ✅ authenticators | ❌ | ❌ |
-| Cookies | ⚠️ only with your own `HttpClient` (`UseHttpClient`) | ✅ `CookieContainer` | ✅ `CookieContainer` | ⚠️ via the handler | ✅ `CookieJar` |
-| Proxy | ⚠️ only with your own `HttpClient` (`UseHttpClient`) | ✅ handler `Proxy` | ✅ `RestClientOptions.Proxy` | ⚠️ via the handler | ⚠️ via the handler |
-| Newtonsoft.Json ready to use | ⚠️ write a custom serializer | ⚠️ extra package | ✅ `RestSharp.Serializers.NewtonsoftJson` | ✅ `Refit.Newtonsoft.Json` | ✅ `Flurl.Http.Newtonsoft` |
-| Streaming a JSON array as `IAsyncEnumerable<T>` | ❌ | ✅ `GetFromJsonAsAsyncEnumerable` | ❔ | ❔ | ❔ |
+| URL templates / path parameters (`users/{id}`) | ⚠️ path segments with `Command`; templates planned ([#31](https://github.com/fmazzant/RestClient/issues/31)) | ❌ | ✅ `AddUrlSegment` | ✅ route attributes | ⚠️ `AppendPathSegment`, no templates |
+| OAuth1 / OAuth2 flows | ❌ bearer/basic header and refresh token only; client credentials planned ([#60](https://github.com/fmazzant/RestClient/issues/60)) | ❌ | ✅ authenticators | ❌ | ❌ |
+| Cookies | ⚠️ only with your own `HttpClient` (`UseHttpClient`); planned ([#59](https://github.com/fmazzant/RestClient/issues/59)) | ✅ `CookieContainer` | ✅ `CookieContainer` | ⚠️ via the handler | ✅ `CookieJar` |
+| Proxy | ⚠️ only with your own `HttpClient` (`UseHttpClient`); planned ([#58](https://github.com/fmazzant/RestClient/issues/58)) | ✅ handler `Proxy` | ✅ `RestClientOptions.Proxy` | ⚠️ via the handler | ⚠️ via the handler |
+| Newtonsoft.Json ready to use | ⚠️ write a custom serializer; package planned ([#53](https://github.com/fmazzant/RestClient/issues/53)) | ⚠️ extra package | ✅ `RestSharp.Serializers.NewtonsoftJson` | ✅ `Refit.Newtonsoft.Json` | ✅ `Flurl.Http.Newtonsoft` |
+| Streaming a JSON array as `IAsyncEnumerable<T>` | ❌ planned ([#30](https://github.com/fmazzant/RestClient/issues/30)) | ✅ `GetFromJsonAsAsyncEnumerable` | ❔ | ❔ | ❔ |
 | Community, documentation, Q&A | ❌ small | ✅ part of .NET | ✅ large | ✅ large | ✅ large |
 
 ✅ built in, ⚠️ partial or extra work, ❌ not available, ❔ not verified. Checked in November 2026 against .NET 10, RestSharp 114.1.0,
