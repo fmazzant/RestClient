@@ -69,6 +69,6 @@ README.
    the workflow does not check it.
 3. Move the content of `PublicAPI.Unshipped.txt` to `PublicAPI.Shipped.txt`.
 4. Merge into `main`, then push the tag: `git tag v3.0.0 && git push origin v3.0.0`.
-   The *Publish on NuGet* workflow checks the versions, runs the tests, publishes the packages and creates the
+   The *NuGet* workflow checks the versions, runs the tests, publishes the packages and creates the
    GitHub Release with the notes of the CHANGELOG section (a missing section does not stop the publish).
 5. Set `PackageValidationBaselineVersion` to the released version and delete the `CompatibilitySuppressions.xml` files.

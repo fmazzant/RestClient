@@ -1,5 +1,12 @@
 # Mafesoft.RestClient.Extensions.DependencyInjection
 
+[![NuGet](https://img.shields.io/nuget/v/Mafesoft.RestClient.Extensions.DependencyInjection?style=flat-square&label=nuget)](https://www.nuget.org/packages/Mafesoft.RestClient.Extensions.DependencyInjection)
+[![Downloads](https://img.shields.io/nuget/dt/Mafesoft.RestClient.Extensions.DependencyInjection?style=flat-square&label=downloads)](https://www.nuget.org/packages/Mafesoft.RestClient.Extensions.DependencyInjection)
+[![Build](https://img.shields.io/github/actions/workflow/status/fmazzant/RestClient/ci.yml?branch=main&style=flat-square&label=build)](https://github.com/fmazzant/RestClient/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](https://github.com/fmazzant/RestClient/blob/main/LICENSE)
+
+[![Mafe.RestClient.Extensions.DependencyInjection downloads](https://img.shields.io/nuget/dt/Mafe.RestClient.Extensions.DependencyInjection?style=flat-square&label=Mafe.RestClient.Extensions.DependencyInjection%20downloads)](https://www.nuget.org/packages/Mafe.RestClient.Extensions.DependencyInjection)
+
 Registers the [Mafesoft.RestClient](https://www.nuget.org/packages/Mafesoft.RestClient) builders in the dependency
 injection container, on top of `IHttpClientFactory`: pooled handlers, delegating handlers and resilience
 (`AddStandardResilienceHandler()`) work as with any other `HttpClient`.
