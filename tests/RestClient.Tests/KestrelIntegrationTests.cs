@@ -5,6 +5,7 @@ namespace Mafesoft.RestClient.Tests
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Server.Kestrel.Core;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Http.Features;
     using Microsoft.Extensions.Logging;
     using System.IO.Compression;
     using System.Net;
@@ -43,6 +44,9 @@ namespace Mafesoft.RestClient.Tests
             app.MapGet("/connection", (HttpContext context) => context.Connection.Id);
 
             app.MapGet("/protocol", (HttpContext context) => context.Request.Protocol);
+
+            // the request target as sent by the client, before any decoding
+            app.MapGet("/route/{**rest}", (HttpContext context) => context.Features.Get<IHttpRequestFeature>().RawTarget);
 
             // the server acts as an HTTP proxy: the requests sent through it have the absolute URI of the target
             app.MapGet("/proxied", (HttpContext context) => context.Request.Host.Value);
@@ -237,6 +241,18 @@ namespace Mafesoft.RestClient.Tests
             Assert.Equal(HttpStatusCode.OK, proxied.StatusCode);
             Assert.Equal("restclient-proxy-test.invalid", proxied.Content);
             Assert.IsType<HttpRequestException>(direct.Exception);
+        }
+
+        [Fact]
+        public async Task Route_values_reach_the_server_url_encoded()
+        {
+            RestResult<string> result = await Rest.Build().Url(httpUrl + "/route/{folder}/{name}")
+                .Route("folder", "a/b")
+                .Route("name", "città 100%")
+                .Parameter("q", 1)
+                .GetAsync();
+
+            Assert.Equal("/route/a%2Fb/citt%C3%A0%20100%25?q=1", result.Content);
         }
 
         [Fact]

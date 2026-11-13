@@ -3,3 +3,4 @@ Mafesoft.RestClient.RestBuilder.HttpVersion(System.Version? version) -> Mafesoft
 Mafesoft.RestClient.RestBuilder.Proxy(System.Net.IWebProxy? proxy) -> Mafesoft.RestClient.RestBuilder!
 Mafesoft.RestClient.RestBuilder.SystemProxy() -> Mafesoft.RestClient.RestBuilder!
 Mafesoft.RestClient.RestBuilder.Cookies(System.Net.CookieContainer? container) -> Mafesoft.RestClient.RestBuilder!
+Mafesoft.RestClient.RestBuilder.Route(string! name, object? value) -> Mafesoft.RestClient.RestBuilder!

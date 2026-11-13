@@ -681,7 +681,7 @@ namespace Mafesoft.RestClient
         }
 
         /// <summary>
-        /// Builds the final url: endpoint + commands + url-encoded query string
+        /// Builds the final url: endpoint + commands (with the route values) + url-encoded query string
         /// </summary>
         private string BuildFinalUrl()
         {
@@ -704,9 +704,13 @@ namespace Mafesoft.RestClient
                 }
             }
 
+            // the {name} placeholders of the endpoint and of the commands (not of the query string parameters)
+            string expanded = UriTemplate.Expand(urlBuilder.ToString(), routeValues);
+            urlBuilder.Clear().Append(expanded);
+
             if (parameters.Count > 0)
             {
-                urlBuilder.Append(urlBuilder.ToString().IndexOf('?') >= 0 ? "&" : "?");
+                urlBuilder.Append(expanded.IndexOf('?') >= 0 ? "&" : "?");
                 urlBuilder.Append(string.Join("&", parameters.Select(q => $"{Uri.EscapeDataString(q.Key)}={Uri.EscapeDataString(q.Value)}")));
             }
 

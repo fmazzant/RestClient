@@ -447,6 +447,161 @@ namespace Mafesoft.RestClient.Tests
         }
 #endif
 
+        [Fact]
+        public async Task Route_values_are_url_encoded()
+        {
+            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
+            var file = Rest.Build(handler.CreateClient()).Url("https://api.example.com/v1/files/{name}");
+
+            await file.Route("name", "a b/c?d#e&f=g").GetAsync();
+            await file.Route("name", "città €").GetAsync();
+            await file.Route("name", "!*'();:@+$,%[]").GetAsync();
+            await file.Route("name", "{id}").GetAsync();   // a value is never expanded again
+
+            Assert.Equal("https://api.example.com/v1/files/a%20b%2Fc%3Fd%23e%26f%3Dg", handler.Requests[0].RequestUri.AbsoluteUri);
+            Assert.Equal("https://api.example.com/v1/files/citt%C3%A0%20%E2%82%AC", handler.Requests[1].RequestUri.AbsoluteUri);
+            Assert.Equal("https://api.example.com/v1/files/%21%2A%27%28%29%3B%3A%40%2B%24%2C%25%5B%5D", handler.Requests[2].RequestUri.OriginalString);
+            Assert.Equal("https://api.example.com/v1/files/%7Bid%7D", handler.Requests[3].RequestUri.AbsoluteUri);
+        }
+
+        [Fact]
+        public async Task Route_values_are_culture_invariant()
+        {
+            var previous = CultureInfo.CurrentCulture;
+            CultureInfo.CurrentCulture = new CultureInfo("it-IT");
+            try
+            {
+                var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
+                await Rest.Build(handler.CreateClient())
+                    .Url("https://api.example.com/{price}/{count}/{date}/{active}/{id}")
+                    .Route("price", 1234.5m)
+                    .Route("count", 1000000)
+                    .Route("date", new DateTime(2026, 11, 13, 10, 30, 0, DateTimeKind.Utc))
+                    .Route("active", true)
+                    .Route("id", new Guid("d3b07384-d9a0-4c9f-8b1e-2f5c6a7b8c9d"))
+                    .GetAsync();
+
+                Assert.Equal(
+                    "https://api.example.com/1234.5/1000000/2026-11-13T10%3A30%3A00.0000000Z/true/d3b07384-d9a0-4c9f-8b1e-2f5c6a7b8c9d",
+                    handler.Requests[0].RequestUri.OriginalString);
+            }
+            finally
+            {
+                CultureInfo.CurrentCulture = previous;
+            }
+        }
+
+        [Fact]
+        public async Task Route_placeholders_in_url_and_commands()
+        {
+            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
+            var orders = Rest.Build(handler.CreateClient())
+                .Url("https://api.example.com/tenants/{tenant}/")
+                .Command("users/{id}")
+                .Command("orders")
+                .Command("{orderId}")
+                .Route("tenant", "acme")
+                .Route("id", 42);
+
+            await orders.Route("orderId", "A/1").Parameter("q", "{id}").GetAsync();
+
+            Assert.Equal("https://api.example.com/tenants/acme/users/42/orders/A%2F1?q=%7Bid%7D", handler.Requests[0].RequestUri.OriginalString);
+        }
+
+        [Fact]
+        public async Task Route_repeated_placeholder_gets_the_same_value()
+        {
+            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
+
+            await Rest.Build(handler.CreateClient())
+                .Url("https://api.example.com/{id}/copy/{id}?source={id}")
+                .Route("id", "a b")
+                .Parameter("x", 1)
+                .GetAsync();
+
+            Assert.Equal("https://api.example.com/a%20b/copy/a%20b?source=a%20b&x=1", handler.Requests[0].RequestUri.OriginalString);
+        }
+
+        [Fact]
+        public async Task Route_missing_value_is_reported_before_sending()
+        {
+            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
+            Exception onException = null;
+            var api = Rest.Build(handler.CreateClient()).Url("https://api.example.com/users/{id}/orders/{orderId}").Route("id", 1);
+
+            RestResult<string> missing = await api.OnException(e => onException = e).GetAsync();
+            RestResult<string> removed = await api.Route("orderId", 2).Route("orderId", null).GetAsync();
+            RestResult<string> caseSensitive = await api.Route("OrderId", 2).GetAsync();
+
+            Assert.IsType<InvalidOperationException>(missing.Exception);
+            Assert.Contains("{orderId}", missing.Exception.Message);
+            Assert.Same(missing.Exception, onException);
+            Assert.IsType<InvalidOperationException>(removed.Exception);
+            Assert.IsType<InvalidOperationException>(caseSensitive.Exception);
+            Assert.Empty(handler.Requests);
+        }
+
+        [Fact]
+        public async Task Route_escaped_braces_and_unused_values()
+        {
+            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
+            var api = Rest.Build(handler.CreateClient()).Url("https://api.example.com/").Route("unused", 1);
+
+            await api.Command("users").GetAsync();
+            await api.Command("{{literal}}").GetAsync();
+            RestResult<string> unclosed = await api.Command("{id").GetAsync();
+            RestResult<string> empty = await api.Command("{}").GetAsync();
+
+            Assert.Equal("https://api.example.com/users", handler.Requests[0].RequestUri.OriginalString);
+            Assert.Equal("https://api.example.com/{literal}", handler.Requests[1].RequestUri.OriginalString);
+            Assert.IsType<InvalidOperationException>(unclosed.Exception);
+            Assert.IsType<InvalidOperationException>(empty.Exception);
+            Assert.Equal(2, handler.Requests.Count);
+        }
+
+        [Fact]
+        public async Task Route_values_belong_to_the_derived_builders()
+        {
+            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
+            var user = Rest.Build(handler.CreateClient()).Url("https://api.example.com/users/{id}");
+            var first = user.Route("id", 1);
+            var second = first.Route("id", 2);
+
+            await first.GetAsync();
+            await second.GetAsync();
+            await first.GetAsync();
+            await Task.WhenAll(Enumerable.Range(10, 5).Select(i => user.Route("id", i).GetAsync()));
+
+            Assert.Equal("https://api.example.com/users/1", handler.Requests[0].RequestUri.OriginalString);
+            Assert.Equal("https://api.example.com/users/2", handler.Requests[1].RequestUri.OriginalString);
+            Assert.Equal("https://api.example.com/users/1", handler.Requests[2].RequestUri.OriginalString);
+            Assert.Equal(
+                Enumerable.Range(10, 5).Select(i => $"https://api.example.com/users/{i}").OrderBy(u => u),
+                handler.Requests.Skip(3).Select(r => r.RequestUri.OriginalString).OrderBy(u => u));
+        }
+
+        [Fact]
+        public void Route_rejects_invalid_arguments()
+        {
+            var root = Rest.Build().Url("https://api.example.com/{id}");
+
+            Assert.Throws<ArgumentNullException>(() => root.Route(null, 1));
+            Assert.Throws<ArgumentException>(() => root.Route("", 1));
+            Assert.Throws<ArgumentException>(() => root.Route("{id}", 1));
+            Assert.Throws<ArgumentException>(() => root.Route("id", new[] { 1, 2 }));
+        }
+
+        [Fact]
+        public async Task Route_expanded_url_is_reported_to_OnStart()
+        {
+            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
+            string url = null;
+
+            await Rest.Build(handler.CreateClient()).Url("https://api.example.com/users/{id}").Route("id", 7).OnStart(e => url = e.Url).GetAsync();
+
+            Assert.Equal("https://api.example.com/users/7", url);
+        }
+
         /// <summary>
         /// A proxy that records the requests and points to a closed port (the requests fail)
         /// </summary>

@@ -78,7 +78,7 @@ error handling, progress bars, logging. Mafesoft.RestClient puts that code in on
 | Typed client from an interface | ❌ | ❌ | ❌ | ✅ | ❌ |
 | Test helpers | ⚠️ write a fake `HttpMessageHandler` | ❌ | ❌ | ✅ `Refit.Testing` | ✅ `HttpTest` |
 | `netstandard2.0` (.NET Framework 4.6.2+, Xamarin, Unity) | ✅ | ✅ | ✅ | ⚠️ `net462`+ and `net8.0`+ only | ✅ |
-| URL templates / path parameters (`users/{id}`) | ⚠️ path segments with `Command`; templates planned ([#31](https://github.com/fmazzant/RestClient/issues/31)) | ❌ | ✅ `AddUrlSegment` | ✅ route attributes | ⚠️ `AppendPathSegment`, no templates |
+| URL templates / path parameters (`users/{id}`) | ✅ `Route` (url-encoded, invariant culture) | ❌ | ✅ `AddUrlSegment` | ✅ route attributes | ⚠️ `AppendPathSegment`, no templates |
 | OAuth1 / OAuth2 flows | ❌ bearer/basic header and refresh token only | ❌ | ✅ authenticators | ❌ | ❌ |
 | Cookies | ✅ `Cookies(CookieContainer)` | ✅ `CookieContainer` | ✅ `CookieContainer` | ⚠️ via the handler | ✅ `CookieJar` |
 | Proxy | ✅ `Proxy` / `SystemProxy` | ✅ handler `Proxy` | ✅ `RestClientOptions.Proxy` | ⚠️ via the handler | ⚠️ via the handler |
@@ -108,6 +108,7 @@ comparison is not one-sided.
 - Results as `string`, `byte[]`, `Stream` (not buffered) or a DTO
 - JSON with System.Text.Json (source generated `JsonSerializerContext` for Native AOT), XML, custom serializers
 - `multipart/form-data`, form-url-encoded, upload and download progress
+- URL templates (`users/{id}`) with url-encoded, culture invariant route values
 - Query string with url-encoding, invariant culture and repeated keys
 - Bearer/basic authentication, refresh token, `NetworkCredential`, per-builder certificate validation
 - Retry with backoff and `Retry-After`, timeout per attempt, cancellation
@@ -182,7 +183,8 @@ RestResult<User> user2 = await users.Command(2).GetAsync<User>();   // https://a
 RestResult<List<User>> all = await users.GetAsync<List<User>>();    // https://api.example.com/users
 ```
 
-`Command(...)` appends a path segment (`string`, `int`, `long` or `Guid`).
+`Command(...)` appends a path segment (`string`, `int`, `long` or `Guid`); for path parameters see
+[URL templates](#url-templates).
 `RestBuilder.Properties` returns the connection properties as a read-only `RestProperties`
 (`EndPoint`, `Timeout`, `BufferSize`, `CertificateOption`).
 
@@ -218,6 +220,31 @@ await file.Content!.CopyToAsync(destination);
 ```
 
 An empty body (for example `204 No Content`) is a `null` content.
+
+### URL templates
+
+Write the path parameters as `{name}` placeholders and set their values with `Route`:
+
+```c#
+RestBuilder orders = Rest.Build().Url("https://api.example.com/users/{id}/orders/{orderId}");
+
+RestResult<Order> order = await orders
+    .Route("id", 42)
+    .Route("orderId", "A/1")
+    .GetAsync<Order>();   // https://api.example.com/users/42/orders/A%2F1
+```
+
+- The values are formatted with the invariant culture and url-encoded like the [query string](#query-string), as a
+  single segment: `/`, `?`, `#`, spaces and non-ASCII characters are percent-encoded. Do not encode them yourself.
+- The placeholders can be in `Url(...)` (path and query) and in `Command(...)`:
+  `api.Command("users/{id}").Route("id", 42)`. They are not supported in the scheme, host and port.
+  The query string parameters (`Parameter`) are never expanded.
+- A placeholder used more than once gets the same value everywhere. The names are case-sensitive.
+- When a placeholder has no value the request is not sent: the result reports an `InvalidOperationException`
+  (as for a missing `Url`). `Route(name, null)` removes a value set before.
+- A value without a placeholder is ignored, so a shared root can set a value (for example `{tenant}`) used only by
+  some requests. Setting a value again replaces it; like every builder method it only affects the derived builders.
+- `{{` and `}}` are literal braces; any other `{` must open a `{name}` placeholder.
 
 ### Query string
 
