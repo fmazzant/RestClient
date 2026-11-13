@@ -26,6 +26,7 @@
     <!-- Package validation: checks that the API is consistent across the target frameworks and compares
          the package with the last released version (baseline), downloaded from NuGet.org.
          The public API of the last release is frozen in PublicAPI.Shipped.txt; new or removed members go in PublicAPI.Unshipped.txt.
+         Members that exist only on .NET (net8.0+) are tracked in PublicAPI/net/ (see RestClient.csproj).
          Intentional breaking changes against the baseline are recorded in CompatibilitySuppressions.xml
          (next to the .csproj), regenerated with:
            dotnet pack -c Release src/RestClient.sln -p:ApiCompatGenerateSuppressionFile=true

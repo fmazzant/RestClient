@@ -301,6 +301,17 @@ namespace Mafesoft.RestClient
             HttpRequestMessage request = new HttpRequestMessage(method, url);
             try
             {
+                if (httpVersion != null)
+                {
+                    request.Version = httpVersion;
+                }
+#if NET
+                if (httpVersionPolicy != null)
+                {
+                    request.VersionPolicy = httpVersionPolicy.Value;
+                }
+#endif
+
                 if (onAuthentication != null)
                 {
                     request.Headers.Authorization = onAuthentication();

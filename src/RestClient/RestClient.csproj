@@ -30,6 +30,12 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.14" />
   </ItemGroup>
 
+  <!-- Public API available only on .NET (net8.0+), e.g. HttpVersionPolicy -->
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+    <AdditionalFiles Include="PublicAPI\net\PublicAPI.Shipped.txt" />
+    <AdditionalFiles Include="PublicAPI\net\PublicAPI.Unshipped.txt" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
     <PackageReference Include="System.Text.Json" Version="10.0.14" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="10.0.14" />

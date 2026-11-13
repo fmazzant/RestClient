@@ -410,6 +410,43 @@ namespace Mafesoft.RestClient.Tests
             Assert.IsType<InvalidOperationException>(result.Exception);
         }
 
+        [Fact]
+        public async Task HttpVersion_is_set_on_the_request()
+        {
+            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
+            var root = Root(handler);
+            var http2 = root.HttpVersion(new Version(2, 0));
+
+            await http2.GetAsync();
+            await root.GetAsync();
+            await http2.HttpVersion(null).GetAsync();
+
+            Assert.Equal(new Version(2, 0), handler.Requests[0].Version);
+            Assert.Equal(HttpVersion.Version11, handler.Requests[1].Version);
+            Assert.Equal(HttpVersion.Version11, handler.Requests[2].Version);
+#if NET
+            Assert.Equal(HttpVersionPolicy.RequestVersionOrLower, handler.Requests[0].VersionPolicy);
+#endif
+        }
+
+#if NET
+        [Fact]
+        public async Task HttpVersion_with_policy_is_set_on_the_request()
+        {
+            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
+            var http3 = Root(handler).HttpVersion(HttpVersion.Version30, HttpVersionPolicy.RequestVersionOrHigher);
+
+            await http3.GetAsync();
+            await http3.HttpVersion(HttpVersion.Version20).GetAsync();
+
+            Assert.Equal(HttpVersion.Version30, handler.Requests[0].Version);
+            Assert.Equal(HttpVersionPolicy.RequestVersionOrHigher, handler.Requests[0].VersionPolicy);
+            Assert.Equal(HttpVersion.Version20, handler.Requests[1].Version);
+            Assert.Equal(HttpVersionPolicy.RequestVersionOrLower, handler.Requests[1].VersionPolicy);
+            Assert.Throws<ArgumentNullException>(() => Root(handler).HttpVersion(null, HttpVersionPolicy.RequestVersionExact));
+        }
+#endif
+
         /// <summary>
         /// Returns the first chunk, then waits for the release before returning the second one
         /// </summary>

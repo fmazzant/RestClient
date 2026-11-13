@@ -83,6 +83,10 @@ namespace Mafesoft.RestClient
         private bool isEnabledFormUrlEncoded;
         private Dictionary<string, string>? formUrlEncodedKeyValues;
         private MultipartFormData? multipartFormData;
+        private Version? httpVersion;
+#if NET
+        private HttpVersionPolicy? httpVersionPolicy;
+#endif
 
         private Action<HttpClient>? onConfigureHttpClientAction;
         private Action<StartEventArgs>? onStartAction;
@@ -142,6 +146,50 @@ namespace Mafesoft.RestClient
         /// <returns></returns>
         public RestBuilder UseHttpClient(HttpClient? httpClient)
             => With(r => r.externalHttpClient = httpClient);
+
+        #endregion
+
+        #region [ HTTP Version ]
+
+        /// <summary>
+        /// Sets the HTTP version of the requests (for example System.Net.HttpVersion.Version20).
+        /// The version is set on every request, so it is applied also to an external HttpClient (see UseHttpClient).
+        /// On .NET the default version policy (RequestVersionOrLower) is used: over https the version is negotiated
+        /// with the server (ALPN), over http HTTP/1.1 is used. RestResult.Version reports the negotiated version.
+        /// On .NET Framework only HTTP/1.0 and HTTP/1.1 are supported.
+        /// </summary>
+        /// <param name="version">The HTTP version, null to go back to the default (HTTP/1.1)</param>
+        /// <returns></returns>
+        public RestBuilder HttpVersion(Version? version)
+            => With(r =>
+            {
+                r.httpVersion = version;
+#if NET
+                r.httpVersionPolicy = null;
+#endif
+            });
+
+#if NET
+        /// <summary>
+        /// Sets the HTTP version of the requests and how it is negotiated with the server,
+        /// for example HttpVersion(System.Net.HttpVersion.Version30, HttpVersionPolicy.RequestVersionOrLower).
+        /// The version is set on every request, so it is applied also to an external HttpClient (see UseHttpClient).
+        /// RequestVersionExact or RequestVersionOrHigher with HTTP/2 over http uses HTTP/2 without TLS (prior knowledge, h2c).
+        /// RestResult.Version reports the negotiated version. Available on .NET 8+ only.
+        /// </summary>
+        /// <param name="version">The HTTP version</param>
+        /// <param name="policy">The version policy</param>
+        /// <returns></returns>
+        public RestBuilder HttpVersion(Version version, HttpVersionPolicy policy)
+        {
+            if (version == null) { throw new ArgumentNullException(nameof(version)); }
+            return With(r =>
+            {
+                r.httpVersion = version;
+                r.httpVersionPolicy = policy;
+            });
+        }
+#endif
 
         #endregion
 
