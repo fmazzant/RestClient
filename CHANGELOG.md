@@ -39,6 +39,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   token) with the cancellation token of the attempt; an exception thrown by it is reported by the result. With
   Dependency Injection, use the `AddRestClient` overloads that receive the `IServiceProvider`. The existing
   `Authentication` overloads are unchanged. ([#27](https://github.com/fmazzant/RestClient/issues/27))
+- Problem Details (RFC 9457): `RestResult.Problem` reads the `application/problem+json` body of an error response as a
+  `RestProblemDetails` (type, title, status, detail, instance, validation `Errors` and `Extensions` as `JsonElement`),
+  without reflection and without ASP.NET Core; it is `null` for a success response, another content type or a body that
+  is not a JSON object. `RestResult.ErrorAs<T>()` reads the error body as `string`, `byte[]`, `Stream` or any type
+  deserialized with the configured serializer (use a `JsonSerializerContext` for Native AOT). The error body is read
+  once and only when they are used; success responses are not affected. For a `Stream` result the error body is read
+  from `Content` on first use and `Content` is replaced with a stream over the same bytes.
+  ([#26](https://github.com/fmazzant/RestClient/issues/26))
 
 ## [3.0.0] - 2026-11-11
 

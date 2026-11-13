@@ -112,6 +112,20 @@ namespace Mafesoft.RestClient.Tests
                 }
             });
 
+            // Problem Details (RFC 9457) as written by ASP.NET Core
+            app.MapGet("/problem", () => Results.Problem(
+                detail: "Your current balance is 30, but that costs 50.",
+                instance: "/account/12345",
+                statusCode: 403,
+                title: "You do not have enough credit.",
+                type: "https://example.com/probs/out-of-credit",
+                extensions: new Dictionary<string, object> { ["balance"] = 30 }));
+            app.MapPost("/validation-problem", () => Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                ["Name"] = new[] { "The Name field is required." },
+                ["Age"] = new[] { "Too young.", "Not a number." },
+            }));
+
             await app.StartAsync();
 
             var addresses = app.Urls.ToList();
@@ -362,6 +376,48 @@ namespace Mafesoft.RestClient.Tests
             Assert.Equal(1, calls);
         }
 
+        [Fact]
+        public async Task Problem_details_of_results_problem()
+        {
+            RestResult<User> result = await Rest.Build().Url(httpUrl).Command("problem").GetAsync<User>();
+
+            Assert.Equal(HttpStatusCode.Forbidden, result.StatusCode);
+            RestProblemDetails problem = result.Problem;
+            Assert.NotNull(problem);
+            Assert.Equal("https://example.com/probs/out-of-credit", problem.Type);
+            Assert.Equal("You do not have enough credit.", problem.Title);
+            Assert.Equal(403, problem.Status);
+            Assert.Equal("Your current balance is 30, but that costs 50.", problem.Detail);
+            Assert.Equal("/account/12345", problem.Instance);
+            Assert.Equal(30, problem.Extensions["balance"].GetInt32());
+            Assert.Empty(problem.Errors);
+        }
+
+        [Fact]
+        public async Task Problem_details_of_results_validation_problem()
+        {
+            RestResult<string> result = await Rest.Build().Url(httpUrl).Command("validation-problem").Payload(new User { Id = 1 }).PostAsync();
+
+            Assert.Equal(HttpStatusCode.BadRequest, result.StatusCode);
+            RestProblemDetails problem = result.Problem;
+            Assert.Equal(400, problem.Status);
+            Assert.Equal("One or more validation errors occurred.", problem.Title);
+            Assert.Equal(new[] { "The Name field is required." }, problem.Errors["Name"]);
+            Assert.Equal(new[] { "Too young.", "Not a number." }, problem.Errors["Age"]);
+            Assert.Equal(result.Content, result.ErrorAs<string>());
+        }
+
+        [Fact]
+        public async Task Problem_details_of_a_stream_result()
+        {
+            using RestResult<Stream> result = await Rest.Build().Url(httpUrl).Command("problem").GetAsync<Stream>();
+
+            Assert.Equal(403, result.Problem.Status);
+            Assert.Equal("You do not have enough credit.", result.Problem.Title);
+            Assert.NotNull(result.ErrorAs<ApiError>());
+            using var reader = new StreamReader(result.Content);
+            Assert.Equal(result.ErrorAs<string>(), await reader.ReadToEndAsync());
+        }
         private static int GetFreePort()
         {
             var listener = new System.Net.Sockets.TcpListener(IPAddress.Loopback, 0);

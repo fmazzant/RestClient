@@ -74,7 +74,7 @@ error handling, progress bars, logging. Mafesoft.RestClient puts that code in on
 | Native AOT / trimming | ✅ (verified in CI) | ✅ | ⚠️ not annotated | ✅ generated clients | ⚠️ not annotated |
 | `IHttpClientFactory` integration | ✅ | ✅ | ✅ DI package | ✅ | ⚠️ manual |
 | `ILogger` / OpenTelemetry of its own | ✅ | ✅ built-in spans and metrics | ❌ | ❌ | ❌ |
-| Problem Details (RFC 9457) | planned ([#26](https://github.com/fmazzant/RestClient/issues/26)) | ⚠️ manual | ❌ | ✅ `ValidationApiException` | ❌ |
+| Problem Details (RFC 9457) | ✅ `result.Problem`, `ErrorAs<T>()` | ⚠️ manual | ❌ | ✅ `ValidationApiException` | ❌ |
 | Typed client from an interface | ❌ | ❌ | ❌ | ✅ | ❌ |
 | Test helpers | ⚠️ write a fake `HttpMessageHandler` | ❌ | ❌ | ✅ `Refit.Testing` | ✅ `HttpTest` |
 | `netstandard2.0` (.NET Framework 4.6.2+, Xamarin, Unity) | ✅ | ✅ | ✅ | ⚠️ `net462`+ and `net8.0`+ only | ✅ |
@@ -112,6 +112,7 @@ comparison is not one-sided.
 - Query string with url-encoding, invariant culture and repeated keys
 - Bearer/basic authentication, asynchronous token provider (`BearerToken(async ct => ...)`), refresh token, `NetworkCredential`, per-builder certificate validation
 - Retry with backoff and `Retry-After`, timeout per attempt, cancellation
+- Problem Details (RFC 9457) and typed error bodies (`result.Problem`, `result.ErrorAs<T>()`)
 - Pooled handlers, or your own `HttpClient` / `IHttpClientFactory`
 - HTTP/2 and HTTP/3 (`HttpVersion`, with `HttpVersionPolicy` on .NET 8+)
 - Proxy (`WebProxy`, system proxy or no proxy)
@@ -680,6 +681,48 @@ else                                     // no response: network error, timeout,
 // or, if you prefer exceptions: HttpRequestException when the request did not succeed
 result.EnsureSuccessStatusCode();
 ```
+
+### Problem Details and error bodies
+
+Most APIs (ASP.NET Core included) describe their errors with **Problem Details** (RFC 9457,
+`application/problem+json`). `result.Problem` reads it from the body of an error response, and `result.ErrorAs<T>()`
+reads the error body as any other type, for example the error DTO of your API:
+
+```c#
+RestResult<User> result = await api.Command("users").Payload(user).PostAsync<User>();
+
+if (!result.IsSuccessStatusCode)
+{
+    RestProblemDetails? problem = result.Problem;     // null if the content type is not application/problem+json
+    if (problem != null)
+    {
+        Console.WriteLine($"{problem.Status} {problem.Title}: {problem.Detail}");
+
+        foreach (var field in problem.Errors)         // validation errors (ASP.NET Core ValidationProblem)
+        {
+            Console.WriteLine($"{field.Key}: {string.Join(", ", field.Value)}");
+        }
+
+        if (problem.Extensions.TryGetValue("traceId", out JsonElement traceId))   // any other member
+        {
+            Console.WriteLine(traceId.GetString());
+        }
+    }
+
+    MyError? error = result.ErrorAs<MyError>();       // any custom error DTO, with the configured serializer
+    string? body = result.ErrorAs<string>();          // or the raw body (also byte[] and Stream)
+}
+```
+
+- `Problem` is `null` for a success response, when no response has been received, for another content type and when
+  the body is not a valid JSON object (it never throws). It is read without reflection, so it is Native AOT safe.
+- `ErrorAs<T>()` uses the serializer configured on the builder: with `Json(MyJsonContext.Default)` add `MyError` to
+  the context to be Native AOT safe. It returns `default` for a success response or a body that cannot be read.
+- The error body is read only once, and only when `Problem` or `ErrorAs` are used: the success responses are not
+  affected. For a `Stream` result the error body is read from `Content` on first use, and `Content` is then replaced
+  with a stream over the same bytes: use `Problem`/`ErrorAs` before reading `Content`.
+- The type is called `RestProblemDetails`, not `ProblemDetails`, so that it does not clash with
+  `Microsoft.AspNetCore.Mvc.ProblemDetails` in the files that import both namespaces.
 
 ## Diagnostics
 

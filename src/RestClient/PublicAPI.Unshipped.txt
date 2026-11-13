@@ -6,3 +6,20 @@ Mafesoft.RestClient.RestBuilder.Cookies(System.Net.CookieContainer? container) -
 Mafesoft.RestClient.RestBuilder.Route(string! name, object? value) -> Mafesoft.RestClient.RestBuilder!
 Mafesoft.RestClient.RestBuilder.Authentication(System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<System.Net.Http.Headers.AuthenticationHeaderValue!>!>? authenticationProvider) -> Mafesoft.RestClient.RestBuilder!
 Mafesoft.RestClient.RestBuilder.BearerToken(System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<string!>!>? tokenProvider) -> Mafesoft.RestClient.RestBuilder!
+Mafesoft.RestClient.RestProblemDetails
+Mafesoft.RestClient.RestProblemDetails.RestProblemDetails() -> void
+Mafesoft.RestClient.RestProblemDetails.Type.get -> string?
+Mafesoft.RestClient.RestProblemDetails.Type.set -> void
+Mafesoft.RestClient.RestProblemDetails.Title.get -> string?
+Mafesoft.RestClient.RestProblemDetails.Title.set -> void
+Mafesoft.RestClient.RestProblemDetails.Status.get -> int?
+Mafesoft.RestClient.RestProblemDetails.Status.set -> void
+Mafesoft.RestClient.RestProblemDetails.Detail.get -> string?
+Mafesoft.RestClient.RestProblemDetails.Detail.set -> void
+Mafesoft.RestClient.RestProblemDetails.Instance.get -> string?
+Mafesoft.RestClient.RestProblemDetails.Instance.set -> void
+Mafesoft.RestClient.RestProblemDetails.Errors.get -> System.Collections.Generic.IDictionary<string!, string![]!>!
+Mafesoft.RestClient.RestProblemDetails.Extensions.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>!
+const Mafesoft.RestClient.RestProblemDetails.MediaType = "application/problem+json" -> string!
+Mafesoft.RestClient.RestResult.Problem.get -> Mafesoft.RestClient.RestProblemDetails?
+Mafesoft.RestClient.RestResult.ErrorAs<TError>() -> TError?

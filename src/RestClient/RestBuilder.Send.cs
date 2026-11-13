@@ -569,6 +569,11 @@ namespace Mafesoft.RestClient
                     }
                     result.Content = (T)(object)stream;
                     result.Owner = lease.Owner;
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        // the error body is read only if Problem or ErrorAs are used
+                        result.SetError(serializer, deserializeOptions, body: null);
+                    }
                     return result;
                 }
 
@@ -599,8 +604,13 @@ namespace Mafesoft.RestClient
                     return result;
                 }
 
-                await BufferContentAsync(response, cancellationToken).ConfigureAwait(false);
+                byte[] body = await BufferContentAsync(response, cancellationToken).ConfigureAwait(false);
                 lease.Owner?.Dispose();
+                if (!response.IsSuccessStatusCode)
+                {
+                    // the buffered body, read by Problem and ErrorAs without reading the content again
+                    result.SetError(serializer, deserializeOptions, body);
+                }
 
                 HttpContent content = response.Content;
                 if (onPreviewContentResponseAsStringAction != null && type != typeof(byte[]))
@@ -664,9 +674,9 @@ namespace Mafesoft.RestClient
 
         /// <summary>
         /// Reads the whole response content (raising OnDownloadProgress) and replaces it with a buffered content,
-        /// so that it can be read more than once and outlives the HttpClient.
+        /// so that it can be read more than once and outlives the HttpClient. Returns the buffered bytes.
         /// </summary>
-        private async Task BufferContentAsync(HttpResponseMessage response, CancellationToken cancellationToken)
+        private async Task<byte[]> BufferContentAsync(HttpResponseMessage response, CancellationToken cancellationToken)
         {
             HttpContent original = response.Content;
             byte[] buffer = new byte[properties.BufferSize];
@@ -680,7 +690,8 @@ namespace Mafesoft.RestClient
                     memory.Write(buffer, 0, read);
                 }
 
-                ByteArrayContent buffered = new ByteArrayContent(memory.ToArray());
+                byte[] body = memory.ToArray();
+                ByteArrayContent buffered = new ByteArrayContent(body);
                 foreach (var header in original.Headers)
                 {
                     buffered.Headers.TryAddWithoutValidation(header.Key, header.Value);
@@ -689,6 +700,7 @@ namespace Mafesoft.RestClient
 
                 original.Dispose();
                 response.Content = buffered;
+                return body;
             }
         }
 

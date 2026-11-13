@@ -60,6 +60,18 @@ Check(upload.Content?.Contains("filename=a.txt") == true, "multipart upload");
 RestResult<User> notFound = await root.Command("missing").GetAsync<User>();
 Check(notFound.StatusCode == HttpStatusCode.NotFound && !notFound.IsSuccessStatusCode, "error status");
 
+// Problem Details (RFC 9457) and a typed error body, without reflection
+RestResult<User> problem = await root.Command("problem").GetAsync<User>();
+Check(problem.Problem is { Status: 409, Title: "Conflict" } p
+    && p.Errors["Name"][0] == "Taken"
+    && p.Extensions["traceId"].GetString() == "t1", "problem details");
+Check(problem.ErrorAs<ApiError>()?.Title == "Conflict", "typed error body");
+
+using (RestResult<Stream> streamProblem = await root.Command("problem").GetAsync<Stream>())
+{
+    Check(streamProblem.Problem?.Status == 409 && streamProblem.ErrorAs<string>()?.Contains("traceId") == true, "stream problem details");
+}
+
 Console.WriteLine(failures.Count == 0 ? "All checks passed." : $"{failures.Count} check(s) failed.");
 return failures.Count == 0 ? 0 : 1;
 
@@ -69,15 +81,21 @@ public sealed class User
     public string? Name { get; set; }
 }
 
+public sealed class ApiError
+{
+    public string? Title { get; set; }
+}
+
 [JsonSerializable(typeof(User))]
 [JsonSerializable(typeof(List<User>))]
+[JsonSerializable(typeof(ApiError))]
 [JsonSourceGenerationOptions(JsonSerializerDefaults.Web)]
 public partial class AppJsonContext : JsonSerializerContext
 {
 }
 
 /// <summary>
-/// In-process server: echoes JSON bodies, fails "flaky" once, returns text and 404.
+/// In-process server: echoes JSON bodies, fails "flaky" once, returns text, a problem details and 404.
 /// </summary>
 internal sealed class EchoHandler : HttpMessageHandler
 {
@@ -103,6 +121,13 @@ internal sealed class EchoHandler : HttpMessageHandler
             "/api/flaky" => Json("[{\"id\":1,\"name\":\"a\"},{\"id\":2,\"name\":\"b\"}]"),
             "/api/text" => new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("plain text") },
             "/api/upload" => new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(body) },
+            "/api/problem" => new HttpResponseMessage(HttpStatusCode.Conflict)
+            {
+                Content = new StringContent(
+                    "{\"title\":\"Conflict\",\"status\":409,\"errors\":{\"Name\":[\"Taken\"]},\"traceId\":\"t1\"}",
+                    Encoding.UTF8,
+                    "application/problem+json"),
+            },
             _ => new HttpResponseMessage(HttpStatusCode.NotFound) { Content = new StringContent("{\"error\":\"not found\"}") },
         };
     }
