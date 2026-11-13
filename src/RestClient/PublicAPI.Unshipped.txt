@@ -1,2 +1,39 @@
 #nullable enable
 Mafesoft.RestClient.RestBuilder.HttpVersion(System.Version? version) -> Mafesoft.RestClient.RestBuilder!
+Mafesoft.RestClient.RestBuilder.Proxy(System.Net.IWebProxy? proxy) -> Mafesoft.RestClient.RestBuilder!
+Mafesoft.RestClient.RestBuilder.SystemProxy() -> Mafesoft.RestClient.RestBuilder!
+Mafesoft.RestClient.RestBuilder.Cookies(System.Net.CookieContainer? container) -> Mafesoft.RestClient.RestBuilder!
+Mafesoft.RestClient.RestBuilder.Route(string! name, object? value) -> Mafesoft.RestClient.RestBuilder!
+Mafesoft.RestClient.RestBuilder.Authentication(System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<System.Net.Http.Headers.AuthenticationHeaderValue!>!>? authenticationProvider) -> Mafesoft.RestClient.RestBuilder!
+Mafesoft.RestClient.RestBuilder.BearerToken(System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<string!>!>? tokenProvider) -> Mafesoft.RestClient.RestBuilder!
+Mafesoft.RestClient.RestProblemDetails
+Mafesoft.RestClient.RestProblemDetails.RestProblemDetails() -> void
+Mafesoft.RestClient.RestProblemDetails.Type.get -> string?
+Mafesoft.RestClient.RestProblemDetails.Type.set -> void
+Mafesoft.RestClient.RestProblemDetails.Title.get -> string?
+Mafesoft.RestClient.RestProblemDetails.Title.set -> void
+Mafesoft.RestClient.RestProblemDetails.Status.get -> int?
+Mafesoft.RestClient.RestProblemDetails.Status.set -> void
+Mafesoft.RestClient.RestProblemDetails.Detail.get -> string?
+Mafesoft.RestClient.RestProblemDetails.Detail.set -> void
+Mafesoft.RestClient.RestProblemDetails.Instance.get -> string?
+Mafesoft.RestClient.RestProblemDetails.Instance.set -> void
+Mafesoft.RestClient.RestProblemDetails.Errors.get -> System.Collections.Generic.IDictionary<string!, string![]!>!
+Mafesoft.RestClient.RestProblemDetails.Extensions.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>!
+const Mafesoft.RestClient.RestProblemDetails.MediaType = "application/problem+json" -> string!
+Mafesoft.RestClient.RestResult.Problem.get -> Mafesoft.RestClient.RestProblemDetails?
+Mafesoft.RestClient.RestResult.ErrorAs<TError>() -> TError?
+const Mafesoft.RestClient.RestClientTelemetry.MeterName = "Mafesoft.RestClient" -> string!
+Mafesoft.RestClient.RestBuilder.ClientName(string? name) -> Mafesoft.RestClient.RestBuilder!
+Mafesoft.RestClient.RestBuilder.GetAsyncEnumerable<T>(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<T>!
+Mafesoft.RestClient.RestBuilder.PostAsyncEnumerable<T>(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<T>!
+Mafesoft.RestClient.RestBuilder.SendAsyncEnumerable<T>(System.Net.Http.HttpMethod! method, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<T>!
+Mafesoft.RestClient.RestBuilder.GetEventsAsync<T>(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<System.Net.ServerSentEvents.SseItem<T>>!
+Mafesoft.RestClient.RestBuilder.GetEventsAsync<T>(System.Func<string!, string!, bool>! filter, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<System.Net.ServerSentEvents.SseItem<T>>!
+Mafesoft.RestClient.RestBuilder.GetEventsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<System.Net.ServerSentEvents.SseItem<string!>>!
+Mafesoft.RestClient.RestBuilder.PostEventsAsync<T>(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<System.Net.ServerSentEvents.SseItem<T>>!
+Mafesoft.RestClient.RestBuilder.PostEventsAsync<T>(System.Func<string!, string!, bool>! filter, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<System.Net.ServerSentEvents.SseItem<T>>!
+Mafesoft.RestClient.RestBuilder.PostEventsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<System.Net.ServerSentEvents.SseItem<string!>>!
+Mafesoft.RestClient.RestBuilder.SendEventsAsync<T>(System.Net.Http.HttpMethod! method, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<System.Net.ServerSentEvents.SseItem<T>>!
+Mafesoft.RestClient.RestBuilder.SendEventsAsync<T>(System.Net.Http.HttpMethod! method, System.Func<string!, string!, bool>? filter, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<System.Net.ServerSentEvents.SseItem<T>>!
+Mafesoft.RestClient.RestBuilder.SendEventsAsync(System.Net.Http.HttpMethod! method, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<System.Net.ServerSentEvents.SseItem<string!>>!

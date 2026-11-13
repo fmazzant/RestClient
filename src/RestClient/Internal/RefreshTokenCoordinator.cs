@@ -30,6 +30,7 @@
 namespace Mafesoft.RestClient.Internal
 {
     using System;
+    using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -70,8 +71,12 @@ namespace Mafesoft.RestClient.Internal
         /// Refreshes the token. If another request already refreshed it after <paramref name="observedGeneration"/>
         /// (the generation read before sending the request) the func is not invoked again.
         /// </summary>
+        /// <param name="observedGeneration">The generation read before sending the request</param>
+        /// <param name="method">The method of the request (metrics)</param>
+        /// <param name="clientName">The client name of the builder (metrics)</param>
+        /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>true if the request can be sent again</returns>
-        public async Task<bool> RefreshAsync(int observedGeneration, CancellationToken cancellationToken)
+        public async Task<bool> RefreshAsync(int observedGeneration, HttpMethod method, string? clientName, CancellationToken cancellationToken)
         {
             await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
@@ -81,6 +86,7 @@ namespace Mafesoft.RestClient.Internal
                     return true;
                 }
 
+                RestClientDiagnostics.RefreshTokenInvoked(method, clientName);
                 refreshing.Value = true;
                 try
                 {

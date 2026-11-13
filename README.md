@@ -57,7 +57,7 @@ error handling, progress bars, logging. Mafesoft.RestClient puts that code in on
 - **Real-world content.** Upload/download progress, real streaming for large files, `multipart/form-data`,
   form-url-encoded, JSON or XML.
 - **Ready for production .NET.** Native AOT and trimming (verified in CI), `ILogger` logging and OpenTelemetry tracing
-  out of the box, `IHttpClientFactory` integration.
+  and metrics out of the box, `IHttpClientFactory` integration.
 - **One API everywhere.** The same code runs on .NET Framework 4.6.2+, Xamarin/Unity (`netstandard2.0`) and .NET 10.
 
 ## Comparison with the alternatives
@@ -74,16 +74,16 @@ error handling, progress bars, logging. Mafesoft.RestClient puts that code in on
 | Native AOT / trimming | ✅ (verified in CI) | ✅ | ⚠️ not annotated | ✅ generated clients | ⚠️ not annotated |
 | `IHttpClientFactory` integration | ✅ | ✅ | ✅ DI package | ✅ | ⚠️ manual |
 | `ILogger` / OpenTelemetry of its own | ✅ | ✅ built-in spans and metrics | ❌ | ❌ | ❌ |
-| Problem Details (RFC 9457) | planned ([#26](https://github.com/fmazzant/RestClient/issues/26)) | ⚠️ manual | ❌ | ✅ `ValidationApiException` | ❌ |
+| Problem Details (RFC 9457) | ✅ `result.Problem`, `ErrorAs<T>()` | ⚠️ manual | ❌ | ✅ `ValidationApiException` | ❌ |
 | Typed client from an interface | ❌ | ❌ | ❌ | ✅ | ❌ |
 | Test helpers | ⚠️ write a fake `HttpMessageHandler` | ❌ | ❌ | ✅ `Refit.Testing` | ✅ `HttpTest` |
 | `netstandard2.0` (.NET Framework 4.6.2+, Xamarin, Unity) | ✅ | ✅ | ✅ | ⚠️ `net462`+ and `net8.0`+ only | ✅ |
-| URL templates / path parameters (`users/{id}`) | ⚠️ path segments with `Command`; templates planned ([#31](https://github.com/fmazzant/RestClient/issues/31)) | ❌ | ✅ `AddUrlSegment` | ✅ route attributes | ⚠️ `AppendPathSegment`, no templates |
-| OAuth1 / OAuth2 flows | ❌ bearer/basic header and refresh token only | ❌ | ✅ authenticators | ❌ | ❌ |
-| Cookies | ⚠️ only with your own `HttpClient` (`UseHttpClient`); planned ([#59](https://github.com/fmazzant/RestClient/issues/59)) | ✅ `CookieContainer` | ✅ `CookieContainer` | ⚠️ via the handler | ✅ `CookieJar` |
-| Proxy | ⚠️ only with your own `HttpClient` (`UseHttpClient`); planned ([#58](https://github.com/fmazzant/RestClient/issues/58)) | ✅ handler `Proxy` | ✅ `RestClientOptions.Proxy` | ⚠️ via the handler | ⚠️ via the handler |
+| URL templates / path parameters (`users/{id}`) | ✅ `Route` (url-encoded, invariant culture) | ❌ | ✅ `AddUrlSegment` | ✅ route attributes | ⚠️ `AppendPathSegment`, no templates |
+| OAuth1 / OAuth2 flows | ❌ bearer/basic header, async token provider and refresh token only | ❌ | ✅ authenticators | ❌ | ❌ |
+| Cookies | ✅ `Cookies(CookieContainer)` | ✅ `CookieContainer` | ✅ `CookieContainer` | ⚠️ via the handler | ✅ `CookieJar` |
+| Proxy | ✅ `Proxy` / `SystemProxy` | ✅ handler `Proxy` | ✅ `RestClientOptions.Proxy` | ⚠️ via the handler | ⚠️ via the handler |
 | Newtonsoft.Json ready to use | ⚠️ write a custom serializer | ⚠️ extra package | ✅ `RestSharp.Serializers.NewtonsoftJson` | ✅ `Refit.Newtonsoft.Json` | ✅ `Flurl.Http.Newtonsoft` |
-| Streaming a JSON array as `IAsyncEnumerable<T>` | ❌ planned ([#30](https://github.com/fmazzant/RestClient/issues/30)) | ✅ `GetFromJsonAsAsyncEnumerable` | ❔ | ❔ | ❔ |
+| Streaming a JSON array as `IAsyncEnumerable<T>` | ✅ `GetAsyncEnumerable<T>` | ✅ `GetFromJsonAsAsyncEnumerable` | ❔ | ❔ | ❔ |
 | Community, documentation, Q&A | ❌ small | ✅ part of .NET | ✅ large | ✅ large | ✅ large |
 
 ✅ built in, ⚠️ partial or extra work, ❌ not available, ❔ not verified. Checked in November 2026 against .NET 10, RestSharp 114.1.0,
@@ -106,14 +106,20 @@ comparison is not one-sided.
 - Fluent, immutable and thread-safe builder (`Rest.Build()`)
 - `Get`, `Post`, `Put`, `Patch`, `Delete`, `Head`, `Options` and any other method with `SendAsync<T>(HttpMethod)`
 - Results as `string`, `byte[]`, `Stream` (not buffered) or a DTO
+- JSON arrays streamed as `IAsyncEnumerable<T>` (`GetAsyncEnumerable<T>()`), without buffering the body
+- Server-Sent Events (`text/event-stream`) as `IAsyncEnumerable<SseItem<T>>` (`PostEventsAsync<T>()`), e.g. to stream LLM completions
 - JSON with System.Text.Json (source generated `JsonSerializerContext` for Native AOT), XML, custom serializers
 - `multipart/form-data`, form-url-encoded, upload and download progress
+- URL templates (`users/{id}`) with url-encoded, culture invariant route values
 - Query string with url-encoding, invariant culture and repeated keys
-- Bearer/basic authentication, refresh token, `NetworkCredential`, per-builder certificate validation
+- Bearer/basic authentication, asynchronous token provider (`BearerToken(async ct => ...)`), refresh token, `NetworkCredential`, per-builder certificate validation
 - Retry with backoff and `Retry-After`, timeout per attempt, cancellation
+- Problem Details (RFC 9457) and typed error bodies (`result.Problem`, `result.ErrorAs<T>()`)
 - Pooled handlers, or your own `HttpClient` / `IHttpClientFactory`
 - HTTP/2 and HTTP/3 (`HttpVersion`, with `HttpVersionPolicy` on .NET 8+)
-- `ILogger` logging and OpenTelemetry tracing
+- Proxy (`WebProxy`, system proxy or no proxy)
+- Cookies (`CookieContainer` per builder, e.g. a cookie-based session)
+- `ILogger` logging, OpenTelemetry tracing and metrics
 - Events: `OnStart`, `OnPreCompleted`, `OnCompleted`, `OnException`, request/response preview
 
 ## Packages
@@ -180,7 +186,8 @@ RestResult<User> user2 = await users.Command(2).GetAsync<User>();   // https://a
 RestResult<List<User>> all = await users.GetAsync<List<User>>();    // https://api.example.com/users
 ```
 
-`Command(...)` appends a path segment (`string`, `int`, `long` or `Guid`).
+`Command(...)` appends a path segment (`string`, `int`, `long` or `Guid`); for path parameters see
+[URL templates](#url-templates).
 `RestBuilder.Properties` returns the connection properties as a read-only `RestProperties`
 (`EndPoint`, `Timeout`, `BufferSize`, `CertificateOption`).
 
@@ -216,6 +223,115 @@ await file.Content!.CopyToAsync(destination);
 ```
 
 An empty body (for example `204 No Content`) is a `null` content.
+
+### Streaming a JSON array
+
+`GetAsyncEnumerable<T>()` returns the items of a JSON array as an `IAsyncEnumerable<T>` while they are downloaded
+(`JsonSerializer.DeserializeAsyncEnumerable`): the body is never buffered, so the memory does not grow with the number
+of items. `PostAsyncEnumerable<T>()` and `SendAsyncEnumerable<T>(HttpMethod)` do the same with a payload or another
+method.
+
+```c#
+await foreach (Order order in api.Command("orders").GetAsyncEnumerable<Order>(cancellationToken))
+{
+    Console.WriteLine(order.Id);
+}
+```
+
+- The request is sent when the enumeration starts, and again at every enumeration.
+- Headers, authentication, cookies, URL templates, the `Timeout` of each attempt, retry and refresh token apply until
+  the headers of a successful response are received; once the items are being read nothing is retried and only the
+  cancellation token stops the download.
+- Unlike the other methods, errors are **thrown** when the enumeration starts: a status code that is not a success
+  status code, or a failed request, throws the `HttpRequestException` of `result.EnsureSuccessStatusCode()` (a timeout
+  is its inner `TimeoutException`), a cancellation throws `OperationCanceledException`, an invalid JSON throws
+  `JsonException`. Use `GetAsync<T>()` when you need the error body (`result.Problem`, `result.ErrorAs<T>()`).
+- The response is released when the enumeration ends, also with `break` or an exception.
+- The items are deserialized with the JSON configuration of the builder; with `Json(MyJsonContext.Default)` the
+  metadata comes from the source generated context (Native AOT safe). `Xml()` and `CustomSerializer(...)` are not
+  supported (`NotSupportedException`): read a `Stream` result instead.
+- A JSON `null` item is returned as `null` (the default value of `T`). Newline delimited JSON (NDJSON) is not supported.
+- `OnStart`, `OnDownloadProgress` and `OnException` are raised; `OnPreviewContentResponseAsString`, `OnPreCompleted`
+  and `OnCompleted` are not (there is no buffered body nor `RestResult`). The activity and the duration metric last
+  until the end of the enumeration.
+
+### Server-Sent Events
+
+`GetEventsAsync<T>()` returns the events of a `text/event-stream` response (Server-Sent Events, used for example by the
+LLM APIs to stream a completion) as an `IAsyncEnumerable<SseItem<T>>` while they are received. The events are parsed by
+`System.Net.ServerSentEvents.SseParser`; `SseItem<T>` carries the `Data` deserialized as `T`, the `EventType`
+(`"message"` when the event has no `event:` field), the `EventId` and the `ReconnectionInterval`.
+`PostEventsAsync<T>()` and `SendEventsAsync<T>(HttpMethod)` do the same with a payload or another method.
+
+```c#
+using System.Net.ServerSentEvents;
+
+await foreach (SseItem<Chunk> evt in api.Command("chat").Payload(request).PostEventsAsync<Chunk>(cancellationToken))
+{
+    Console.Write(evt.Data.Text);
+}
+```
+
+The data of every event must be JSON (a data spanning more lines is joined with `\n`), otherwise a `JsonException`
+stops the enumeration. Pass a filter, which receives the event type and the raw data, to skip the events that do not
+carry `T`, such as the `data: [DONE]` sentinel of some APIs or the event types you do not need:
+
+```c#
+await foreach (SseItem<Chunk> evt in api.Command("chat").Payload(request)
+    .PostEventsAsync<Chunk>((type, data) => data != "[DONE]", cancellationToken))
+{
+    Console.Write(evt.Data.Text);
+}
+```
+
+`GetEventsAsync()`, `PostEventsAsync()` and `SendEventsAsync(HttpMethod)` (without `T`) return the data as a `string`,
+not deserialized:
+
+```c#
+await foreach (SseItem<string> evt in api.Command("notifications").GetEventsAsync(cancellationToken))
+{
+    Console.WriteLine($"{evt.EventType}: {evt.Data}");
+}
+```
+
+- The request has the header `Accept: text/event-stream`, unless you set an `Accept` header with `Header(...)`.
+- The request, the errors, the events and the diagnostics behave as in [Streaming a JSON array](#streaming-a-json-array):
+  the request is sent when the enumeration starts, errors are thrown when the enumeration starts, the response is
+  released when the enumeration ends (also with `break`), and nothing is retried once the events are being read.
+- The `Last-Event-ID` reconnection is not automatic: when the stream ends or fails, read the `EventId` of the last
+  event and send a new request with `Header("Last-Event-ID", id)` if the server supports it.
+- The data is deserialized with the JSON configuration of the builder (`Json(MyJsonContext.Default)` for Native AOT);
+  `Xml()` and `CustomSerializer(...)` are not supported by the typed methods (`NotSupportedException`), the `string`
+  methods work with any serializer.
+- On `net8.0`, `netstandard2.1` and `netstandard2.0` this uses the `System.Net.ServerSentEvents` package (a dependency
+  of Mafesoft.RestClient); on .NET 9+ it is part of the framework.
+
+### URL templates
+
+Write the path parameters as `{name}` placeholders and set their values with `Route`:
+
+```c#
+RestBuilder orders = Rest.Build().Url("https://api.example.com/users/{id}/orders/{orderId}");
+
+RestResult<Order> order = await orders
+    .Route("id", 42)
+    .Route("orderId", "A/1")
+    .GetAsync<Order>();   // https://api.example.com/users/42/orders/A%2F1
+```
+
+- The values are formatted with the invariant culture and url-encoded like the [query string](#query-string), as a
+  single segment: `/`, `?`, `#`, spaces and non-ASCII characters are percent-encoded. Do not encode them yourself.
+- The placeholders can be in `Url(...)` (path and query) and in `Command(...)`:
+  `api.Command("users/{id}").Route("id", 42)`. They are not supported in the scheme, host and port.
+  The query string parameters (`Parameter`) are never expanded.
+- A placeholder used more than once gets the same value everywhere. The names are case-sensitive.
+- When a placeholder has no value the request is not sent: the result reports an `InvalidOperationException`
+  (as for a missing `Url`). `Route(name, null)` removes a value set before.
+- A value without a placeholder is ignored, so a shared root can set a value (for example `{tenant}`) used only by
+  some requests. Setting a value again replaces it; like every builder method it only affects the derived builders.
+- `{{` and `}}` are literal braces; any other `{` must open a `{name}` placeholder.
+- The url is a template only when the builder has at least one `Route` value: without `Route` (or after removing the
+  last value) `Url` and `Command` are sent untouched, braces included, as in 3.0.
 
 ### Query string
 
@@ -270,9 +386,10 @@ bool canceled = result.IsCancellationRequested;     // OperationCanceledExceptio
 
 ### Connections and HttpClient
 
-RestClient keeps a pool of HTTP handlers, one for each combination of compression, credentials, certificate option and
-certificate validation callback. The TCP/TLS connections are reused by all the requests and, on .NET 8+, recycled
-every 2 minutes so that DNS changes are honored. Cookies are not stored.
+RestClient keeps a pool of HTTP handlers, one for each combination of compression, credentials, certificate option,
+certificate validation callback and proxy. The TCP/TLS connections are reused by all the requests and, on .NET 8+, recycled
+every 2 minutes so that DNS changes are honored. The pooled handlers never store cookies: use `Cookies` (see
+[Cookies](#cookies)) to keep them in a container of the builder.
 
 You can send the requests with your own `HttpClient`, for example one created by `IHttpClientFactory`
 (see also [Dependency Injection](#dependency-injection)):
@@ -287,7 +404,7 @@ RestResult<List<User>> users = await Rest.Build(httpClient)   // or Rest.Build()
 ```
 
 The external `HttpClient` is never disposed by RestClient. `NetworkCredential`, `CertificateValidation`,
-`CertificateOption`, `EnableGZipCompression` and `OnConfigureHttpClient` configure the `HttpClient` managed by
+`CertificateOption`, `EnableGZipCompression`, `Proxy`, `SystemProxy`, `Cookies` and `OnConfigureHttpClient` configure the `HttpClient` managed by
 RestClient, so they are not applied to an external one: configure them on your handler. Headers, authentication,
 HTTP version, timeout, retry, serialization, progress and all the events work in both cases.
 
@@ -320,6 +437,63 @@ RestBuilder h2c = Rest.Build()
   when the app runs on .NET Core 3.0+, while .NET Framework supports only HTTP/1.0 and HTTP/1.1.
 - HTTP/3 needs .NET 8+ and QUIC support in the operating system (msquic on Windows 11 / Windows Server 2022+, libmsquic
   on Linux).
+
+### Proxy
+
+By default the requests use the system proxy settings (`HttpClient.DefaultProxy` on .NET, the environment variables
+`HTTP_PROXY`/`HTTPS_PROXY`/`NO_PROXY` or the operating system settings). `Proxy` sends them through a proxy of your
+choice, `Proxy(null)` sends them directly to the server and `SystemProxy` goes back to the default.
+
+```c#
+// create the proxy once (e.g. a static field) and reuse it: the same instance shares the pooled handler
+IWebProxy corporateProxy = new WebProxy("http://proxy:8080")
+{
+    Credentials = CredentialCache.DefaultCredentials,
+    BypassProxyOnLocal = true,
+};
+
+RestBuilder viaProxy = api.Proxy(corporateProxy);
+
+// no proxy, ignoring the system settings
+RestBuilder direct = api.Proxy(null);
+
+// back to the system proxy (the default)
+RestBuilder system = viaProxy.SystemProxy();
+```
+
+- The proxy is part of the pooled handler configuration (see [Connections and HttpClient](#connections-and-httpclient)):
+  the same `IWebProxy` instance shares the handler and its connections, a new instance gets a new handler, so create
+  the proxy once instead of for every request.
+- The proxy is not applied to your own `HttpClient` (`UseHttpClient`): set `Proxy` on its handler.
+
+### Cookies
+
+By default cookies are neither stored nor sent. `Cookies` gives the builder a `CookieContainer`: the cookies of the
+responses (`Set-Cookie`) are stored in it and sent back (`Cookie`) with the next requests, for example for an API with
+a cookie-based session.
+
+```c#
+var cookies = new CookieContainer();
+RestBuilder api = Rest.Build().Url("https://example.com").Cookies(cookies);
+
+await api.Command("login").Payload(credentials).PostAsync();     // stores the Set-Cookie
+RestResult<Order[]> orders = await api.Command("orders").GetAsync<Order[]>(); // sends the cookies
+
+// stop storing and sending cookies
+RestBuilder anonymous = api.Cookies(null);
+```
+
+- The container belongs to the builder, not to the pooled handler, so the handlers and their connections are still
+  shared: builders with different containers never see each other's cookies, and two users of the same application
+  get two separate sessions if each has its own container.
+- The builder is immutable, but the container is an object: the builders derived from the one with `Cookies(container)`
+  share the same container, which is the session. `CookieContainer` is thread-safe; create a new container (or call
+  `Cookies` again) for a new session.
+- The cookies set by the redirects are stored too: when a container is set, RestClient follows the redirects itself
+  (with the same rules as `HttpClientHandler`: up to 50 redirects, `POST` becomes `GET` after 300/301/302 and every
+  method except `HEAD` becomes `GET` after 303, method and content are kept for 307/308, the `Authorization` header
+  is not sent to the new location, never from HTTPS to HTTP).
+- The cookies are not applied to your own `HttpClient` (`UseHttpClient`): set `CookieContainer` on its handler.
 
 ## Content
 
@@ -472,6 +646,28 @@ RestBuilder bearer = api.Authentication("Bearer", accessToken);
 RestBuilder current = api.Authentication(() => new AuthenticationHeaderValue("Bearer", tokenStore.AccessToken));
 ```
 
+### Asynchronous token provider
+
+When the token comes from an asynchronous source (MSAL, a token cache, a secret store, an OAuth2/OIDC client), pass an
+async func to `BearerToken` (`Authorization: Bearer <token>`) or to `Authentication` (any scheme): no `.Result` needed.
+
+```c#
+RestBuilder msal = api.BearerToken(async cancellationToken =>
+    (await app.AcquireTokenForClient(scopes).ExecuteAsync(cancellationToken)).AccessToken);
+
+RestBuilder custom = api.Authentication(async cancellationToken =>
+    new AuthenticationHeaderValue("Bearer", await tokenProvider.GetTokenAsync(cancellationToken)));
+```
+
+- The func is invoked for **every attempt**: the first request, every [retry](#retry) and the request sent again after
+  a [refresh token](#refresh-token), so it always provides the current token (cache it in your provider if needed).
+  The redirects followed by RestClient are part of the same attempt and never receive the `Authorization` header.
+- It receives the `CancellationToken` of the attempt: canceled by the token of the request and by the `Timeout`
+  (a provider that times out is retried like a request that times out).
+- An exception thrown by the func is reported by the result (`result.Exception`, `OnException`) like the other errors:
+  `SendAsync` never throws. A `null` header, or a `null` / empty token, sends the request without authorization.
+- The last `Authentication(...)` / `BearerToken(...)` call wins; `BearerToken(null)` removes the authentication.
+
 ### Refresh token
 
 Pass the refresh func to `RefreshToken`: when a response is `401 Unauthorized` the func is invoked and, if it returns a
@@ -547,7 +743,8 @@ see [Dependency Injection](#dependency-injection).
 
 ### Handling the result
 
-Requests never throw: HTTP errors, network errors, timeouts and cancellations are reported in the result.
+Requests never throw: HTTP errors, network errors, timeouts and cancellations are reported in the result (except
+the streamed JSON arrays, see [Streaming a JSON array](#streaming-a-json-array)).
 
 ```c#
 RestResult<User> result = await api.Command("users").Command(1).GetAsync<User>();
@@ -570,6 +767,48 @@ else                                     // no response: network error, timeout,
 result.EnsureSuccessStatusCode();
 ```
 
+### Problem Details and error bodies
+
+Most APIs (ASP.NET Core included) describe their errors with **Problem Details** (RFC 9457,
+`application/problem+json`). `result.Problem` reads it from the body of an error response, and `result.ErrorAs<T>()`
+reads the error body as any other type, for example the error DTO of your API:
+
+```c#
+RestResult<User> result = await api.Command("users").Payload(user).PostAsync<User>();
+
+if (!result.IsSuccessStatusCode)
+{
+    RestProblemDetails? problem = result.Problem;     // null if the content type is not application/problem+json
+    if (problem != null)
+    {
+        Console.WriteLine($"{problem.Status} {problem.Title}: {problem.Detail}");
+
+        foreach (var field in problem.Errors)         // validation errors (ASP.NET Core ValidationProblem)
+        {
+            Console.WriteLine($"{field.Key}: {string.Join(", ", field.Value)}");
+        }
+
+        if (problem.Extensions.TryGetValue("traceId", out JsonElement traceId))   // any other member
+        {
+            Console.WriteLine(traceId.GetString());
+        }
+    }
+
+    MyError? error = result.ErrorAs<MyError>();       // any custom error DTO, with the configured serializer
+    string? body = result.ErrorAs<string>();          // or the raw body (also byte[] and Stream)
+}
+```
+
+- `Problem` is `null` for a success response, when no response has been received, for another content type and when
+  the body is not a valid JSON object (it never throws). It is read without reflection, so it is Native AOT safe.
+- `ErrorAs<T>()` uses the serializer configured on the builder: with `Json(MyJsonContext.Default)` add `MyError` to
+  the context to be Native AOT safe. It returns `default` for a success response or a body that cannot be read.
+- The error body is read only once, and only when `Problem` or `ErrorAs` are used: the success responses are not
+  affected. For a `Stream` result the error body is read from `Content` on first use, and `Content` is then replaced
+  with a stream over the same bytes: use `Problem`/`ErrorAs` before reading `Content`.
+- The type is called `RestProblemDetails`, not `ProblemDetails`, so that it does not clash with
+  `Microsoft.AspNetCore.Mvc.ProblemDetails` in the files that import both namespaces.
+
 ## Diagnostics
 
 ### Logging
@@ -583,17 +822,38 @@ RestBuilder logged = api.Logger(loggerFactory.CreateLogger("MyApi"));
 
 The builders created by [Dependency Injection](#dependency-injection) log with the category `Mafesoft.RestClient.{name}`.
 
-### Tracing (OpenTelemetry)
+### Tracing and metrics (OpenTelemetry)
 
 Every request creates an `Activity` named `RestClient {METHOD}` from the `ActivitySource` `Mafesoft.RestClient`, with
 the tags `http.request.method`, `url.full` (without query string), `http.response.status_code`,
 `rest_client.retry_count` and `error.type`. The activities of `HttpClient` (one for each attempt) are its children.
 
+The `Meter` `Mafesoft.RestClient` (`RestClientTelemetry.MeterName`, the same name) records:
+
+| Instrument | Type | Unit | Description |
+|---|---|---|---|
+| `restclient.request.duration` | histogram | `s` | Duration of a request, one measurement per `SendAsync`: retries, retry delays and refresh token included |
+| `restclient.retries` | counter | `{retry}` | Requests sent again by the retry policy (`Retry`) |
+| `restclient.refresh_token` | counter | `{refresh}` | Invocations of the refresh token func (once for concurrent `401` responses) |
+
+Tags: `http.request.method`; `restclient.client.name`, the name of the client when the builder is created by
+[Dependency Injection](#dependency-injection) or set with `ClientName("name")` when you build the client yourself
+(no tag otherwise); on the duration also
+`http.response.status_code` (when there is a response) and `error.type` (failed requests: the status code or the
+exception type, as on the activity). The duration of a `Stream` result does not include the reading of the body;
+the duration of `GetAsyncEnumerable<T>()` lasts until the end of the enumeration.
+The histogram suggests the bucket boundaries of `http.client.request.duration` (except on the `net8.0` build,
+where `InstrumentAdvice` does not exist). When nobody listens to the meter no tags are built.
+
 ```c#
-builder.Services.AddOpenTelemetry().WithTracing(tracing => tracing
-    .AddAspNetCoreInstrumentation()   // in ASP.NET Core, see below
-    .AddSource(RestClientTelemetry.ActivitySourceName)
-    .AddHttpClientInstrumentation());
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()   // in ASP.NET Core, see below
+        .AddSource(RestClientTelemetry.ActivitySourceName)
+        .AddHttpClientInstrumentation())
+    .WithMetrics(metrics => metrics
+        .AddMeter(RestClientTelemetry.MeterName)   // "Mafesoft.RestClient"
+        .AddHttpClientInstrumentation());
 ```
 
 In ASP.NET Core add also `AddAspNetCoreInstrumentation()` (package `OpenTelemetry.Instrumentation.AspNetCore`):
@@ -651,9 +911,25 @@ public class UsersClient(RestBuilder rest)
 }
 ```
 
+The overloads of `AddRestClient` that receive the `IServiceProvider` are the place for an
+[asynchronous token provider](#asynchronous-token-provider) registered in the container:
+
+```c#
+builder.Services.AddSingleton<ITokenProvider, MsalTokenProvider>();
+builder.Services.AddRestClient("graph", (provider, rest) =>
+{
+    ITokenProvider tokens = provider.GetRequiredService<ITokenProvider>();
+    return rest.Url("https://graph.microsoft.com/v1.0").BearerToken(tokens.GetTokenAsync);
+});
+```
+
+The provider passed to the configuration is the root `IServiceProvider`: resolve singletons (a token provider usually is
+one, it owns the token cache), not scoped services.
+
 `IRestClientFactory` is in the `Mafesoft.RestClient` namespace, `AddRestClient` in
 `Microsoft.Extensions.DependencyInjection`. The builders log with the category `Mafesoft.RestClient.{name}` (the full
-type name for a typed client).
+type name for a typed client) and their [metrics](#tracing-and-metrics-opentelemetry) have the tag
+`restclient.client.name` = `{name}`.
 
 ## Samples
 
@@ -759,7 +1035,7 @@ Version 2.0.0 modernized the library and fixed several long-standing issues. It 
 #### Behavior changes
 
 * **Connections**: the HTTP handlers are pooled and the connections are reused (in 1.x a new handler, and a new TCP/TLS connection,
-  was created for every request). Cookies are not stored, as in 1.x.
+  was created for every request). Cookies are not stored by default, as in 1.x (see [Cookies](#cookies)).
 * **TLS certificate validation**: 1.x set `ServicePointManager.ServerCertificateValidationCallback` to *accept every certificate*
   for the whole process on .NET Framework/.NET Standard, as soon as a `RestBuilder` was created. This has been removed:
   certificates are validated by default and `CertificateValidation(...)` only affects the requests of that builder.

@@ -73,7 +73,8 @@ namespace Mafesoft.RestClient.Extensions.DependencyInjection
 
             RestBuilder builder = Rest
                 .Build(httpClientFactory.CreateClient(name))
-                .Logger(loggerFactory.CreateLogger(LoggerCategoryPrefix + name));
+                .Logger(loggerFactory.CreateLogger(LoggerCategoryPrefix + name))
+                .ClientName(name);
 
             foreach (var configure in options.Get(name).Configurations)
             {

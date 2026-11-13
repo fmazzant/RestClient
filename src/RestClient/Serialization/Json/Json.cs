@@ -108,6 +108,12 @@ namespace Mafesoft.RestClient.Serialization.Json
             return JsonSerializer.Serialize(value, GetTypeInfo(typeOf ?? value.GetType(), options));
         }
 
+        /// <summary>
+        /// Gets the metadata of T from the options (or the JsonSerializerContext), as the other methods do
+        /// </summary>
+        internal static JsonTypeInfo<T> GetTypeInfo<T>(object? options)
+            => (JsonTypeInfo<T>)GetTypeInfo(typeof(T), options);
+
         private static JsonTypeInfo GetTypeInfo(Type type, object? options)
         {
             if (type == null) { throw new ArgumentNullException(nameof(type)); }

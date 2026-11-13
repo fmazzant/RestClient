@@ -53,6 +53,41 @@ namespace Mafesoft.RestClient.Tests
             Assert.Equal("https://api.example.com/users/5", handler.Requests[0].RequestUri.AbsoluteUri);
         }
 
+        public sealed class TokenProvider
+        {
+            public int Calls;
+
+            public async Task<string> GetTokenAsync(CancellationToken cancellationToken)
+            {
+                await Task.Yield();
+                return "token-" + Interlocked.Increment(ref Calls);
+            }
+        }
+
+        [Fact]
+        public async Task Bearer_token_provider_resolved_from_the_service_provider()
+        {
+            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
+            var services = new ServiceCollection();
+            services.AddSingleton<TokenProvider>();
+            services
+                .AddRestClient("secure", (provider, builder) =>
+                {
+                    TokenProvider tokens = provider.GetRequiredService<TokenProvider>();
+                    return builder.Url("https://api.example.com").BearerToken(tokens.GetTokenAsync);
+                })
+                .ConfigurePrimaryHttpMessageHandler(() => handler);
+
+            using ServiceProvider provider = services.BuildServiceProvider();
+            RestBuilder api = provider.GetRequiredService<IRestClientFactory>().CreateClient("secure");
+            await api.GetAsync();
+            await api.GetAsync();
+
+            Assert.Equal(2, provider.GetRequiredService<TokenProvider>().Calls);
+            Assert.Equal("Bearer token-1", handler.Requests[0].Headers.Authorization.ToString());
+            Assert.Equal("Bearer token-2", handler.Requests[1].Headers.Authorization.ToString());
+        }
+
 #if NET
         [Fact]
         public async Task Works_with_the_standard_resilience_handler()

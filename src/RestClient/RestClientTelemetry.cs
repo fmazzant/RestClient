@@ -30,7 +30,7 @@
 namespace Mafesoft.RestClient
 {
     /// <summary>
-    /// Names used by RestClient for tracing.
+    /// Names used by RestClient for tracing and metrics.
     /// </summary>
     public static class RestClientTelemetry
     {
@@ -41,5 +41,13 @@ namespace Mafesoft.RestClient
         /// of the attempts (retries and refresh token included).
         /// </summary>
         public const string ActivitySourceName = "Mafesoft.RestClient";
+
+        /// <summary>
+        /// Name of the Meter used by RestClient (the same as <see cref="ActivitySourceName"/>). Add it to OpenTelemetry with
+        /// <c>metrics.AddMeter(RestClientTelemetry.MeterName)</c>.
+        /// Instruments: <c>restclient.request.duration</c> (histogram, seconds, one measurement per request, retries and
+        /// refresh token included), <c>restclient.retries</c> and <c>restclient.refresh_token</c> (counters).
+        /// </summary>
+        public const string MeterName = "Mafesoft.RestClient";
     }
 }

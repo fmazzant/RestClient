@@ -1,4 +1,5 @@
 using Mafesoft.RestClient;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
 // ASP.NET Core minimal API that calls JSONPlaceholder (https://jsonplaceholder.typicode.com) through a typed client.
@@ -20,11 +21,17 @@ builder.Services.AddRestClient<PostsClient>((provider, rest) => rest
 // the HttpClient activities (one for each attempt) are its children. Here they are written to the console.
 // AddAspNetCoreInstrumentation is required: without it the activity of the incoming request is not recorded and
 // the default sampler (parent based) drops its children, the RestClient activities included.
-builder.Services.AddOpenTelemetry().WithTracing(tracing => tracing
-    .AddAspNetCoreInstrumentation()
-    .AddSource(RestClientTelemetry.ActivitySourceName)
-    .AddHttpClientInstrumentation()
-    .AddConsoleExporter());
+// Metrics: the Meter "Mafesoft.RestClient" records restclient.request.duration (one measurement per request, retries
+// included), restclient.retries and restclient.refresh_token, tagged with the client name of AddRestClient.
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()
+        .AddSource(RestClientTelemetry.ActivitySourceName)
+        .AddHttpClientInstrumentation()
+        .AddConsoleExporter())
+    .WithMetrics(metrics => metrics
+        .AddMeter(RestClientTelemetry.MeterName)
+        .AddConsoleExporter());
 
 var app = builder.Build();
 

@@ -67,18 +67,24 @@ namespace Mafesoft.RestClient
         private RestProperties properties;
         private List<string> commands = new List<string>();
         private List<KeyValuePair<string, string>> parameters = new List<KeyValuePair<string, string>>();
+        private Dictionary<string, string> routeValues = new Dictionary<string, string>(StringComparer.Ordinal);
         private ISerializerContent serializer = new JSON();
         private object? serializeOptions;
         private object? deserializeOptions;
         private HttpClient? externalHttpClient;
         private Func<object, X509Certificate?, X509Chain?, SslPolicyErrors, bool>? certificateCallback;
         private ICredentials? credentials;
+        private bool useProxy = true;
+        private IWebProxy? proxy;
+        private CookieContainer? cookies;
         private Func<AuthenticationHeaderValue>? onAuthentication;
+        private Func<CancellationToken, Task<AuthenticationHeaderValue>>? onAuthenticationAsync;
         private Action<HttpRequestHeaders>? onRequestHeaders;
         private bool enabledCompression;
         private RefreshTokenCoordinator? refreshTokenCoordinator;
         private RetrySettings? retrySettings;
         private ILogger? logger;
+        private string? clientName;
         private object? payloadContent;
         private bool isEnabledFormUrlEncoded;
         private Dictionary<string, string>? formUrlEncodedKeyValues;
@@ -139,7 +145,7 @@ namespace Mafesoft.RestClient
 
         /// <summary>
         /// Sends the requests using an existing HttpClient (for example created by IHttpClientFactory).
-        /// The HttpClient is never disposed by RestClient. Credentials, CertificateValidation, CertificateOption,
+        /// The HttpClient is never disposed by RestClient. Credentials, CertificateValidation, CertificateOption, Proxy, Cookies,
         /// compression and OnConfigureHttpClient are not applied: configure them on your HttpClient/handler.
         /// </summary>
         /// <param name="httpClient">The HttpClient, null to go back to the HttpClient managed by RestClient.</param>
@@ -190,6 +196,57 @@ namespace Mafesoft.RestClient
             });
         }
 #endif
+
+        #endregion
+
+        #region [ Proxy ]
+
+        /// <summary>
+        /// Sends the requests through the proxy, for example
+        /// Proxy(new WebProxy("http://proxy:8080") { Credentials = CredentialCache.DefaultCredentials }).
+        /// Null disables the proxy: the requests go directly to the server, ignoring the system proxy settings.
+        /// The proxy is part of the pooled handler configuration: builders that use the same IWebProxy instance
+        /// share the handler and its connections, a different instance gets its own handler, so define the proxy once.
+        /// It is not applied to an external HttpClient (see UseHttpClient): configure it on your handler.
+        /// </summary>
+        /// <param name="proxy">The proxy, null to send the requests without a proxy</param>
+        /// <returns></returns>
+        public RestBuilder Proxy(IWebProxy? proxy)
+            => With(r =>
+            {
+                r.useProxy = proxy != null;
+                r.proxy = proxy;
+            });
+
+        /// <summary>
+        /// Uses the system proxy settings (HttpClient.DefaultProxy on .NET): this is the default.
+        /// It undoes a previous call to Proxy. It is not applied to an external HttpClient (see UseHttpClient).
+        /// </summary>
+        /// <returns></returns>
+        public RestBuilder SystemProxy()
+            => With(r =>
+            {
+                r.useProxy = true;
+                r.proxy = null;
+            });
+
+        #endregion
+
+        #region [ Cookies ]
+
+        /// <summary>
+        /// Stores the cookies of the responses (Set-Cookie) in the container and sends them back with the requests (Cookie),
+        /// for example for an API with a cookie-based session: Cookies(new CookieContainer()).
+        /// The container belongs to the builder, not to the pooled handler: the builders derived from this one share
+        /// the same container (it is the session), builders with different containers never see each other's cookies,
+        /// and without Cookies no cookie is stored. The cookies set by the redirects are stored too: RestClient follows
+        /// the redirects itself when a container is set. CookieContainer is thread-safe.
+        /// It is not applied to an external HttpClient (see UseHttpClient): configure CookieContainer on your handler.
+        /// </summary>
+        /// <param name="container">The cookie container, null to stop storing and sending cookies</param>
+        /// <returns></returns>
+        public RestBuilder Cookies(CookieContainer? container)
+            => With(r => r.cookies = container);
 
         #endregion
 
@@ -265,11 +322,35 @@ namespace Mafesoft.RestClient
         /// <summary>
         /// The Authorization header for an HTTP request. The func is invoked for every request,
         /// so after a refresh token the new value is used.
+        /// It replaces any authentication set before (also an asynchronous one); null removes the authentication.
         /// </summary>
         /// <param name="authentication"></param>
         /// <returns></returns>
         public RestBuilder Authentication(Func<AuthenticationHeaderValue>? authentication)
-            => With(r => r.onAuthentication = authentication);
+            => With(r =>
+            {
+                r.onAuthentication = authentication;
+                r.onAuthenticationAsync = null;
+            });
+
+        /// <summary>
+        /// The Authorization header for an HTTP request, provided asynchronously (e.g. a token from MSAL,
+        /// a cache or a secret store). The func is invoked for every attempt: the first request, every retry
+        /// and the request sent again after a refresh token. A null header sends the request without authorization.
+        /// An exception thrown by the func is reported by the result, like the other errors of the request.
+        /// It replaces any authentication set before; null removes the authentication.
+        /// </summary>
+        /// <param name="authenticationProvider">
+        /// The func that provides the header; it receives the cancellation token of the attempt
+        /// (canceled by the request token and by the Timeout).
+        /// </param>
+        /// <returns></returns>
+        public RestBuilder Authentication(Func<CancellationToken, Task<AuthenticationHeaderValue>>? authenticationProvider)
+            => With(r =>
+            {
+                r.onAuthentication = null;
+                r.onAuthenticationAsync = authenticationProvider;
+            });
 
         /// <summary>
         /// The Authorization header for an HTTP request
@@ -287,6 +368,33 @@ namespace Mafesoft.RestClient
         /// <returns></returns>
         public RestBuilder Authentication(string scheme, string? parameter)
             => Authentication(() => new AuthenticationHeaderValue(scheme, parameter));
+
+        /// <summary>
+        /// The bearer token of the Authorization header (<c>Authorization: Bearer &lt;token&gt;</c>), provided asynchronously
+        /// (e.g. a token from MSAL, a cache or a secret store). The func is invoked for every attempt: the first request,
+        /// every retry and the request sent again after a refresh token. A null or empty token sends the request without
+        /// authorization. An exception thrown by the func is reported by the result, like the other errors of the request.
+        /// It replaces any authentication set before; null removes the authentication.
+        /// </summary>
+        /// <param name="tokenProvider">
+        /// The func that provides the token; it receives the cancellation token of the attempt
+        /// (canceled by the request token and by the Timeout).
+        /// </param>
+        /// <returns></returns>
+        public RestBuilder BearerToken(Func<CancellationToken, Task<string>>? tokenProvider)
+        {
+            if (tokenProvider == null)
+            {
+                return Authentication((Func<CancellationToken, Task<AuthenticationHeaderValue>>?)null);
+            }
+
+            return Authentication(async cancellationToken =>
+            {
+                string token = await (tokenProvider(cancellationToken)
+                    ?? throw new InvalidOperationException("The bearer token provider returned a null task.")).ConfigureAwait(false);
+                return string.IsNullOrEmpty(token) ? null! : new AuthenticationHeaderValue("Bearer", token);
+            });
+        }
 
         #endregion
 
@@ -408,6 +516,54 @@ namespace Mafesoft.RestClient
 
         #endregion
 
+        #region [ Route ]
+
+        /// <summary>
+        /// Sets the value of a {name} placeholder of the url, for example
+        /// Url("https://api.example.com/users/{id}/orders/{orderId}").Route("id", 42).Route("orderId", "A/1").
+        /// The placeholders can be in the url and in the Command segments; the same placeholder used more than once
+        /// gets the same value everywhere. The value is formatted with the invariant culture (as the query string parameters)
+        /// and url-encoded as a single segment ('/', '?', '#', spaces and non-ASCII characters are percent-encoded).
+        /// Use {{ and }} for literal braces. A value without a placeholder is ignored, so a base builder can set values
+        /// used only by some requests. When a placeholder has no value the request is not sent: the result reports an
+        /// InvalidOperationException. Placeholders are not supported in the scheme, host and port of the url.
+        /// The url is treated as a template only when the builder has at least one route value: without Route
+        /// (or after removing the last value) Url and Command are used untouched, braces included.
+        /// </summary>
+        /// <param name="name">The placeholder name, without braces (case-sensitive)</param>
+        /// <param name="value">The value, null to remove a value set before</param>
+        /// <returns></returns>
+        public RestBuilder Route(string name, object? value)
+        {
+            if (name == null) { throw new ArgumentNullException(nameof(name)); }
+            if (name.Length == 0 || name.IndexOf('{') >= 0 || name.IndexOf('}') >= 0)
+            {
+                throw new ArgumentException("The route name cannot be empty or contain braces.", nameof(name));
+            }
+            if (value is IEnumerable && !(value is string))
+            {
+                throw new ArgumentException("The route value cannot be a collection.", nameof(value));
+            }
+
+            string? encoded = value == null ? null : Uri.EscapeDataString(FormatValue(value));
+            return With(r =>
+            {
+                // copy on write: the dictionary is shared with the builder this one derives from
+                var values = new Dictionary<string, string>(routeValues, StringComparer.Ordinal);
+                if (encoded == null)
+                {
+                    values.Remove(name);
+                }
+                else
+                {
+                    values[name] = encoded;
+                }
+                r.routeValues = values;
+            });
+        }
+
+        #endregion
+
         #region [ Refresh Token & Retry ]
 
         /// <summary>
@@ -456,6 +612,16 @@ namespace Mafesoft.RestClient
         /// <returns></returns>
         public RestBuilder Logger(ILogger? logger)
             => With(r => r.logger = logger);
+
+        /// <summary>
+        /// Sets the logical name of the client, used as the <c>restclient.client.name</c> tag on the metrics
+        /// (see <see cref="RestClientTelemetry.MeterName"/>). It is set automatically by <c>IRestClientFactory</c> /
+        /// <c>AddRestClient</c> (the name of the client); set it yourself when you build the client without the factory.
+        /// </summary>
+        /// <param name="name">The name of the client, null to remove it (no tag)</param>
+        /// <returns></returns>
+        public RestBuilder ClientName(string? name)
+            => With(r => r.clientName = name);
 
         #endregion
 

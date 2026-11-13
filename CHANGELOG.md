@@ -15,6 +15,68 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `HttpVersion(Version, HttpVersionPolicy)` builder method (.NET 8+ only): sets the version and how it is negotiated,
   e.g. HTTP/3 with fallback (`RequestVersionOrLower`) or HTTP/2 without TLS (`RequestVersionExact`).
   ([#35](https://github.com/fmazzant/RestClient/issues/35))
+- `Proxy(IWebProxy?)` builder method: sends the requests through a proxy (e.g. a `WebProxy`), or directly to the server
+  with `Proxy(null)`, without passing your own `HttpClient`. The proxy is part of the pooled handler configuration;
+  it is not applied to an external `HttpClient`. ([#58](https://github.com/fmazzant/RestClient/issues/58))
+- `SystemProxy()` builder method: goes back to the system proxy settings, the default.
+  ([#58](https://github.com/fmazzant/RestClient/issues/58))
+- `Cookies(CookieContainer?)` builder method: stores the `Set-Cookie` of the responses (redirects included) in the
+  container and sends the cookies back with the next requests, e.g. for a cookie-based session. The container belongs
+  to the builder (the derived builders share it), the pooled handlers keep `UseCookies = false`; when a container is set
+  RestClient follows the redirects itself. It is not applied to an external `HttpClient`.
+  ([#59](https://github.com/fmazzant/RestClient/issues/59))
+- URL templates: `Route(string, object?)` builder method sets the value of a `{name}` placeholder of `Url(...)` or of a
+  `Command(...)` segment, e.g. `Url("https://api/users/{id}").Route("id", 42)`. Values are formatted with the invariant
+  culture and url-encoded as a single segment; a repeated placeholder gets the same value; a missing value is reported
+  as `InvalidOperationException` without sending the request; values without a placeholder are ignored; `{{` and `}}`
+  are literal braces. The url is a template only when at least one `Route` value is set: without `Route` it is sent
+  unchanged, as before.
+  ([#31](https://github.com/fmazzant/RestClient/issues/31))
+- Asynchronous token provider: `BearerToken(Func<CancellationToken, Task<string>>?)` and
+  `Authentication(Func<CancellationToken, Task<AuthenticationHeaderValue>>?)` builder methods, e.g.
+  `BearerToken(async ct => await tokens.GetTokenAsync(ct))`, for tokens from MSAL, a cache or a secret store without
+  `.Result`. The func is invoked for every attempt (first request, retries, the request sent again after a refresh
+  token) with the cancellation token of the attempt; an exception thrown by it is reported by the result. With
+  Dependency Injection, use the `AddRestClient` overloads that receive the `IServiceProvider`. The existing
+  `Authentication` overloads are unchanged. ([#27](https://github.com/fmazzant/RestClient/issues/27))
+- Problem Details (RFC 9457): `RestResult.Problem` reads the `application/problem+json` body of an error response as a
+  `RestProblemDetails` (type, title, status, detail, instance, validation `Errors` and `Extensions` as `JsonElement`),
+  without reflection and without ASP.NET Core; it is `null` for a success response, another content type or a body that
+  is not a JSON object. `RestResult.ErrorAs<T>()` reads the error body as `string`, `byte[]`, `Stream` or any type
+  deserialized with the configured serializer (use a `JsonSerializerContext` for Native AOT). The error body is read
+  once and only when they are used; success responses are not affected. For a `Stream` result the error body is read
+  from `Content` on first use and `Content` is replaced with a stream over the same bytes.
+  ([#26](https://github.com/fmazzant/RestClient/issues/26))
+- Metrics (`System.Diagnostics.Metrics`): the `Meter` `Mafesoft.RestClient` (`RestClientTelemetry.MeterName`, the
+  same name as the `ActivitySource`) records `restclient.request.duration` (histogram in seconds, one measurement per
+  request, retries and refresh token included), `restclient.retries` and `restclient.refresh_token` (counters), with
+  the tags `http.request.method`, `http.response.status_code`, `error.type` and `restclient.client.name`. Add it to
+  OpenTelemetry with `AddMeter("Mafesoft.RestClient")`; traces and logs are unchanged.
+  ([#29](https://github.com/fmazzant/RestClient/issues/29))
+- `ClientName(string?)` builder method: the logical name of the client, used as the `restclient.client.name` tag on
+  the metrics; `IRestClientFactory` / `AddRestClient` set it to the name of the client, `null` removes it.
+  ([#29](https://github.com/fmazzant/RestClient/issues/29))
+- JSON arrays streamed as `IAsyncEnumerable<T>`: `GetAsyncEnumerable<T>()`, `PostAsyncEnumerable<T>()` and
+  `SendAsyncEnumerable<T>(HttpMethod)` builder methods return the items while they are downloaded
+  (`JsonSerializer.DeserializeAsyncEnumerable`, with the `JsonTypeInfo<T>` of the configured `JsonSerializerContext`
+  for Native AOT), without buffering the body. The request is sent when the enumeration starts; headers,
+  authentication, cookies, timeout per attempt, retry and refresh token apply until the headers of a successful
+  response. Errors are thrown when the enumeration starts: the `HttpRequestException` of `EnsureSuccessStatusCode()`
+  for an error status code or a failed request, `OperationCanceledException` for a cancellation. The response is
+  released when the enumeration ends (also with `break`); the activity and the duration metric last until then.
+  `Xml()` and custom serializers throw `NotSupportedException`. The existing methods are unchanged.
+  ([#30](https://github.com/fmazzant/RestClient/issues/30))
+- Server-Sent Events (`text/event-stream`): `GetEventsAsync<T>()`, `PostEventsAsync<T>()` and
+  `SendEventsAsync<T>(HttpMethod)` builder methods return the events as `IAsyncEnumerable<SseItem<T>>` while they are
+  received (`System.Net.ServerSentEvents.SseParser`), with the data deserialized with the JSON configuration of the
+  builder (the `JsonTypeInfo<T>` of the configured `JsonSerializerContext` for Native AOT) and the event type, id and
+  reconnection interval of every event. An overload with a `filter` (event type, data) skips the events that do not
+  carry `T`, e.g. the `data: [DONE]` sentinel of LLM APIs; `GetEventsAsync()`, `PostEventsAsync()` and
+  `SendEventsAsync(HttpMethod)` return the data as a string. `Accept: text/event-stream` is sent unless an `Accept`
+  header is set. Same pipeline, deferred execution, exceptions, events and diagnostics as `GetAsyncEnumerable<T>()`;
+  the `Last-Event-ID` reconnection is not automatic. On `net8.0`, `netstandard2.1` and `netstandard2.0` the package now
+  depends on `System.Net.ServerSentEvents` (part of .NET 9+, so no new dependency on `net10.0`).
+  ([#34](https://github.com/fmazzant/RestClient/issues/34))
 
 ## [3.0.0] - 2026-11-11
 

@@ -221,6 +221,18 @@ namespace Mafesoft.RestClient.Tests
         }
 
         [Fact]
+        public async Task Logger_writes_the_url_with_the_route_values()
+        {
+            var logger = new ListLogger();
+            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
+
+            await Root(handler).Logger(logger).Command("users/{id}").Route("id", "a b").Parameter("apiKey", "secret").GetAsync();
+
+            Assert.Contains(logger.Entries, e => e.Level == LogLevel.Debug && e.Message == "Sending HTTP GET https://api.example.com/users/a%20b");
+            Assert.DoesNotContain(logger.Entries, e => e.Message.Contains("secret"));
+        }
+
+        [Fact]
         public async Task Logger_writes_retries_and_errors()
         {
             var logger = new ListLogger();

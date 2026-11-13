@@ -1,6 +1,7 @@
 using Mafesoft.RestClient;
 using System.Net;
 using System.Net.Http.Headers;
+using System.Net.ServerSentEvents;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -60,6 +61,55 @@ Check(upload.Content?.Contains("filename=a.txt") == true, "multipart upload");
 RestResult<User> notFound = await root.Command("missing").GetAsync<User>();
 Check(notFound.StatusCode == HttpStatusCode.NotFound && !notFound.IsSuccessStatusCode, "error status");
 
+// Problem Details (RFC 9457) and a typed error body, without reflection
+RestResult<User> problem = await root.Command("problem").GetAsync<User>();
+Check(problem.Problem is { Status: 409, Title: "Conflict" } p
+    && p.Errors["Name"][0] == "Taken"
+    && p.Extensions["traceId"].GetString() == "t1", "problem details");
+Check(problem.ErrorAs<ApiError>()?.Title == "Conflict", "typed error body");
+
+using (RestResult<Stream> streamProblem = await root.Command("problem").GetAsync<Stream>())
+{
+    Check(streamProblem.Problem?.Status == 409 && streamProblem.ErrorAs<string>()?.Contains("traceId") == true, "stream problem details");
+}
+
+// JSON array streamed as IAsyncEnumerable<T>, metadata from the source generated context
+var streamed = new List<string?>();
+await foreach (User user in root.Command("list").GetAsyncEnumerable<User>())
+{
+    streamed.Add(user.Name);
+}
+Check(streamed.SequenceEqual(new[] { "a", "b" }), "async enumerable");
+
+try
+{
+    await foreach (User user in root.Command("missing").GetAsyncEnumerable<User>())
+    {
+    }
+    Check(false, "async enumerable error status");
+}
+catch (HttpRequestException ex)
+{
+    Check(ex.Message.Contains("404"), "async enumerable error status");
+}
+
+// server-sent events: JSON data through the source generated context, the [DONE] sentinel skipped by the filter
+var chunks = new List<string?>();
+string? eventType = null;
+await foreach (SseItem<User> item in root.Command("events").PostEventsAsync<User>((type, data) => data != "[DONE]"))
+{
+    chunks.Add(item.Data.Name);
+    eventType ??= item.EventType;
+}
+Check(chunks.SequenceEqual(new[] { "a", "b" }) && eventType == "delta" && handler.LastAccept == "text/event-stream", "server-sent events");
+
+var rawEvents = new List<string>();
+await foreach (SseItem<string> item in root.Command("events").GetEventsAsync())
+{
+    rawEvents.Add(item.Data);
+}
+Check(rawEvents.Count == 3 && rawEvents[2] == "[DONE]", "server-sent events as string");
+
 Console.WriteLine(failures.Count == 0 ? "All checks passed." : $"{failures.Count} check(s) failed.");
 return failures.Count == 0 ? 0 : 1;
 
@@ -69,15 +119,21 @@ public sealed class User
     public string? Name { get; set; }
 }
 
+public sealed class ApiError
+{
+    public string? Title { get; set; }
+}
+
 [JsonSerializable(typeof(User))]
 [JsonSerializable(typeof(List<User>))]
+[JsonSerializable(typeof(ApiError))]
 [JsonSourceGenerationOptions(JsonSerializerDefaults.Web)]
 public partial class AppJsonContext : JsonSerializerContext
 {
 }
 
 /// <summary>
-/// In-process server: echoes JSON bodies, fails "flaky" once, returns text and 404.
+/// In-process server: echoes JSON bodies, fails "flaky" once, returns text, a problem details and 404.
 /// </summary>
 internal sealed class EchoHandler : HttpMessageHandler
 {
@@ -85,10 +141,13 @@ internal sealed class EchoHandler : HttpMessageHandler
 
     public string? LastQuery { get; private set; }
 
+    public string? LastAccept { get; private set; }
+
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         string path = request.RequestUri!.AbsolutePath;
         LastQuery = request.RequestUri.Query;
+        LastAccept = request.Headers.Accept.ToString();
         string body = request.Content is null ? string.Empty : await request.Content.ReadAsStringAsync(cancellationToken);
 
         if (request.Headers.Authorization?.Parameter != "token")
@@ -101,8 +160,23 @@ internal sealed class EchoHandler : HttpMessageHandler
             "/api/users" => Json(body),
             "/api/flaky" when Interlocked.Increment(ref flakyCalls) == 1 => new HttpResponseMessage(HttpStatusCode.ServiceUnavailable),
             "/api/flaky" => Json("[{\"id\":1,\"name\":\"a\"},{\"id\":2,\"name\":\"b\"}]"),
+            "/api/events" => new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(
+                    "event: delta\ndata: {\"id\":1,\"name\":\"a\"}\n\nevent: delta\ndata: {\"id\":2,\"name\":\"b\"}\n\ndata: [DONE]\n\n",
+                    Encoding.UTF8,
+                    "text/event-stream"),
+            },
+            "/api/list" => Json("[{\"id\":1,\"name\":\"a\"},{\"id\":2,\"name\":\"b\"}]"),
             "/api/text" => new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("plain text") },
             "/api/upload" => new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(body) },
+            "/api/problem" => new HttpResponseMessage(HttpStatusCode.Conflict)
+            {
+                Content = new StringContent(
+                    "{\"title\":\"Conflict\",\"status\":409,\"errors\":{\"Name\":[\"Taken\"]},\"traceId\":\"t1\"}",
+                    Encoding.UTF8,
+                    "application/problem+json"),
+            },
             _ => new HttpResponseMessage(HttpStatusCode.NotFound) { Content = new StringContent("{\"error\":\"not found\"}") },
         };
     }

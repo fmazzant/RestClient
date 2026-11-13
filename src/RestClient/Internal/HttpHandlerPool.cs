@@ -98,7 +98,14 @@ namespace Mafesoft.RestClient.Internal
                     AutomaticDecompression = key.Compression
                         ? DecompressionMethods.GZip | DecompressionMethods.Deflate | DecompressionMethods.Brotli
                         : DecompressionMethods.None,
+                    UseProxy = key.UseProxy,
+                    AllowAutoRedirect = key.AllowAutoRedirect,
                 };
+
+                if (key.Proxy != null)
+                {
+                    socketsHandler.Proxy = key.Proxy;
+                }
 
                 if (key.Credentials != null)
                 {
@@ -119,7 +126,14 @@ namespace Mafesoft.RestClient.Internal
             {
                 ClientCertificateOptions = key.CertificateOption,
                 UseCookies = false,
+                UseProxy = key.UseProxy,
+                AllowAutoRedirect = key.AllowAutoRedirect,
             };
+
+            if (key.Proxy != null)
+            {
+                handler.Proxy = key.Proxy;
+            }
 
             if (key.Credentials != null)
             {
@@ -154,12 +168,18 @@ namespace Mafesoft.RestClient.Internal
                 bool compression,
                 ClientCertificateOption certificateOption,
                 ICredentials? credentials,
-                Func<object, X509Certificate?, X509Chain?, SslPolicyErrors, bool>? certificateCallback)
+                Func<object, X509Certificate?, X509Chain?, SslPolicyErrors, bool>? certificateCallback,
+                bool useProxy,
+                IWebProxy? proxy,
+                bool allowAutoRedirect = true)
             {
                 Compression = compression;
                 CertificateOption = certificateOption;
                 Credentials = credentials;
                 CertificateCallback = certificateCallback;
+                UseProxy = useProxy;
+                Proxy = proxy;
+                AllowAutoRedirect = allowAutoRedirect;
             }
 
             public bool Compression { get; }
@@ -170,9 +190,27 @@ namespace Mafesoft.RestClient.Internal
 
             public Func<object, X509Certificate?, X509Chain?, SslPolicyErrors, bool>? CertificateCallback { get; }
 
+            /// <summary>
+            /// False: no proxy. True with a null Proxy: the system proxy (the default).
+            /// </summary>
+            public bool UseProxy { get; }
+
+            /// <summary>
+            /// The proxy, compared by reference: builders with the same instance share the handler.
+            /// </summary>
+            public IWebProxy? Proxy { get; }
+
+            /// <summary>
+            /// False when RestClient follows the redirects itself, to store the cookies of every response (see RestBuilder.Cookies)
+            /// </summary>
+            public bool AllowAutoRedirect { get; }
+
             public bool Equals(HandlerKey other)
                 => Compression == other.Compression
                 && CertificateOption == other.CertificateOption
+                && UseProxy == other.UseProxy
+                && AllowAutoRedirect == other.AllowAutoRedirect
+                && ReferenceEquals(Proxy, other.Proxy)
                 && Equals(CertificateCallback, other.CertificateCallback)
                 && CredentialsEquals(Credentials, other.Credentials);
 
@@ -186,6 +224,9 @@ namespace Mafesoft.RestClient.Internal
                     hash = (hash * 397) ^ (int)CertificateOption;
                     hash = (hash * 397) ^ (CertificateCallback?.GetHashCode() ?? 0);
                     hash = (hash * 397) ^ CredentialsHashCode(Credentials);
+                    hash = (hash * 397) ^ (UseProxy ? 1 : 0);
+                    hash = (hash * 397) ^ (AllowAutoRedirect ? 1 : 0);
+                    hash = (hash * 397) ^ (Proxy == null ? 0 : System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(Proxy));
                     return hash;
                 }
             }
