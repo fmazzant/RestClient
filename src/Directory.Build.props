@@ -25,13 +25,13 @@
 
     <!-- Package validation: checks that the API is consistent across the target frameworks and compares
          the package with the last released version (baseline), downloaded from NuGet.org.
-         The public API of 2.0.0 is frozen in PublicAPI.Shipped.txt; new or removed members go in PublicAPI.Unshipped.txt.
+         The public API of the last release is frozen in PublicAPI.Shipped.txt; new or removed members go in PublicAPI.Unshipped.txt.
          Intentional breaking changes against the baseline are recorded in CompatibilitySuppressions.xml
          (next to the .csproj), regenerated with:
            dotnet pack -c Release src/RestClient.sln -p:ApiCompatGenerateSuppressionFile=true
          After every release move PackageValidationBaselineVersion to the released version. -->
     <EnablePackageValidation>true</EnablePackageValidation>
-    <PackageValidationBaselineVersion>2.0.0</PackageValidationBaselineVersion>
+    <PackageValidationBaselineVersion>3.0.0</PackageValidationBaselineVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">

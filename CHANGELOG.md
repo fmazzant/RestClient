@@ -5,7 +5,9 @@ All notable changes to the `Mafesoft.RestClient*` packages (`Mafe.RestClient*` u
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.0.0] - Unreleased
+## [Unreleased]
+
+## [3.0.0] - 2026-11-11
 
 The `Mafesoft.*` release: the packages and the namespaces have a new name and a few APIs changed.
 Read [Migrating to 3.0](README.md#migrating-to-30) before upgrading.
