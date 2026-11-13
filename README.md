@@ -752,7 +752,8 @@ The `Meter` `Mafesoft.RestClient` (`RestClientTelemetry.MeterName`, the same nam
 | `restclient.refresh_token` | counter | `{refresh}` | Invocations of the refresh token func (once for concurrent `401` responses) |
 
 Tags: `http.request.method`; `restclient.client.name`, the name of the client when the builder is created by
-[Dependency Injection](#dependency-injection) (no tag otherwise); on the duration also
+[Dependency Injection](#dependency-injection) or set with `ClientName("name")` when you build the client yourself
+(no tag otherwise); on the duration also
 `http.response.status_code` (when there is a response) and `error.type` (failed requests: the status code or the
 exception type, as on the activity). The duration of a `Stream` result does not include the reading of the body.
 The histogram suggests the bucket boundaries of `http.client.request.duration` (except on the `net8.0` build,

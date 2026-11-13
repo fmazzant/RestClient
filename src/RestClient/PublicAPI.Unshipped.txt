@@ -24,3 +24,4 @@ const Mafesoft.RestClient.RestProblemDetails.MediaType = "application/problem+js
 Mafesoft.RestClient.RestResult.Problem.get -> Mafesoft.RestClient.RestProblemDetails?
 Mafesoft.RestClient.RestResult.ErrorAs<TError>() -> TError?
 const Mafesoft.RestClient.RestClientTelemetry.MeterName = "Mafesoft.RestClient" -> string!
+Mafesoft.RestClient.RestBuilder.ClientName(string? name) -> Mafesoft.RestClient.RestBuilder!

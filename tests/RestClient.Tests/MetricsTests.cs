@@ -119,6 +119,27 @@ namespace Mafesoft.RestClient.Tests
         }
 
         [Fact]
+        public async Task Client_name_set_without_the_factory_tags_the_metrics_and_null_removes_it()
+        {
+            using var metrics = new MetricsCollector();
+            string name = UniqueName();
+            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.ServiceUnavailable);
+            RestBuilder api = Rest.Build(handler.CreateClient()).Url("https://api.example.com").ClientName(name);
+
+            await api.Retry(1, TimeSpan.Zero).GetAsync();
+
+            Measurement duration = Assert.Single(metrics.For(Duration, ClientNameTag, name));
+            Assert.Equal(503, duration.Tags["http.response.status_code"]);
+            Assert.Equal(1, Assert.Single(metrics.For(Retries, ClientNameTag, name)).Value);
+
+            var method = new HttpMethod("METRICS-" + Guid.NewGuid().ToString("N"));
+            await api.ClientName(null).SendAsync<string>(method);
+
+            Measurement removed = Assert.Single(metrics.For(Duration, "http.request.method", method.Method));
+            Assert.False(removed.Tags.ContainsKey(ClientNameTag));
+        }
+
+        [Fact]
         public async Task Retries_are_counted_and_the_duration_is_recorded_once()
         {
             using var metrics = new MetricsCollector();

@@ -614,13 +614,13 @@ namespace Mafesoft.RestClient
             => With(r => r.logger = logger);
 
         /// <summary>
-        /// Sets the client name added to the metrics (tag restclient.client.name), null for no tag.
-        /// Internal: set by IRestClientFactory of Mafesoft.RestClient.Extensions.DependencyInjection
-        /// (InternalsVisibleTo): keep the signature compatible with the released versions of that package.
+        /// Sets the logical name of the client, used as the <c>restclient.client.name</c> tag on the metrics
+        /// (see <see cref="RestClientTelemetry.MeterName"/>). It is set automatically by <c>IRestClientFactory</c> /
+        /// <c>AddRestClient</c> (the name of the client); set it yourself when you build the client without the factory.
         /// </summary>
-        /// <param name="name">The name of the client</param>
+        /// <param name="name">The name of the client, null to remove it (no tag)</param>
         /// <returns></returns>
-        internal RestBuilder ClientName(string? name)
+        public RestBuilder ClientName(string? name)
             => With(r => r.clientName = name);
 
         #endregion

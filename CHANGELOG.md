@@ -50,9 +50,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Metrics (`System.Diagnostics.Metrics`): the `Meter` `Mafesoft.RestClient` (`RestClientTelemetry.MeterName`, the
   same name as the `ActivitySource`) records `restclient.request.duration` (histogram in seconds, one measurement per
   request, retries and refresh token included), `restclient.retries` and `restclient.refresh_token` (counters), with
-  the tags `http.request.method`, `http.response.status_code`, `error.type` and `restclient.client.name` (the name of
-  the client created by `IRestClientFactory`). Add it to OpenTelemetry with `AddMeter("Mafesoft.RestClient")`; traces
-  and logs are unchanged. ([#29](https://github.com/fmazzant/RestClient/issues/29))
+  the tags `http.request.method`, `http.response.status_code`, `error.type` and `restclient.client.name`. Add it to
+  OpenTelemetry with `AddMeter("Mafesoft.RestClient")`; traces and logs are unchanged.
+  ([#29](https://github.com/fmazzant/RestClient/issues/29))
+- `ClientName(string?)` builder method: the logical name of the client, used as the `restclient.client.name` tag on
+  the metrics; `IRestClientFactory` / `AddRestClient` set it to the name of the client, `null` removes it.
+  ([#29](https://github.com/fmazzant/RestClient/issues/29))
 
 ## [3.0.0] - 2026-11-11
 
