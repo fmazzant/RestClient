@@ -10,21 +10,13 @@
     <PackageId>Mafesoft.RestClient</PackageId>
     <Product>RestClient</Product>
     <Title>Mafesoft.RestClient</Title>
-    <Version>3.1.0</Version>
+    <Version>3.1.1</Version>
     <Description>RestClient is a fluent library for .NET that helps you to consume REST services.</Description>
     <PackageTags>rest-client, c-sharp, dotnet-standard, dotnet-core, dotnet-framework, http-client, restclient, mafesoft, xml, json, rest, fluent</PackageTags>
     <!-- Only the current version: the full history is in CHANGELOG.md -->
     <PackageReleaseNotes>
-      3.1.0 (no breaking changes)
-      - HttpVersion(...): HTTP/2 and HTTP/3
-      - Proxy(IWebProxy?) and SystemProxy()
-      - Cookies(CookieContainer?): per-builder cookie session
-      - Route(name, value): URL templates ("users/{id}")
-      - Authentication / BearerToken with an asynchronous token provider
-      - RestResult.Problem (Problem Details, RFC 9457) and RestResult.ErrorAs&lt;T&gt;()
-      - Metrics: Meter "Mafesoft.RestClient" (request duration, retries, refresh token), ClientName(...)
-      - GetAsyncEnumerable&lt;T&gt;(): stream a JSON array as IAsyncEnumerable&lt;T&gt;
-      - GetEventsAsync&lt;T&gt;() / PostEventsAsync&lt;T&gt;(): Server-Sent Events
+      3.1.1 (no breaking changes)
+      - No changes to the library code: same features as 3.1.0 (build and tests only)
 
       Full changelog: https://github.com/fmazzant/RestClient/blob/main/CHANGELOG.md
     </PackageReleaseNotes>

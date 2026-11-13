@@ -20,6 +20,8 @@ works from `netstandard2.0` (.NET Framework 4.6.2+, Xamarin, Unity) to `net10.0`
 The changes of every release are listed in the [CHANGELOG](CHANGELOG.md). To report a security problem, read the
 [security policy](SECURITY.md).
 
+If RestClient is useful to you, consider [supporting the project](#support). ☕
+
 ## Table of contents
 
 - [Why Mafesoft.RestClient](#why-mafesoftrestclient)
@@ -1086,6 +1088,14 @@ Native AOT smoke test, the public API files and the release steps.
 
 Bug reports, ideas and pull requests are welcome: open an [issue](https://github.com/fmazzant/RestClient/issues) first
 and read [CONTRIBUTING.md](CONTRIBUTING.md). For security problems read [SECURITY.md](SECURITY.md).
+
+## Support
+
+If RestClient saves you time, you can say thanks with a small donation. It is never required, but it helps me keep the project maintained and up to date.
+
+[![Donate](https://img.shields.io/badge/donate-PayPal-00457C?style=flat-square&logo=paypal&logoColor=white)](https://paypal.me/fmazzant)
+
+A star on GitHub, a bug report or a pull request help too. Thank you!
 
 ## License
 

@@ -5,7 +5,25 @@ All notable changes to the `Mafesoft.RestClient*` packages (`Mafe.RestClient*` u
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.1.0] - Unreleased
+## [3.1.1] - 2026-11-14
+
+No changes to the library code: same features as 3.1.0.
+
+```
+dotnet add package Mafesoft.RestClient --version 3.1.1
+dotnet add package Mafesoft.RestClient.Extensions.DependencyInjection --version 3.1.1
+```
+
+### Changed
+
+- Build: Central Package Management (`Directory.Packages.props`) and `global.json` with the .NET 10 SDK.
+  ([#23](https://github.com/fmazzant/RestClient/issues/23))
+- Tests: XML and custom serializers, upload/download progress, cancellation and timeouts, certificate validation,
+  form and multipart edge cases. ([#25](https://github.com/fmazzant/RestClient/issues/25))
+- NuGet workflow: when the GitHub release is created by hand, the packages are attached to it instead of failing.
+- README: Support section with a PayPal donation link.
+
+## [3.1.0] - 2026-11-13
 
 New features, no breaking changes: HTTP/2 and HTTP/3, proxy, cookies, URL templates, asynchronous token provider,
 Problem Details, metrics, streaming of JSON arrays and Server-Sent Events.
