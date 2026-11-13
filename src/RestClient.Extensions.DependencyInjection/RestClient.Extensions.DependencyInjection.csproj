@@ -5,8 +5,6 @@
     <AssemblyName>Mafesoft.$(MSBuildProjectName)</AssemblyName>
     <RootNamespace>Mafesoft.RestClient.Extensions.DependencyInjection</RootNamespace>
     <PackageId>Mafesoft.RestClient.Extensions.DependencyInjection</PackageId>
-    <!-- Package validation baseline: the last release was published with the old package ID -->
-    <PackageValidationBaselineName>Mafe.RestClient.Extensions.DependencyInjection</PackageValidationBaselineName>
     <Product>RestClient</Product>
     <Title>Mafesoft.RestClient.Extensions.DependencyInjection</Title>
     <Version>3.0.0</Version>

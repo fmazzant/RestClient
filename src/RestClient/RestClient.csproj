@@ -8,8 +8,6 @@
     <!-- NuGet package metadata. The publish workflow checks that the git tag (v3.0.0)
          matches Version, here and in Mafesoft.RestClient.Extensions.DependencyInjection. -->
     <PackageId>Mafesoft.RestClient</PackageId>
-    <!-- Package validation baseline: the last release was published with the old package ID -->
-    <PackageValidationBaselineName>Mafe.RestClient</PackageValidationBaselineName>
     <Product>RestClient</Product>
     <Title>Mafesoft.RestClient</Title>
     <Version>3.0.0</Version>

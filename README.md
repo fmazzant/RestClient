@@ -75,14 +75,14 @@ error handling, progress bars, logging. Mafesoft.RestClient puts that code in on
 | `IHttpClientFactory` integration | ✅ | ✅ | ✅ DI package | ✅ | ⚠️ manual |
 | `ILogger` / OpenTelemetry of its own | ✅ | ✅ built-in spans and metrics | ❌ | ❌ | ❌ |
 | Problem Details (RFC 9457) | planned ([#26](https://github.com/fmazzant/RestClient/issues/26)) | ⚠️ manual | ❌ | ✅ `ValidationApiException` | ❌ |
-| Typed client from an interface | to evaluate ([#32](https://github.com/fmazzant/RestClient/issues/32)) | ❌ | ❌ | ✅ | ❌ |
-| Test helpers | planned ([#33](https://github.com/fmazzant/RestClient/issues/33)) | ❌ | ❌ | ✅ `Refit.Testing` | ✅ `HttpTest` |
+| Typed client from an interface | ❌ | ❌ | ❌ | ✅ | ❌ |
+| Test helpers | ⚠️ write a fake `HttpMessageHandler` | ❌ | ❌ | ✅ `Refit.Testing` | ✅ `HttpTest` |
 | `netstandard2.0` (.NET Framework 4.6.2+, Xamarin, Unity) | ✅ | ✅ | ✅ | ⚠️ `net462`+ and `net8.0`+ only | ✅ |
 | URL templates / path parameters (`users/{id}`) | ⚠️ path segments with `Command`; templates planned ([#31](https://github.com/fmazzant/RestClient/issues/31)) | ❌ | ✅ `AddUrlSegment` | ✅ route attributes | ⚠️ `AppendPathSegment`, no templates |
-| OAuth1 / OAuth2 flows | ❌ bearer/basic header and refresh token only; client credentials planned ([#60](https://github.com/fmazzant/RestClient/issues/60)) | ❌ | ✅ authenticators | ❌ | ❌ |
+| OAuth1 / OAuth2 flows | ❌ bearer/basic header and refresh token only | ❌ | ✅ authenticators | ❌ | ❌ |
 | Cookies | ⚠️ only with your own `HttpClient` (`UseHttpClient`); planned ([#59](https://github.com/fmazzant/RestClient/issues/59)) | ✅ `CookieContainer` | ✅ `CookieContainer` | ⚠️ via the handler | ✅ `CookieJar` |
 | Proxy | ⚠️ only with your own `HttpClient` (`UseHttpClient`); planned ([#58](https://github.com/fmazzant/RestClient/issues/58)) | ✅ handler `Proxy` | ✅ `RestClientOptions.Proxy` | ⚠️ via the handler | ⚠️ via the handler |
-| Newtonsoft.Json ready to use | ⚠️ write a custom serializer; package planned ([#53](https://github.com/fmazzant/RestClient/issues/53)) | ⚠️ extra package | ✅ `RestSharp.Serializers.NewtonsoftJson` | ✅ `Refit.Newtonsoft.Json` | ✅ `Flurl.Http.Newtonsoft` |
+| Newtonsoft.Json ready to use | ⚠️ write a custom serializer | ⚠️ extra package | ✅ `RestSharp.Serializers.NewtonsoftJson` | ✅ `Refit.Newtonsoft.Json` | ✅ `Flurl.Http.Newtonsoft` |
 | Streaming a JSON array as `IAsyncEnumerable<T>` | ❌ planned ([#30](https://github.com/fmazzant/RestClient/issues/30)) | ✅ `GetFromJsonAsAsyncEnumerable` | ❔ | ❔ | ❔ |
 | Community, documentation, Q&A | ❌ small | ✅ part of .NET | ✅ large | ✅ large | ✅ large |
 
