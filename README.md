@@ -107,6 +107,7 @@ comparison is not one-sided.
 - `Get`, `Post`, `Put`, `Patch`, `Delete`, `Head`, `Options` and any other method with `SendAsync<T>(HttpMethod)`
 - Results as `string`, `byte[]`, `Stream` (not buffered) or a DTO
 - JSON arrays streamed as `IAsyncEnumerable<T>` (`GetAsyncEnumerable<T>()`), without buffering the body
+- Server-Sent Events (`text/event-stream`) as `IAsyncEnumerable<SseItem<T>>` (`PostEventsAsync<T>()`), e.g. to stream LLM completions
 - JSON with System.Text.Json (source generated `JsonSerializerContext` for Native AOT), XML, custom serializers
 - `multipart/form-data`, form-url-encoded, upload and download progress
 - URL templates (`users/{id}`) with url-encoded, culture invariant route values
@@ -253,6 +254,57 @@ await foreach (Order order in api.Command("orders").GetAsyncEnumerable<Order>(ca
 - `OnStart`, `OnDownloadProgress` and `OnException` are raised; `OnPreviewContentResponseAsString`, `OnPreCompleted`
   and `OnCompleted` are not (there is no buffered body nor `RestResult`). The activity and the duration metric last
   until the end of the enumeration.
+
+### Server-Sent Events
+
+`GetEventsAsync<T>()` returns the events of a `text/event-stream` response (Server-Sent Events, used for example by the
+LLM APIs to stream a completion) as an `IAsyncEnumerable<SseItem<T>>` while they are received. The events are parsed by
+`System.Net.ServerSentEvents.SseParser`; `SseItem<T>` carries the `Data` deserialized as `T`, the `EventType`
+(`"message"` when the event has no `event:` field), the `EventId` and the `ReconnectionInterval`.
+`PostEventsAsync<T>()` and `SendEventsAsync<T>(HttpMethod)` do the same with a payload or another method.
+
+```c#
+using System.Net.ServerSentEvents;
+
+await foreach (SseItem<Chunk> evt in api.Command("chat").Payload(request).PostEventsAsync<Chunk>(cancellationToken))
+{
+    Console.Write(evt.Data.Text);
+}
+```
+
+The data of every event must be JSON (a data spanning more lines is joined with `\n`), otherwise a `JsonException`
+stops the enumeration. Pass a filter, which receives the event type and the raw data, to skip the events that do not
+carry `T`, such as the `data: [DONE]` sentinel of some APIs or the event types you do not need:
+
+```c#
+await foreach (SseItem<Chunk> evt in api.Command("chat").Payload(request)
+    .PostEventsAsync<Chunk>((type, data) => data != "[DONE]", cancellationToken))
+{
+    Console.Write(evt.Data.Text);
+}
+```
+
+`GetEventsAsync()`, `PostEventsAsync()` and `SendEventsAsync(HttpMethod)` (without `T`) return the data as a `string`,
+not deserialized:
+
+```c#
+await foreach (SseItem<string> evt in api.Command("notifications").GetEventsAsync(cancellationToken))
+{
+    Console.WriteLine($"{evt.EventType}: {evt.Data}");
+}
+```
+
+- The request has the header `Accept: text/event-stream`, unless you set an `Accept` header with `Header(...)`.
+- The request, the errors, the events and the diagnostics behave as in [Streaming a JSON array](#streaming-a-json-array):
+  the request is sent when the enumeration starts, errors are thrown when the enumeration starts, the response is
+  released when the enumeration ends (also with `break`), and nothing is retried once the events are being read.
+- The `Last-Event-ID` reconnection is not automatic: when the stream ends or fails, read the `EventId` of the last
+  event and send a new request with `Header("Last-Event-ID", id)` if the server supports it.
+- The data is deserialized with the JSON configuration of the builder (`Json(MyJsonContext.Default)` for Native AOT);
+  `Xml()` and `CustomSerializer(...)` are not supported by the typed methods (`NotSupportedException`), the `string`
+  methods work with any serializer.
+- On `net8.0`, `netstandard2.1` and `netstandard2.0` this uses the `System.Net.ServerSentEvents` package (a dependency
+  of Mafesoft.RestClient); on .NET 9+ it is part of the framework.
 
 ### URL templates
 

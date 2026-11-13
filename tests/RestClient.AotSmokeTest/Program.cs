@@ -1,6 +1,7 @@
 using Mafesoft.RestClient;
 using System.Net;
 using System.Net.Http.Headers;
+using System.Net.ServerSentEvents;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -92,6 +93,23 @@ catch (HttpRequestException ex)
     Check(ex.Message.Contains("404"), "async enumerable error status");
 }
 
+// server-sent events: JSON data through the source generated context, the [DONE] sentinel skipped by the filter
+var chunks = new List<string?>();
+string? eventType = null;
+await foreach (SseItem<User> item in root.Command("events").PostEventsAsync<User>((type, data) => data != "[DONE]"))
+{
+    chunks.Add(item.Data.Name);
+    eventType ??= item.EventType;
+}
+Check(chunks.SequenceEqual(new[] { "a", "b" }) && eventType == "delta" && handler.LastAccept == "text/event-stream", "server-sent events");
+
+var rawEvents = new List<string>();
+await foreach (SseItem<string> item in root.Command("events").GetEventsAsync())
+{
+    rawEvents.Add(item.Data);
+}
+Check(rawEvents.Count == 3 && rawEvents[2] == "[DONE]", "server-sent events as string");
+
 Console.WriteLine(failures.Count == 0 ? "All checks passed." : $"{failures.Count} check(s) failed.");
 return failures.Count == 0 ? 0 : 1;
 
@@ -123,10 +141,13 @@ internal sealed class EchoHandler : HttpMessageHandler
 
     public string? LastQuery { get; private set; }
 
+    public string? LastAccept { get; private set; }
+
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         string path = request.RequestUri!.AbsolutePath;
         LastQuery = request.RequestUri.Query;
+        LastAccept = request.Headers.Accept.ToString();
         string body = request.Content is null ? string.Empty : await request.Content.ReadAsStringAsync(cancellationToken);
 
         if (request.Headers.Authorization?.Parameter != "token")
@@ -139,6 +160,13 @@ internal sealed class EchoHandler : HttpMessageHandler
             "/api/users" => Json(body),
             "/api/flaky" when Interlocked.Increment(ref flakyCalls) == 1 => new HttpResponseMessage(HttpStatusCode.ServiceUnavailable),
             "/api/flaky" => Json("[{\"id\":1,\"name\":\"a\"},{\"id\":2,\"name\":\"b\"}]"),
+            "/api/events" => new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(
+                    "event: delta\ndata: {\"id\":1,\"name\":\"a\"}\n\nevent: delta\ndata: {\"id\":2,\"name\":\"b\"}\n\ndata: [DONE]\n\n",
+                    Encoding.UTF8,
+                    "text/event-stream"),
+            },
             "/api/list" => Json("[{\"id\":1,\"name\":\"a\"},{\"id\":2,\"name\":\"b\"}]"),
             "/api/text" => new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("plain text") },
             "/api/upload" => new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(body) },

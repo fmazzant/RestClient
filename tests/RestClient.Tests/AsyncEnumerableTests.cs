@@ -291,7 +291,7 @@ namespace Mafesoft.RestClient.Tests
         /// A response stream that returns its content and then waits, ignoring the cancellation token, until it is
         /// disposed (or ends, when ended is true)
         /// </summary>
-        private sealed class GatedStream : Stream
+        internal sealed class GatedStream : Stream
         {
             private readonly byte[] content;
             private readonly bool ended;

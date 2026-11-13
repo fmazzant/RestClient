@@ -66,6 +66,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   released when the enumeration ends (also with `break`); the activity and the duration metric last until then.
   `Xml()` and custom serializers throw `NotSupportedException`. The existing methods are unchanged.
   ([#30](https://github.com/fmazzant/RestClient/issues/30))
+- Server-Sent Events (`text/event-stream`): `GetEventsAsync<T>()`, `PostEventsAsync<T>()` and
+  `SendEventsAsync<T>(HttpMethod)` builder methods return the events as `IAsyncEnumerable<SseItem<T>>` while they are
+  received (`System.Net.ServerSentEvents.SseParser`), with the data deserialized with the JSON configuration of the
+  builder (the `JsonTypeInfo<T>` of the configured `JsonSerializerContext` for Native AOT) and the event type, id and
+  reconnection interval of every event. An overload with a `filter` (event type, data) skips the events that do not
+  carry `T`, e.g. the `data: [DONE]` sentinel of LLM APIs; `GetEventsAsync()`, `PostEventsAsync()` and
+  `SendEventsAsync(HttpMethod)` return the data as a string. `Accept: text/event-stream` is sent unless an `Accept`
+  header is set. Same pipeline, deferred execution, exceptions, events and diagnostics as `GetAsyncEnumerable<T>()`;
+  the `Last-Event-ID` reconnection is not automatic. On `net8.0`, `netstandard2.1` and `netstandard2.0` the package now
+  depends on `System.Net.ServerSentEvents` (part of .NET 9+, so no new dependency on `net10.0`).
+  ([#34](https://github.com/fmazzant/RestClient/issues/34))
 
 ## [3.0.0] - 2026-11-11
 

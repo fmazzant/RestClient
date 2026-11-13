@@ -41,4 +41,9 @@
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="10.0.14" />
   </ItemGroup>
 
+  <!-- System.Net.ServerSentEvents (SseParser, SseItem<T>) is part of .NET 9+; older targets use the package -->
+  <ItemGroup Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))">
+    <PackageReference Include="System.Net.ServerSentEvents" Version="10.0.14" />
+  </ItemGroup>
+
 </Project>
