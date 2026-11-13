@@ -105,7 +105,7 @@ namespace Mafesoft.RestClient
                 RestResult<T> result = await ExecuteAsync<T>(method, url, logUrl, cancellationToken).ConfigureAwait(false);
 
                 stopwatch.Stop();
-                RestClientDiagnostics.Completed(activity, logger, method, logUrl, result, stopwatch.Elapsed);
+                RestClientDiagnostics.Completed(activity, logger, method, logUrl, result, stopwatch.Elapsed, clientName);
 
                 onPreCompletedAction?.Invoke(new PreCompletedEventArgs { IsCompleted = true, Result = result });
                 onCompletedAction?.Invoke(new CompletedEventArgs { Result = result, ExecutionTime = stopwatch.Elapsed });
@@ -115,7 +115,7 @@ namespace Mafesoft.RestClient
             catch (Exception ex)
             {
                 stopwatch.Stop();
-                RestClientDiagnostics.Failed(activity, logger, method, logUrl, ex, stopwatch.Elapsed);
+                RestClientDiagnostics.Failed(activity, logger, method, logUrl, ex, stopwatch.Elapsed, clientName);
                 onExceptionAction?.Invoke(ex);
                 return new RestResult<T>(ex);
             }
@@ -150,7 +150,7 @@ namespace Mafesoft.RestClient
                         {
                             refreshAttempted = true;
                             RestClientDiagnostics.RefreshingToken(logger, method, logUrl);
-                            if (await refreshTokenCoordinator.RefreshAsync(generation, cancellationToken).ConfigureAwait(false))
+                            if (await refreshTokenCoordinator.RefreshAsync(generation, method, clientName, cancellationToken).ConfigureAwait(false))
                             {
                                 lease.Dispose();
                                 continue;
@@ -193,7 +193,7 @@ namespace Mafesoft.RestClient
 
                 TimeSpan delay = retrySettings!.GetDelay(retries, retryAfter);
                 retries++;
-                RestClientDiagnostics.Retrying(logger, method, logUrl, delay, retries, retrySettings.MaxRetries, retryReason);
+                RestClientDiagnostics.Retrying(logger, method, logUrl, delay, retries, retrySettings.MaxRetries, retryReason, clientName);
                 await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
             }
         }

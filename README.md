@@ -57,7 +57,7 @@ error handling, progress bars, logging. Mafesoft.RestClient puts that code in on
 - **Real-world content.** Upload/download progress, real streaming for large files, `multipart/form-data`,
   form-url-encoded, JSON or XML.
 - **Ready for production .NET.** Native AOT and trimming (verified in CI), `ILogger` logging and OpenTelemetry tracing
-  out of the box, `IHttpClientFactory` integration.
+  and metrics out of the box, `IHttpClientFactory` integration.
 - **One API everywhere.** The same code runs on .NET Framework 4.6.2+, Xamarin/Unity (`netstandard2.0`) and .NET 10.
 
 ## Comparison with the alternatives
@@ -117,7 +117,7 @@ comparison is not one-sided.
 - HTTP/2 and HTTP/3 (`HttpVersion`, with `HttpVersionPolicy` on .NET 8+)
 - Proxy (`WebProxy`, system proxy or no proxy)
 - Cookies (`CookieContainer` per builder, e.g. a cookie-based session)
-- `ILogger` logging and OpenTelemetry tracing
+- `ILogger` logging, OpenTelemetry tracing and metrics
 - Events: `OnStart`, `OnPreCompleted`, `OnCompleted`, `OnException`, request/response preview
 
 ## Packages
@@ -737,17 +737,36 @@ RestBuilder logged = api.Logger(loggerFactory.CreateLogger("MyApi"));
 
 The builders created by [Dependency Injection](#dependency-injection) log with the category `Mafesoft.RestClient.{name}`.
 
-### Tracing (OpenTelemetry)
+### Tracing and metrics (OpenTelemetry)
 
 Every request creates an `Activity` named `RestClient {METHOD}` from the `ActivitySource` `Mafesoft.RestClient`, with
 the tags `http.request.method`, `url.full` (without query string), `http.response.status_code`,
 `rest_client.retry_count` and `error.type`. The activities of `HttpClient` (one for each attempt) are its children.
 
+The `Meter` `Mafesoft.RestClient` (`RestClientTelemetry.MeterName`, the same name) records:
+
+| Instrument | Type | Unit | Description |
+|---|---|---|---|
+| `restclient.request.duration` | histogram | `s` | Duration of a request, one measurement per `SendAsync`: retries, retry delays and refresh token included |
+| `restclient.retries` | counter | `{retry}` | Requests sent again by the retry policy (`Retry`) |
+| `restclient.refresh_token` | counter | `{refresh}` | Invocations of the refresh token func (once for concurrent `401` responses) |
+
+Tags: `http.request.method`; `restclient.client.name`, the name of the client when the builder is created by
+[Dependency Injection](#dependency-injection) (no tag otherwise); on the duration also
+`http.response.status_code` (when there is a response) and `error.type` (failed requests: the status code or the
+exception type, as on the activity). The duration of a `Stream` result does not include the reading of the body.
+The histogram suggests the bucket boundaries of `http.client.request.duration` (except on the `net8.0` build,
+where `InstrumentAdvice` does not exist). When nobody listens to the meter no tags are built.
+
 ```c#
-builder.Services.AddOpenTelemetry().WithTracing(tracing => tracing
-    .AddAspNetCoreInstrumentation()   // in ASP.NET Core, see below
-    .AddSource(RestClientTelemetry.ActivitySourceName)
-    .AddHttpClientInstrumentation());
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()   // in ASP.NET Core, see below
+        .AddSource(RestClientTelemetry.ActivitySourceName)
+        .AddHttpClientInstrumentation())
+    .WithMetrics(metrics => metrics
+        .AddMeter(RestClientTelemetry.MeterName)   // "Mafesoft.RestClient"
+        .AddHttpClientInstrumentation());
 ```
 
 In ASP.NET Core add also `AddAspNetCoreInstrumentation()` (package `OpenTelemetry.Instrumentation.AspNetCore`):
@@ -822,7 +841,8 @@ one, it owns the token cache), not scoped services.
 
 `IRestClientFactory` is in the `Mafesoft.RestClient` namespace, `AddRestClient` in
 `Microsoft.Extensions.DependencyInjection`. The builders log with the category `Mafesoft.RestClient.{name}` (the full
-type name for a typed client).
+type name for a typed client) and their [metrics](#tracing-and-metrics-opentelemetry) have the tag
+`restclient.client.name` = `{name}`.
 
 ## Samples
 

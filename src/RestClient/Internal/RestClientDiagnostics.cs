@@ -32,16 +32,58 @@ namespace Mafesoft.RestClient.Internal
     using Microsoft.Extensions.Logging;
     using System;
     using System.Diagnostics;
+    using System.Diagnostics.Metrics;
     using System.Net.Http;
 
     /// <summary>
-    /// Logging and tracing helpers
+    /// Logging, tracing and metrics helpers
     /// </summary>
     internal static class RestClientDiagnostics
     {
-        internal static readonly ActivitySource ActivitySource = new ActivitySource(
-            RestClientTelemetry.ActivitySourceName,
-            typeof(RestClientDiagnostics).Assembly.GetName().Version?.ToString());
+        private static readonly string? version = typeof(RestClientDiagnostics).Assembly.GetName().Version?.ToString();
+
+        internal static readonly ActivitySource ActivitySource = new ActivitySource(RestClientTelemetry.ActivitySourceName, version);
+
+        internal static readonly Meter Meter = new Meter(RestClientTelemetry.MeterName, version);
+
+        // tag names: the same as the trace tags and the OpenTelemetry HTTP semantic conventions
+        private const string MethodTag = "http.request.method";
+        private const string StatusCodeTag = "http.response.status_code";
+        private const string ErrorTypeTag = "error.type";
+        private const string ClientNameTag = "restclient.client.name";
+
+        // duration of a request as seen by the caller: one measurement per SendAsync, retries, retry delays,
+        // refresh token and reading of the body included (not of a Stream content, read after SendAsync)
+#if NET9_0_OR_GREATER || NETSTANDARD
+        // with the bucket boundaries recommended by OpenTelemetry for http.client.request.duration
+        // (the default boundaries of the OpenTelemetry SDK are for milliseconds); InstrumentAdvice is not available on net8.0
+        private static readonly Histogram<double> requestDuration = Meter.CreateHistogram<double>(
+            "restclient.request.duration",
+            unit: "s",
+            description: RequestDurationDescription,
+            tags: null,
+            advice: new InstrumentAdvice<double>
+            {
+                HistogramBucketBoundaries = new[] { 0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10 }
+            });
+#else
+        private static readonly Histogram<double> requestDuration = Meter.CreateHistogram<double>(
+            "restclient.request.duration",
+            unit: "s",
+            description: RequestDurationDescription);
+#endif
+
+        private const string RequestDurationDescription = "Duration of the requests sent by RestClient, retries and refresh token included.";
+
+        private static readonly Counter<long> retries = Meter.CreateCounter<long>(
+            "restclient.retries",
+            unit: "{retry}",
+            description: "Number of requests sent again by the RestClient retry policy.");
+
+        private static readonly Counter<long> refreshTokens = Meter.CreateCounter<long>(
+            "restclient.refresh_token",
+            unit: "{refresh}",
+            description: "Number of invocations of the RestClient refresh token func.");
 
         private static readonly Action<ILogger, string, string, Exception?> requestStarting = LoggerMessage.Define<string, string>(
             LogLevel.Debug, new EventId(1, "RequestStarting"), "Sending HTTP {Method} {Url}");
@@ -91,17 +133,33 @@ namespace Mafesoft.RestClient.Internal
             }
         }
 
-        internal static void Completed(Activity? activity, ILogger? logger, HttpMethod method, string url, RestResult result, TimeSpan elapsed)
+        internal static void Completed(Activity? activity, ILogger? logger, HttpMethod method, string url, RestResult result, TimeSpan elapsed, string? clientName)
         {
+            bool recordDuration = requestDuration.Enabled;
+            string? errorType = result.IsSuccessStatusCode || (activity == null && !recordDuration)
+                ? null
+                : result.Exception?.GetType().FullName ?? ((int)result.StatusCode).ToString();
+
             if (activity != null)
             {
                 activity.SetTag("http.response.status_code", (int)result.StatusCode);
                 activity.SetTag("rest_client.retry_count", result.RetryCount);
-                if (!result.IsSuccessStatusCode)
+                if (errorType != null)
                 {
-                    activity.SetTag("error.type", result.Exception?.GetType().FullName ?? ((int)result.StatusCode).ToString());
+                    activity.SetTag("error.type", errorType);
                     activity.SetStatus(ActivityStatusCode.Error);
                 }
+            }
+
+            if (recordDuration)
+            {
+                TagList tags = CreateTags(method, clientName);
+                tags.Add(StatusCodeTag, (int)result.StatusCode);
+                if (errorType != null)
+                {
+                    tags.Add(ErrorTypeTag, errorType);
+                }
+                requestDuration.Record(elapsed.TotalSeconds, tags);
             }
 
             if (logger != null && logger.IsEnabled(LogLevel.Information))
@@ -110,12 +168,19 @@ namespace Mafesoft.RestClient.Internal
             }
         }
 
-        internal static void Failed(Activity? activity, ILogger? logger, HttpMethod method, string url, Exception exception, TimeSpan elapsed)
+        internal static void Failed(Activity? activity, ILogger? logger, HttpMethod method, string url, Exception exception, TimeSpan elapsed, string? clientName)
         {
             if (activity != null)
             {
                 activity.SetTag("error.type", exception.GetType().FullName);
                 activity.SetStatus(ActivityStatusCode.Error, exception.Message);
+            }
+
+            if (requestDuration.Enabled)
+            {
+                TagList tags = CreateTags(method, clientName);
+                tags.Add(ErrorTypeTag, exception.GetType().FullName);
+                requestDuration.Record(elapsed.TotalSeconds, tags);
             }
 
             if (logger != null && logger.IsEnabled(LogLevel.Error))
@@ -124,9 +189,13 @@ namespace Mafesoft.RestClient.Internal
             }
         }
 
-        internal static void Retrying(ILogger? logger, HttpMethod method, string url, TimeSpan delay, int retryCount, int maxRetries, string reason)
+        internal static void Retrying(ILogger? logger, HttpMethod method, string url, TimeSpan delay, int retryCount, int maxRetries, string reason, string? clientName)
         {
             Activity.Current?.AddEvent(new ActivityEvent("retry"));
+            if (retries.Enabled)
+            {
+                retries.Add(1, CreateTags(method, clientName));
+            }
             if (logger != null && logger.IsEnabled(LogLevel.Warning))
             {
                 retrying(logger, method.Method, url, delay.TotalMilliseconds, retryCount, maxRetries, reason, null);
@@ -140,6 +209,27 @@ namespace Mafesoft.RestClient.Internal
             {
                 refreshingToken(logger, method.Method, url, null);
             }
+        }
+
+        /// <summary>
+        /// The refresh token func is being invoked (once for all the concurrent requests that received 401)
+        /// </summary>
+        internal static void RefreshTokenInvoked(HttpMethod method, string? clientName)
+        {
+            if (refreshTokens.Enabled)
+            {
+                refreshTokens.Add(1, CreateTags(method, clientName));
+            }
+        }
+
+        private static TagList CreateTags(HttpMethod method, string? clientName)
+        {
+            TagList tags = new TagList { { MethodTag, method.Method } };
+            if (clientName != null)
+            {
+                tags.Add(ClientNameTag, clientName);
+            }
+            return tags;
         }
 
         internal static void ContentError(ILogger? logger, HttpMethod method, string url, Type type, Exception exception)

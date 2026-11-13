@@ -23,3 +23,4 @@ Mafesoft.RestClient.RestProblemDetails.Extensions.get -> System.Collections.Gene
 const Mafesoft.RestClient.RestProblemDetails.MediaType = "application/problem+json" -> string!
 Mafesoft.RestClient.RestResult.Problem.get -> Mafesoft.RestClient.RestProblemDetails?
 Mafesoft.RestClient.RestResult.ErrorAs<TError>() -> TError?
+const Mafesoft.RestClient.RestClientTelemetry.MeterName = "Mafesoft.RestClient" -> string!

@@ -9,7 +9,7 @@
 
 A fluent and immutable builder over `HttpClient` to consume REST services: pooled connections, retry with backoff,
 refresh token, timeout, JSON (System.Text.Json, Native AOT ready) or XML serialization, multipart and form-url-encoded
-uploads, upload/download progress, `ILogger` logging and OpenTelemetry tracing. The result is a `RestResult<T>`
+uploads, upload/download progress, `ILogger` logging, OpenTelemetry tracing and metrics. The result is a `RestResult<T>`
 (status code, headers, content, error) instead of an exception.
 
 Target frameworks: .NET 10, .NET 8, .NET Standard 2.1, .NET Standard 2.0 (.NET Framework 4.6.2+, Xamarin, Unity).

@@ -84,6 +84,7 @@ namespace Mafesoft.RestClient
         private RefreshTokenCoordinator? refreshTokenCoordinator;
         private RetrySettings? retrySettings;
         private ILogger? logger;
+        private string? clientName;
         private object? payloadContent;
         private bool isEnabledFormUrlEncoded;
         private Dictionary<string, string>? formUrlEncodedKeyValues;
@@ -611,6 +612,16 @@ namespace Mafesoft.RestClient
         /// <returns></returns>
         public RestBuilder Logger(ILogger? logger)
             => With(r => r.logger = logger);
+
+        /// <summary>
+        /// Sets the client name added to the metrics (tag restclient.client.name), null for no tag.
+        /// Internal: set by IRestClientFactory of Mafesoft.RestClient.Extensions.DependencyInjection
+        /// (InternalsVisibleTo): keep the signature compatible with the released versions of that package.
+        /// </summary>
+        /// <param name="name">The name of the client</param>
+        /// <returns></returns>
+        internal RestBuilder ClientName(string? name)
+            => With(r => r.clientName = name);
 
         #endregion
 
