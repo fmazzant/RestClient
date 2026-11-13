@@ -20,6 +20,8 @@ works from `netstandard2.0` (.NET Framework 4.6.2+, Xamarin, Unity) to `net10.0`
 The changes of every release are listed in the [CHANGELOG](CHANGELOG.md). To report a security problem, read the
 [security policy](SECURITY.md).
 
+If RestClient is useful to you, consider [supporting the project](#support). ☕
+
 ## Table of contents
 
 - [Why Mafesoft.RestClient](#why-mafesoftrestclient)
@@ -39,6 +41,7 @@ The changes of every release are listed in the [CHANGELOG](CHANGELOG.md). To rep
 - [Migrating to 3.0](#migrating-to-30)
 - [Build and test](#build-and-test)
 - [Contributing](#contributing)
+- [Support](#support)
 - [License](#license)
 
 ## Why Mafesoft.RestClient

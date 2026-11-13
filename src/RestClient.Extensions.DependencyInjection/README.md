@@ -47,6 +47,12 @@ builder.Services.AddRestClient("graph", (provider, rest) => rest
 `IRestClientFactory` is in the `Mafesoft.RestClient` namespace, `AddRestClient` in `Microsoft.Extensions.DependencyInjection`.
 The builders log with the category `Mafesoft.RestClient.{name}`.
 
+## Support
+
+If Mafesoft.RestClient.Extensions.DependencyInjection saves you time, you can say thanks with a small donation. It is never required, but it helps me keep the project maintained and up to date.
+
+[![Donate](https://img.shields.io/badge/donate-PayPal-00457C?style=flat-square&logo=paypal&logoColor=white)](https://paypal.me/fmazzant)
+
 ## Links
 
 - [Documentation](https://github.com/fmazzant/RestClient#dependency-injection)

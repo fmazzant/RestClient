@@ -41,6 +41,12 @@ RestResult<User> created = await api.Command("users").Payload(new User { Name = 
 To register the builders in the dependency injection container, on top of `IHttpClientFactory`, use
 [Mafesoft.RestClient.Extensions.DependencyInjection](https://www.nuget.org/packages/Mafesoft.RestClient.Extensions.DependencyInjection).
 
+## Support
+
+If Mafesoft.RestClient saves you time, you can say thanks with a small donation. It is never required, but it helps me keep the project maintained and up to date.
+
+[![Donate](https://img.shields.io/badge/donate-PayPal-00457C?style=flat-square&logo=paypal&logoColor=white)](https://paypal.me/fmazzant)
+
 ## Links
 
 - [Documentation](https://github.com/fmazzant/RestClient#readme)
