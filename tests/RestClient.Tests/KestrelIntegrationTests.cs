@@ -3,6 +3,7 @@ namespace Mafesoft.RestClient.Tests
 {
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Server.Kestrel.Core;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Logging;
     using System.IO.Compression;
@@ -20,10 +21,12 @@ namespace Mafesoft.RestClient.Tests
         private WebApplication app;
         private string httpUrl;
         private string httpsUrl;
+        private string http2Url;
 
         public async Task InitializeAsync()
         {
             X509Certificate2 certificate = CreateSelfSignedCertificate();
+            int http2Port = GetFreePort();
 
             WebApplicationBuilder builder = WebApplication.CreateBuilder();
             builder.Logging.ClearProviders();
@@ -31,11 +34,15 @@ namespace Mafesoft.RestClient.Tests
             {
                 kestrel.Listen(IPAddress.Loopback, 0);
                 kestrel.Listen(IPAddress.Loopback, 0, listen => listen.UseHttps(certificate));
+                // HTTP/2 without TLS (prior knowledge, h2c)
+                kestrel.Listen(IPAddress.Loopback, http2Port, listen => listen.Protocols = HttpProtocols.Http2);
             });
 
             app = builder.Build();
 
             app.MapGet("/connection", (HttpContext context) => context.Connection.Id);
+
+            app.MapGet("/protocol", (HttpContext context) => context.Request.Protocol);
 
             app.MapGet("/gzip", async (HttpContext context) =>
             {
@@ -73,7 +80,8 @@ namespace Mafesoft.RestClient.Tests
             await app.StartAsync();
 
             var addresses = app.Urls.ToList();
-            httpUrl = addresses.Single(a => a.StartsWith("http://"));
+            http2Url = $"http://127.0.0.1:{http2Port}";
+            httpUrl = addresses.Single(a => a.StartsWith("http://") && !a.EndsWith($":{http2Port}"));
             httpsUrl = addresses.Single(a => a.StartsWith("https://"));
         }
 
@@ -145,6 +153,53 @@ namespace Mafesoft.RestClient.Tests
 
             Assert.Equal(32 * 64 * 1024, total);
             Assert.Equal(total, lastProgress);
+        }
+
+        [Fact]
+        public async Task Http2_without_tls_with_the_exact_version_policy()
+        {
+            RestResult<string> http2 = await Rest.Build().Url(http2Url).Command("protocol")
+                .HttpVersion(HttpVersion.Version20, HttpVersionPolicy.RequestVersionExact)
+                .GetAsync();
+
+            Assert.Null(http2.Exception);
+            Assert.Equal(HttpStatusCode.OK, http2.StatusCode);
+            Assert.Equal("HTTP/2", http2.Content);
+            Assert.Equal(HttpVersion.Version20, http2.Version);
+        }
+
+        [Fact]
+        public async Task Http2_over_tls_is_negotiated_and_http1_is_the_default()
+        {
+            RestBuilder rest = Rest.Build().Url(httpsUrl).Command("protocol").CertificateValidation(TrustEverything);
+
+            RestResult<string> http2 = await rest.HttpVersion(HttpVersion.Version20).GetAsync();
+            RestResult<string> http1 = await rest.GetAsync();
+
+            Assert.Equal("HTTP/2", http2.Content);
+            Assert.Equal(HttpVersion.Version20, http2.Version);
+            Assert.Equal("HTTP/1.1", http1.Content);
+            Assert.Equal(HttpVersion.Version11, http1.Version);
+        }
+
+        [Fact]
+        public async Task Http2_or_lower_falls_back_to_http1_without_tls()
+        {
+            RestResult<string> result = await Rest.Build().Url(httpUrl).Command("protocol")
+                .HttpVersion(HttpVersion.Version20, HttpVersionPolicy.RequestVersionOrLower)
+                .GetAsync();
+
+            Assert.Equal("HTTP/1.1", result.Content);
+            Assert.Equal(HttpVersion.Version11, result.Version);
+        }
+
+        private static int GetFreePort()
+        {
+            var listener = new System.Net.Sockets.TcpListener(IPAddress.Loopback, 0);
+            listener.Start();
+            int port = ((IPEndPoint)listener.LocalEndpoint).Port;
+            listener.Stop();
+            return port;
         }
 
         private static X509Certificate2 CreateSelfSignedCertificate()

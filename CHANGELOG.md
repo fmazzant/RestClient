@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `HttpVersion(Version?)` builder method: sets the HTTP version of the requests (HTTP/2, HTTP/3), also when an
+  external `HttpClient` is used; `RestResult.Version` reports the negotiated version.
+  ([#35](https://github.com/fmazzant/RestClient/issues/35))
+- `HttpVersion(Version, HttpVersionPolicy)` builder method (.NET 8+ only): sets the version and how it is negotiated,
+  e.g. HTTP/3 with fallback (`RequestVersionOrLower`) or HTTP/2 without TLS (`RequestVersionExact`).
+  ([#35](https://github.com/fmazzant/RestClient/issues/35))
+
 ## [3.0.0] - 2026-11-11
 
 The `Mafesoft.*` release: the packages and the namespaces have a new name and a few APIs changed.

@@ -112,6 +112,7 @@ comparison is not one-sided.
 - Bearer/basic authentication, refresh token, `NetworkCredential`, per-builder certificate validation
 - Retry with backoff and `Retry-After`, timeout per attempt, cancellation
 - Pooled handlers, or your own `HttpClient` / `IHttpClientFactory`
+- HTTP/2 and HTTP/3 (`HttpVersion`, with `HttpVersionPolicy` on .NET 8+)
 - `ILogger` logging and OpenTelemetry tracing
 - Events: `OnStart`, `OnPreCompleted`, `OnCompleted`, `OnException`, request/response preview
 
@@ -288,7 +289,37 @@ RestResult<List<User>> users = await Rest.Build(httpClient)   // or Rest.Build()
 The external `HttpClient` is never disposed by RestClient. `NetworkCredential`, `CertificateValidation`,
 `CertificateOption`, `EnableGZipCompression` and `OnConfigureHttpClient` configure the `HttpClient` managed by
 RestClient, so they are not applied to an external one: configure them on your handler. Headers, authentication,
-timeout, retry, serialization, progress and all the events work in both cases.
+HTTP version, timeout, retry, serialization, progress and all the events work in both cases.
+
+### HTTP/2 and HTTP/3
+
+The requests use HTTP/1.1 unless you choose another version with `HttpVersion`. The version is set on every request,
+so it works also with your own `HttpClient`; `RestResult.Version` reports the version negotiated with the server.
+
+```c#
+// HTTP/2 over https: negotiated with the server (ALPN), HTTP/1.1 when the server does not support it
+RestResult<User> user = await api
+    .HttpVersion(HttpVersion.Version20)
+    .Command("users").Command(1)
+    .GetAsync<User>();
+Version? negotiated = user.Version;
+
+// .NET 8+: HTTP/3 with a fallback to HTTP/2 or HTTP/1.1
+RestBuilder http3 = api.HttpVersion(HttpVersion.Version30, HttpVersionPolicy.RequestVersionOrLower);
+
+// .NET 8+: HTTP/2 without TLS (h2c, prior knowledge), for example an internal service over http
+RestBuilder h2c = Rest.Build()
+    .Url("http://localhost:5000")
+    .HttpVersion(HttpVersion.Version20, HttpVersionPolicy.RequestVersionExact);
+```
+
+- On .NET 8+ `HttpVersion(version)` uses the default policy `RequestVersionOrLower`: over `http://` it means HTTP/1.1,
+  use `RequestVersionExact` or `RequestVersionOrHigher` for HTTP/2 without TLS. `HttpVersion(null)` goes back to the
+  default.
+- The `HttpVersionPolicy` overload exists only on .NET 8+. On `netstandard2.x` only the version is set: HTTP/2 works
+  when the app runs on .NET Core 3.0+, while .NET Framework supports only HTTP/1.0 and HTTP/1.1.
+- HTTP/3 needs .NET 8+ and QUIC support in the operating system (msquic on Windows 11 / Windows Server 2022+, libmsquic
+  on Linux).
 
 ## Content
 
