@@ -78,6 +78,7 @@ namespace Mafesoft.RestClient
         private IWebProxy? proxy;
         private CookieContainer? cookies;
         private Func<AuthenticationHeaderValue>? onAuthentication;
+        private Func<CancellationToken, Task<AuthenticationHeaderValue>>? onAuthenticationAsync;
         private Action<HttpRequestHeaders>? onRequestHeaders;
         private bool enabledCompression;
         private RefreshTokenCoordinator? refreshTokenCoordinator;
@@ -320,11 +321,35 @@ namespace Mafesoft.RestClient
         /// <summary>
         /// The Authorization header for an HTTP request. The func is invoked for every request,
         /// so after a refresh token the new value is used.
+        /// It replaces any authentication set before (also an asynchronous one); null removes the authentication.
         /// </summary>
         /// <param name="authentication"></param>
         /// <returns></returns>
         public RestBuilder Authentication(Func<AuthenticationHeaderValue>? authentication)
-            => With(r => r.onAuthentication = authentication);
+            => With(r =>
+            {
+                r.onAuthentication = authentication;
+                r.onAuthenticationAsync = null;
+            });
+
+        /// <summary>
+        /// The Authorization header for an HTTP request, provided asynchronously (e.g. a token from MSAL,
+        /// a cache or a secret store). The func is invoked for every attempt: the first request, every retry
+        /// and the request sent again after a refresh token. A null header sends the request without authorization.
+        /// An exception thrown by the func is reported by the result, like the other errors of the request.
+        /// It replaces any authentication set before; null removes the authentication.
+        /// </summary>
+        /// <param name="authenticationProvider">
+        /// The func that provides the header; it receives the cancellation token of the attempt
+        /// (canceled by the request token and by the Timeout).
+        /// </param>
+        /// <returns></returns>
+        public RestBuilder Authentication(Func<CancellationToken, Task<AuthenticationHeaderValue>>? authenticationProvider)
+            => With(r =>
+            {
+                r.onAuthentication = null;
+                r.onAuthenticationAsync = authenticationProvider;
+            });
 
         /// <summary>
         /// The Authorization header for an HTTP request
@@ -342,6 +367,33 @@ namespace Mafesoft.RestClient
         /// <returns></returns>
         public RestBuilder Authentication(string scheme, string? parameter)
             => Authentication(() => new AuthenticationHeaderValue(scheme, parameter));
+
+        /// <summary>
+        /// The bearer token of the Authorization header (<c>Authorization: Bearer &lt;token&gt;</c>), provided asynchronously
+        /// (e.g. a token from MSAL, a cache or a secret store). The func is invoked for every attempt: the first request,
+        /// every retry and the request sent again after a refresh token. A null or empty token sends the request without
+        /// authorization. An exception thrown by the func is reported by the result, like the other errors of the request.
+        /// It replaces any authentication set before; null removes the authentication.
+        /// </summary>
+        /// <param name="tokenProvider">
+        /// The func that provides the token; it receives the cancellation token of the attempt
+        /// (canceled by the request token and by the Timeout).
+        /// </param>
+        /// <returns></returns>
+        public RestBuilder BearerToken(Func<CancellationToken, Task<string>>? tokenProvider)
+        {
+            if (tokenProvider == null)
+            {
+                return Authentication((Func<CancellationToken, Task<AuthenticationHeaderValue>>?)null);
+            }
+
+            return Authentication(async cancellationToken =>
+            {
+                string token = await (tokenProvider(cancellationToken)
+                    ?? throw new InvalidOperationException("The bearer token provider returned a null task.")).ConfigureAwait(false);
+                return string.IsNullOrEmpty(token) ? null! : new AuthenticationHeaderValue("Bearer", token);
+            });
+        }
 
         #endregion
 

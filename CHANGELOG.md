@@ -32,6 +32,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   are literal braces. The url is a template only when at least one `Route` value is set: without `Route` it is sent
   unchanged, as before.
   ([#31](https://github.com/fmazzant/RestClient/issues/31))
+- Asynchronous token provider: `BearerToken(Func<CancellationToken, Task<string>>?)` and
+  `Authentication(Func<CancellationToken, Task<AuthenticationHeaderValue>>?)` builder methods, e.g.
+  `BearerToken(async ct => await tokens.GetTokenAsync(ct))`, for tokens from MSAL, a cache or a secret store without
+  `.Result`. The func is invoked for every attempt (first request, retries, the request sent again after a refresh
+  token) with the cancellation token of the attempt; an exception thrown by it is reported by the result. With
+  Dependency Injection, use the `AddRestClient` overloads that receive the `IServiceProvider`. The existing
+  `Authentication` overloads are unchanged. ([#27](https://github.com/fmazzant/RestClient/issues/27))
 
 ## [3.0.0] - 2026-11-11
 

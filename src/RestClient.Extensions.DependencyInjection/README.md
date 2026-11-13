@@ -37,6 +37,11 @@ public class ReposService(IRestClientFactory factory)
 // typed client: UsersClient receives a configured RestBuilder in its constructor
 builder.Services.AddRestClient<UsersClient>((provider, rest) => rest
     .Url(provider.GetRequiredService<IConfiguration>()["Api:Url"]!));
+
+// asynchronous token provider registered in the container (resolve singletons: the provider is the root one)
+builder.Services.AddRestClient("graph", (provider, rest) => rest
+    .Url("https://graph.microsoft.com/v1.0")
+    .BearerToken(provider.GetRequiredService<ITokenProvider>().GetTokenAsync));
 ```
 
 `IRestClientFactory` is in the `Mafesoft.RestClient` namespace, `AddRestClient` in `Microsoft.Extensions.DependencyInjection`.

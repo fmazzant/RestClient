@@ -342,6 +342,26 @@ namespace Mafesoft.RestClient.Tests
             Assert.DoesNotContain("Bearer", temporary.Content);
         }
 
+        [Fact]
+        public async Task Bearer_token_provider_is_called_once_per_attempt_and_not_sent_on_redirect()
+        {
+            int calls = 0;
+            RestBuilder api = Rest.Build().Url(httpUrl).Cookies(new CookieContainer())
+                .BearerToken(async ct =>
+                {
+                    Interlocked.Increment(ref calls);
+                    await Task.Yield();
+                    return "token";
+                });
+
+            RestResult<string> temporary = await api.Command("cookies/temporary-redirect").Payload(new User { Id = 2 }).PostAsync();
+
+            Assert.Equal(HttpStatusCode.OK, temporary.StatusCode);
+            Assert.Contains("hop=307", temporary.Content);
+            Assert.DoesNotContain("Bearer", temporary.Content);
+            Assert.Equal(1, calls);
+        }
+
         private static int GetFreePort()
         {
             var listener = new System.Net.Sockets.TcpListener(IPAddress.Loopback, 0);

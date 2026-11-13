@@ -39,6 +39,7 @@ namespace Mafesoft.RestClient
     using System.Linq;
     using System.Net;
     using System.Net.Http;
+    using System.Net.Http.Headers;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
@@ -285,6 +286,11 @@ namespace Mafesoft.RestClient
 
             try
             {
+                // the authorization is computed once per attempt: the redirected requests have no Authorization header
+                AuthenticationHeaderValue? authorization = onAuthenticationAsync != null
+                    ? await GetAuthorizationAsync(onAuthenticationAsync, cancellationToken).ConfigureAwait(false)
+                    : onAuthentication?.Invoke();
+
                 HttpMethod requestMethod = method;
                 Uri requestUri = new Uri(url, UriKind.RelativeOrAbsolute);
                 bool redirected = false;
@@ -294,7 +300,7 @@ namespace Mafesoft.RestClient
                 while (true)
                 {
                     HttpResponseMessage response;
-                    using (HttpRequestMessage request = CreateRequestMessage(requestMethod, requestUri, redirected, withContent, cancellationToken))
+                    using (HttpRequestMessage request = CreateRequestMessage(requestMethod, requestUri, authorization, redirected, withContent, cancellationToken))
                     {
                         AddCookieHeader(cookieContainer, request);
                         response = await client
@@ -331,6 +337,12 @@ namespace Mafesoft.RestClient
                 throw;
             }
         }
+
+        /// <summary>
+        /// Invokes the asynchronous authentication provider of the attempt
+        /// </summary>
+        private static Task<AuthenticationHeaderValue> GetAuthorizationAsync(Func<CancellationToken, Task<AuthenticationHeaderValue>> provider, CancellationToken cancellationToken)
+            => provider(cancellationToken) ?? throw new InvalidOperationException("The authentication provider returned a null task.");
 
         /// <summary>
         /// Adds the cookies of the container for the request URI (Cookie header)
@@ -431,7 +443,7 @@ namespace Mafesoft.RestClient
         /// A redirected request has no Authorization header (as with HttpClientHandler), no content when the method
         /// has become GET, and it does not raise OnPreviewContentRequestAsString again.
         /// </summary>
-        private HttpRequestMessage CreateRequestMessage(HttpMethod method, Uri requestUri, bool redirected, bool withContent, CancellationToken cancellationToken)
+        private HttpRequestMessage CreateRequestMessage(HttpMethod method, Uri requestUri, AuthenticationHeaderValue? authorization, bool redirected, bool withContent, CancellationToken cancellationToken)
         {
             HttpRequestMessage request = new HttpRequestMessage(method, requestUri);
             try
@@ -447,9 +459,9 @@ namespace Mafesoft.RestClient
                 }
 #endif
 
-                if (onAuthentication != null && !redirected)
+                if (authorization != null && !redirected)
                 {
-                    request.Headers.Authorization = onAuthentication();
+                    request.Headers.Authorization = authorization;
                 }
 
                 onRequestHeaders?.Invoke(request.Headers);

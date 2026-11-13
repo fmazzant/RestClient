@@ -4,3 +4,5 @@ Mafesoft.RestClient.RestBuilder.Proxy(System.Net.IWebProxy? proxy) -> Mafesoft.R
 Mafesoft.RestClient.RestBuilder.SystemProxy() -> Mafesoft.RestClient.RestBuilder!
 Mafesoft.RestClient.RestBuilder.Cookies(System.Net.CookieContainer? container) -> Mafesoft.RestClient.RestBuilder!
 Mafesoft.RestClient.RestBuilder.Route(string! name, object? value) -> Mafesoft.RestClient.RestBuilder!
+Mafesoft.RestClient.RestBuilder.Authentication(System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<System.Net.Http.Headers.AuthenticationHeaderValue!>!>? authenticationProvider) -> Mafesoft.RestClient.RestBuilder!
+Mafesoft.RestClient.RestBuilder.BearerToken(System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<string!>!>? tokenProvider) -> Mafesoft.RestClient.RestBuilder!

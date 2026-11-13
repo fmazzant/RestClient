@@ -79,7 +79,7 @@ error handling, progress bars, logging. Mafesoft.RestClient puts that code in on
 | Test helpers | ⚠️ write a fake `HttpMessageHandler` | ❌ | ❌ | ✅ `Refit.Testing` | ✅ `HttpTest` |
 | `netstandard2.0` (.NET Framework 4.6.2+, Xamarin, Unity) | ✅ | ✅ | ✅ | ⚠️ `net462`+ and `net8.0`+ only | ✅ |
 | URL templates / path parameters (`users/{id}`) | ✅ `Route` (url-encoded, invariant culture) | ❌ | ✅ `AddUrlSegment` | ✅ route attributes | ⚠️ `AppendPathSegment`, no templates |
-| OAuth1 / OAuth2 flows | ❌ bearer/basic header and refresh token only | ❌ | ✅ authenticators | ❌ | ❌ |
+| OAuth1 / OAuth2 flows | ❌ bearer/basic header, async token provider and refresh token only | ❌ | ✅ authenticators | ❌ | ❌ |
 | Cookies | ✅ `Cookies(CookieContainer)` | ✅ `CookieContainer` | ✅ `CookieContainer` | ⚠️ via the handler | ✅ `CookieJar` |
 | Proxy | ✅ `Proxy` / `SystemProxy` | ✅ handler `Proxy` | ✅ `RestClientOptions.Proxy` | ⚠️ via the handler | ⚠️ via the handler |
 | Newtonsoft.Json ready to use | ⚠️ write a custom serializer | ⚠️ extra package | ✅ `RestSharp.Serializers.NewtonsoftJson` | ✅ `Refit.Newtonsoft.Json` | ✅ `Flurl.Http.Newtonsoft` |
@@ -110,7 +110,7 @@ comparison is not one-sided.
 - `multipart/form-data`, form-url-encoded, upload and download progress
 - URL templates (`users/{id}`) with url-encoded, culture invariant route values
 - Query string with url-encoding, invariant culture and repeated keys
-- Bearer/basic authentication, refresh token, `NetworkCredential`, per-builder certificate validation
+- Bearer/basic authentication, asynchronous token provider (`BearerToken(async ct => ...)`), refresh token, `NetworkCredential`, per-builder certificate validation
 - Retry with backoff and `Retry-After`, timeout per attempt, cancellation
 - Pooled handlers, or your own `HttpClient` / `IHttpClientFactory`
 - HTTP/2 and HTTP/3 (`HttpVersion`, with `HttpVersionPolicy` on .NET 8+)
@@ -561,6 +561,28 @@ RestBuilder bearer = api.Authentication("Bearer", accessToken);
 RestBuilder current = api.Authentication(() => new AuthenticationHeaderValue("Bearer", tokenStore.AccessToken));
 ```
 
+### Asynchronous token provider
+
+When the token comes from an asynchronous source (MSAL, a token cache, a secret store, an OAuth2/OIDC client), pass an
+async func to `BearerToken` (`Authorization: Bearer <token>`) or to `Authentication` (any scheme): no `.Result` needed.
+
+```c#
+RestBuilder msal = api.BearerToken(async cancellationToken =>
+    (await app.AcquireTokenForClient(scopes).ExecuteAsync(cancellationToken)).AccessToken);
+
+RestBuilder custom = api.Authentication(async cancellationToken =>
+    new AuthenticationHeaderValue("Bearer", await tokenProvider.GetTokenAsync(cancellationToken)));
+```
+
+- The func is invoked for **every attempt**: the first request, every [retry](#retry) and the request sent again after
+  a [refresh token](#refresh-token), so it always provides the current token (cache it in your provider if needed).
+  The redirects followed by RestClient are part of the same attempt and never receive the `Authorization` header.
+- It receives the `CancellationToken` of the attempt: canceled by the token of the request and by the `Timeout`
+  (a provider that times out is retried like a request that times out).
+- An exception thrown by the func is reported by the result (`result.Exception`, `OnException`) like the other errors:
+  `SendAsync` never throws. A `null` header, or a `null` / empty token, sends the request without authorization.
+- The last `Authentication(...)` / `BearerToken(...)` call wins; `BearerToken(null)` removes the authentication.
+
 ### Refresh token
 
 Pass the refresh func to `RefreshToken`: when a response is `401 Unauthorized` the func is invoked and, if it returns a
@@ -739,6 +761,21 @@ public class UsersClient(RestBuilder rest)
     public Task<RestResult<User>> GetAsync(int id) => rest.Command("users").Command(id).GetAsync<User>();
 }
 ```
+
+The overloads of `AddRestClient` that receive the `IServiceProvider` are the place for an
+[asynchronous token provider](#asynchronous-token-provider) registered in the container:
+
+```c#
+builder.Services.AddSingleton<ITokenProvider, MsalTokenProvider>();
+builder.Services.AddRestClient("graph", (provider, rest) =>
+{
+    ITokenProvider tokens = provider.GetRequiredService<ITokenProvider>();
+    return rest.Url("https://graph.microsoft.com/v1.0").BearerToken(tokens.GetTokenAsync);
+});
+```
+
+The provider passed to the configuration is the root `IServiceProvider`: resolve singletons (a token provider usually is
+one, it owns the token cache), not scoped services.
 
 `IRestClientFactory` is in the `Mafesoft.RestClient` namespace, `AddRestClient` in
 `Microsoft.Extensions.DependencyInjection`. The builders log with the category `Mafesoft.RestClient.{name}` (the full
