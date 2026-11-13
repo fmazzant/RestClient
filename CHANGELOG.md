@@ -5,7 +5,15 @@ All notable changes to the `Mafesoft.RestClient*` packages (`Mafe.RestClient*` u
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [3.1.0] - Unreleased
+
+New features, no breaking changes: HTTP/2 and HTTP/3, proxy, cookies, URL templates, asynchronous token provider,
+Problem Details, metrics, streaming of JSON arrays and Server-Sent Events.
+
+```
+dotnet add package Mafesoft.RestClient --version 3.1.0
+dotnet add package Mafesoft.RestClient.Extensions.DependencyInjection --version 3.1.0
+```
 
 ### Added
 

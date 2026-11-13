@@ -1,1 +1,2 @@
 #nullable enable
+Mafesoft.RestClient.RestBuilder.HttpVersion(System.Version! version, System.Net.Http.HttpVersionPolicy policy) -> Mafesoft.RestClient.RestBuilder!
