@@ -41,7 +41,6 @@ If RestClient is useful to you, consider [supporting the project](#support). ☕
 - [Migrating to 3.0](#migrating-to-30)
 - [Build and test](#build-and-test)
 - [Contributing](#contributing)
-- [Support](#support)
 - [License](#license)
 
 ## Why Mafesoft.RestClient
