@@ -23,7 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RestClient\RestClient.csproj" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.14" />
+    <PackageReference Include="Microsoft.Extensions.Http" />
   </ItemGroup>
 
 </Project>
