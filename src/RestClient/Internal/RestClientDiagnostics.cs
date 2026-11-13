@@ -53,7 +53,8 @@ namespace Mafesoft.RestClient.Internal
         private const string ClientNameTag = "restclient.client.name";
 
         // duration of a request as seen by the caller: one measurement per SendAsync, retries, retry delays,
-        // refresh token and reading of the body included (not of a Stream content, read after SendAsync)
+        // refresh token and reading of the body included (not of a Stream content, read after SendAsync; for an
+        // IAsyncEnumerable until the end of the enumeration)
 #if NET9_0_OR_GREATER || NETSTANDARD
         // with the bucket boundaries recommended by OpenTelemetry for http.client.request.duration
         // (the default boundaries of the OpenTelemetry SDK are for milliseconds); InstrumentAdvice is not available on net8.0
@@ -134,16 +135,23 @@ namespace Mafesoft.RestClient.Internal
         }
 
         internal static void Completed(Activity? activity, ILogger? logger, HttpMethod method, string url, RestResult result, TimeSpan elapsed, string? clientName)
+            => Completed(activity, logger, method, url, (int)result.StatusCode, result.IsSuccessStatusCode, result.Exception, result.RetryCount, elapsed, clientName);
+
+        /// <summary>
+        /// A response has been received (statusCode); success is false for an error status code or a content that
+        /// cannot be read (contentException)
+        /// </summary>
+        internal static void Completed(Activity? activity, ILogger? logger, HttpMethod method, string url, int statusCode, bool success, Exception? contentException, int retryCount, TimeSpan elapsed, string? clientName)
         {
             bool recordDuration = requestDuration.Enabled;
-            string? errorType = result.IsSuccessStatusCode || (activity == null && !recordDuration)
+            string? errorType = success || (activity == null && !recordDuration)
                 ? null
-                : result.Exception?.GetType().FullName ?? ((int)result.StatusCode).ToString();
+                : contentException?.GetType().FullName ?? statusCode.ToString();
 
             if (activity != null)
             {
-                activity.SetTag("http.response.status_code", (int)result.StatusCode);
-                activity.SetTag("rest_client.retry_count", result.RetryCount);
+                activity.SetTag("http.response.status_code", statusCode);
+                activity.SetTag("rest_client.retry_count", retryCount);
                 if (errorType != null)
                 {
                     activity.SetTag("error.type", errorType);
@@ -154,7 +162,7 @@ namespace Mafesoft.RestClient.Internal
             if (recordDuration)
             {
                 TagList tags = CreateTags(method, clientName);
-                tags.Add(StatusCodeTag, (int)result.StatusCode);
+                tags.Add(StatusCodeTag, statusCode);
                 if (errorType != null)
                 {
                     tags.Add(ErrorTypeTag, errorType);
@@ -164,7 +172,7 @@ namespace Mafesoft.RestClient.Internal
 
             if (logger != null && logger.IsEnabled(LogLevel.Information))
             {
-                requestCompleted(logger, (int)result.StatusCode, method.Method, url, elapsed.TotalMilliseconds, null);
+                requestCompleted(logger, statusCode, method.Method, url, elapsed.TotalMilliseconds, null);
             }
         }
 

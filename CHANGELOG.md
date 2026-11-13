@@ -56,6 +56,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ClientName(string?)` builder method: the logical name of the client, used as the `restclient.client.name` tag on
   the metrics; `IRestClientFactory` / `AddRestClient` set it to the name of the client, `null` removes it.
   ([#29](https://github.com/fmazzant/RestClient/issues/29))
+- JSON arrays streamed as `IAsyncEnumerable<T>`: `GetAsyncEnumerable<T>()`, `PostAsyncEnumerable<T>()` and
+  `SendAsyncEnumerable<T>(HttpMethod)` builder methods return the items while they are downloaded
+  (`JsonSerializer.DeserializeAsyncEnumerable`, with the `JsonTypeInfo<T>` of the configured `JsonSerializerContext`
+  for Native AOT), without buffering the body. The request is sent when the enumeration starts; headers,
+  authentication, cookies, timeout per attempt, retry and refresh token apply until the headers of a successful
+  response. Errors are thrown when the enumeration starts: the `HttpRequestException` of `EnsureSuccessStatusCode()`
+  for an error status code or a failed request, `OperationCanceledException` for a cancellation. The response is
+  released when the enumeration ends (also with `break`); the activity and the duration metric last until then.
+  `Xml()` and custom serializers throw `NotSupportedException`. The existing methods are unchanged.
+  ([#30](https://github.com/fmazzant/RestClient/issues/30))
 
 ## [3.0.0] - 2026-11-11
 

@@ -328,21 +328,33 @@ namespace Mafesoft.RestClient
         {
             if (Response == null)
             {
-                throw new HttpRequestException(Exception?.Message ?? "No response received.", Exception);
+                throw CreateRequestException(Exception);
             }
 
             if (!Response.IsSuccessStatusCode)
             {
-                throw new HttpRequestException($"Response status code does not indicate success: {(int)Response.StatusCode} ({Response.ReasonPhrase}).");
+                throw CreateStatusCodeException(Response);
             }
 
             if (Exception != null)
             {
-                throw new HttpRequestException(Exception.Message, Exception);
+                throw CreateRequestException(Exception);
             }
 
             return this;
         }
+
+        /// <summary>
+        /// The exception of EnsureSuccessStatusCode for a request that failed (no response or unreadable content)
+        /// </summary>
+        internal static HttpRequestException CreateRequestException(Exception? exception)
+            => new HttpRequestException(exception?.Message ?? "No response received.", exception);
+
+        /// <summary>
+        /// The exception of EnsureSuccessStatusCode for a response with a status code that is not a success status code
+        /// </summary>
+        internal static HttpRequestException CreateStatusCodeException(HttpResponseMessage response)
+            => new HttpRequestException($"Response status code does not indicate success: {(int)response.StatusCode} ({response.ReasonPhrase}).");
 
         #endregion
 

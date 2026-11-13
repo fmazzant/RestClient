@@ -25,3 +25,6 @@ Mafesoft.RestClient.RestResult.Problem.get -> Mafesoft.RestClient.RestProblemDet
 Mafesoft.RestClient.RestResult.ErrorAs<TError>() -> TError?
 const Mafesoft.RestClient.RestClientTelemetry.MeterName = "Mafesoft.RestClient" -> string!
 Mafesoft.RestClient.RestBuilder.ClientName(string? name) -> Mafesoft.RestClient.RestBuilder!
+Mafesoft.RestClient.RestBuilder.GetAsyncEnumerable<T>(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<T>!
+Mafesoft.RestClient.RestBuilder.PostAsyncEnumerable<T>(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<T>!
+Mafesoft.RestClient.RestBuilder.SendAsyncEnumerable<T>(System.Net.Http.HttpMethod! method, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<T>!

@@ -122,9 +122,22 @@ namespace Mafesoft.RestClient
         }
 
         /// <summary>
-        /// Sends the request with the retry policy and the refresh token
+        /// Sends the request with the retry policy and the refresh token and reads the response as T
         /// </summary>
-        private async Task<RestResult<T>> ExecuteAsync<T>(HttpMethod method, string url, string logUrl, CancellationToken cancellationToken)
+        private Task<RestResult<T>> ExecuteAsync<T>(HttpMethod method, string url, string logUrl, CancellationToken cancellationToken)
+            => ExecuteAsync(method, url, logUrl, async (lease, retries, attemptToken) =>
+            {
+                RestResult<T> result = await MaterializeAsync<T>(method, logUrl, lease, attemptToken).ConfigureAwait(false);
+                result.RetryCount = retries;
+                return result;
+            }, cancellationToken);
+
+        /// <summary>
+        /// Sends the request with the retry policy and the refresh token (each attempt limited by the Timeout) until a
+        /// response that is not retried is received, then passes it to complete with the number of retries and the
+        /// cancellation token of the attempt. complete owns the lease (it is disposed here only if complete throws).
+        /// </summary>
+        private async Task<TResult> ExecuteAsync<TResult>(HttpMethod method, string url, string logUrl, Func<ResponseLease, int, CancellationToken, Task<TResult>> complete, CancellationToken cancellationToken)
         {
             int retries = 0;
             bool refreshAttempted = false;
@@ -159,9 +172,7 @@ namespace Mafesoft.RestClient
 
                         if (!IsTransient(response.StatusCode) || !CanRetry(method, retries))
                         {
-                            RestResult<T> result = await MaterializeAsync<T>(method, logUrl, lease, attemptSource.Token).ConfigureAwait(false);
-                            result.RetryCount = retries;
-                            return result;
+                            return await complete(lease, retries, attemptSource.Token).ConfigureAwait(false);
                         }
 
                         retryAfter = GetRetryAfter(response);

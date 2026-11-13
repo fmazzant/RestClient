@@ -83,7 +83,7 @@ error handling, progress bars, logging. Mafesoft.RestClient puts that code in on
 | Cookies | ✅ `Cookies(CookieContainer)` | ✅ `CookieContainer` | ✅ `CookieContainer` | ⚠️ via the handler | ✅ `CookieJar` |
 | Proxy | ✅ `Proxy` / `SystemProxy` | ✅ handler `Proxy` | ✅ `RestClientOptions.Proxy` | ⚠️ via the handler | ⚠️ via the handler |
 | Newtonsoft.Json ready to use | ⚠️ write a custom serializer | ⚠️ extra package | ✅ `RestSharp.Serializers.NewtonsoftJson` | ✅ `Refit.Newtonsoft.Json` | ✅ `Flurl.Http.Newtonsoft` |
-| Streaming a JSON array as `IAsyncEnumerable<T>` | ❌ planned ([#30](https://github.com/fmazzant/RestClient/issues/30)) | ✅ `GetFromJsonAsAsyncEnumerable` | ❔ | ❔ | ❔ |
+| Streaming a JSON array as `IAsyncEnumerable<T>` | ✅ `GetAsyncEnumerable<T>` | ✅ `GetFromJsonAsAsyncEnumerable` | ❔ | ❔ | ❔ |
 | Community, documentation, Q&A | ❌ small | ✅ part of .NET | ✅ large | ✅ large | ✅ large |
 
 ✅ built in, ⚠️ partial or extra work, ❌ not available, ❔ not verified. Checked in November 2026 against .NET 10, RestSharp 114.1.0,
@@ -106,6 +106,7 @@ comparison is not one-sided.
 - Fluent, immutable and thread-safe builder (`Rest.Build()`)
 - `Get`, `Post`, `Put`, `Patch`, `Delete`, `Head`, `Options` and any other method with `SendAsync<T>(HttpMethod)`
 - Results as `string`, `byte[]`, `Stream` (not buffered) or a DTO
+- JSON arrays streamed as `IAsyncEnumerable<T>` (`GetAsyncEnumerable<T>()`), without buffering the body
 - JSON with System.Text.Json (source generated `JsonSerializerContext` for Native AOT), XML, custom serializers
 - `multipart/form-data`, form-url-encoded, upload and download progress
 - URL templates (`users/{id}`) with url-encoded, culture invariant route values
@@ -221,6 +222,37 @@ await file.Content!.CopyToAsync(destination);
 ```
 
 An empty body (for example `204 No Content`) is a `null` content.
+
+### Streaming a JSON array
+
+`GetAsyncEnumerable<T>()` returns the items of a JSON array as an `IAsyncEnumerable<T>` while they are downloaded
+(`JsonSerializer.DeserializeAsyncEnumerable`): the body is never buffered, so the memory does not grow with the number
+of items. `PostAsyncEnumerable<T>()` and `SendAsyncEnumerable<T>(HttpMethod)` do the same with a payload or another
+method.
+
+```c#
+await foreach (Order order in api.Command("orders").GetAsyncEnumerable<Order>(cancellationToken))
+{
+    Console.WriteLine(order.Id);
+}
+```
+
+- The request is sent when the enumeration starts, and again at every enumeration.
+- Headers, authentication, cookies, URL templates, the `Timeout` of each attempt, retry and refresh token apply until
+  the headers of a successful response are received; once the items are being read nothing is retried and only the
+  cancellation token stops the download.
+- Unlike the other methods, errors are **thrown** when the enumeration starts: a status code that is not a success
+  status code, or a failed request, throws the `HttpRequestException` of `result.EnsureSuccessStatusCode()` (a timeout
+  is its inner `TimeoutException`), a cancellation throws `OperationCanceledException`, an invalid JSON throws
+  `JsonException`. Use `GetAsync<T>()` when you need the error body (`result.Problem`, `result.ErrorAs<T>()`).
+- The response is released when the enumeration ends, also with `break` or an exception.
+- The items are deserialized with the JSON configuration of the builder; with `Json(MyJsonContext.Default)` the
+  metadata comes from the source generated context (Native AOT safe). `Xml()` and `CustomSerializer(...)` are not
+  supported (`NotSupportedException`): read a `Stream` result instead.
+- A JSON `null` item is returned as `null` (the default value of `T`). Newline delimited JSON (NDJSON) is not supported.
+- `OnStart`, `OnDownloadProgress` and `OnException` are raised; `OnPreviewContentResponseAsString`, `OnPreCompleted`
+  and `OnCompleted` are not (there is no buffered body nor `RestResult`). The activity and the duration metric last
+  until the end of the enumeration.
 
 ### URL templates
 
@@ -659,7 +691,8 @@ see [Dependency Injection](#dependency-injection).
 
 ### Handling the result
 
-Requests never throw: HTTP errors, network errors, timeouts and cancellations are reported in the result.
+Requests never throw: HTTP errors, network errors, timeouts and cancellations are reported in the result (except
+the streamed JSON arrays, see [Streaming a JSON array](#streaming-a-json-array)).
 
 ```c#
 RestResult<User> result = await api.Command("users").Command(1).GetAsync<User>();
@@ -755,7 +788,8 @@ Tags: `http.request.method`; `restclient.client.name`, the name of the client wh
 [Dependency Injection](#dependency-injection) or set with `ClientName("name")` when you build the client yourself
 (no tag otherwise); on the duration also
 `http.response.status_code` (when there is a response) and `error.type` (failed requests: the status code or the
-exception type, as on the activity). The duration of a `Stream` result does not include the reading of the body.
+exception type, as on the activity). The duration of a `Stream` result does not include the reading of the body;
+the duration of `GetAsyncEnumerable<T>()` lasts until the end of the enumeration.
 The histogram suggests the bucket boundaries of `http.client.request.duration` (except on the `net8.0` build,
 where `InstrumentAdvice` does not exist). When nobody listens to the meter no tags are built.
 

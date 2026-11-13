@@ -72,6 +72,26 @@ using (RestResult<Stream> streamProblem = await root.Command("problem").GetAsync
     Check(streamProblem.Problem?.Status == 409 && streamProblem.ErrorAs<string>()?.Contains("traceId") == true, "stream problem details");
 }
 
+// JSON array streamed as IAsyncEnumerable<T>, metadata from the source generated context
+var streamed = new List<string?>();
+await foreach (User user in root.Command("list").GetAsyncEnumerable<User>())
+{
+    streamed.Add(user.Name);
+}
+Check(streamed.SequenceEqual(new[] { "a", "b" }), "async enumerable");
+
+try
+{
+    await foreach (User user in root.Command("missing").GetAsyncEnumerable<User>())
+    {
+    }
+    Check(false, "async enumerable error status");
+}
+catch (HttpRequestException ex)
+{
+    Check(ex.Message.Contains("404"), "async enumerable error status");
+}
+
 Console.WriteLine(failures.Count == 0 ? "All checks passed." : $"{failures.Count} check(s) failed.");
 return failures.Count == 0 ? 0 : 1;
 
@@ -119,6 +139,7 @@ internal sealed class EchoHandler : HttpMessageHandler
             "/api/users" => Json(body),
             "/api/flaky" when Interlocked.Increment(ref flakyCalls) == 1 => new HttpResponseMessage(HttpStatusCode.ServiceUnavailable),
             "/api/flaky" => Json("[{\"id\":1,\"name\":\"a\"},{\"id\":2,\"name\":\"b\"}]"),
+            "/api/list" => Json("[{\"id\":1,\"name\":\"a\"},{\"id\":2,\"name\":\"b\"}]"),
             "/api/text" => new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("plain text") },
             "/api/upload" => new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(body) },
             "/api/problem" => new HttpResponseMessage(HttpStatusCode.Conflict)
