@@ -263,7 +263,7 @@ namespace Mafesoft.RestClient
             else
             {
                 client = HttpHandlerPool.CreateClient(new HttpHandlerPool.HandlerKey(
-                    enabledCompression, properties.CertificateOption, credentials, certificateCallback));
+                    enabledCompression, properties.CertificateOption, credentials, certificateCallback, useProxy, proxy));
                 // the timeout is managed by RestClient (see CreateAttemptTokenSource)
                 client.Timeout = System.Threading.Timeout.InfiniteTimeSpan;
                 owner = client;

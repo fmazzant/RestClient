@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `HttpVersion(Version, HttpVersionPolicy)` builder method (.NET 8+ only): sets the version and how it is negotiated,
   e.g. HTTP/3 with fallback (`RequestVersionOrLower`) or HTTP/2 without TLS (`RequestVersionExact`).
   ([#35](https://github.com/fmazzant/RestClient/issues/35))
+- `Proxy(IWebProxy?)` builder method: sends the requests through a proxy (e.g. a `WebProxy`), or directly to the server
+  with `Proxy(null)`, without passing your own `HttpClient`. The proxy is part of the pooled handler configuration;
+  it is not applied to an external `HttpClient`. ([#58](https://github.com/fmazzant/RestClient/issues/58))
+- `SystemProxy()` builder method: goes back to the system proxy settings, the default.
+  ([#58](https://github.com/fmazzant/RestClient/issues/58))
 
 ## [3.0.0] - 2026-11-11
 

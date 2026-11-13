@@ -73,6 +73,8 @@ namespace Mafesoft.RestClient
         private HttpClient? externalHttpClient;
         private Func<object, X509Certificate?, X509Chain?, SslPolicyErrors, bool>? certificateCallback;
         private ICredentials? credentials;
+        private bool useProxy = true;
+        private IWebProxy? proxy;
         private Func<AuthenticationHeaderValue>? onAuthentication;
         private Action<HttpRequestHeaders>? onRequestHeaders;
         private bool enabledCompression;
@@ -139,7 +141,7 @@ namespace Mafesoft.RestClient
 
         /// <summary>
         /// Sends the requests using an existing HttpClient (for example created by IHttpClientFactory).
-        /// The HttpClient is never disposed by RestClient. Credentials, CertificateValidation, CertificateOption,
+        /// The HttpClient is never disposed by RestClient. Credentials, CertificateValidation, CertificateOption, Proxy,
         /// compression and OnConfigureHttpClient are not applied: configure them on your HttpClient/handler.
         /// </summary>
         /// <param name="httpClient">The HttpClient, null to go back to the HttpClient managed by RestClient.</param>
@@ -190,6 +192,39 @@ namespace Mafesoft.RestClient
             });
         }
 #endif
+
+        #endregion
+
+        #region [ Proxy ]
+
+        /// <summary>
+        /// Sends the requests through the proxy, for example
+        /// Proxy(new WebProxy("http://proxy:8080") { Credentials = CredentialCache.DefaultCredentials }).
+        /// Null disables the proxy: the requests go directly to the server, ignoring the system proxy settings.
+        /// The proxy is part of the pooled handler configuration: builders that use the same IWebProxy instance
+        /// share the handler and its connections, a different instance gets its own handler, so define the proxy once.
+        /// It is not applied to an external HttpClient (see UseHttpClient): configure it on your handler.
+        /// </summary>
+        /// <param name="proxy">The proxy, null to send the requests without a proxy</param>
+        /// <returns></returns>
+        public RestBuilder Proxy(IWebProxy? proxy)
+            => With(r =>
+            {
+                r.useProxy = proxy != null;
+                r.proxy = proxy;
+            });
+
+        /// <summary>
+        /// Uses the system proxy settings (HttpClient.DefaultProxy on .NET): this is the default.
+        /// It undoes a previous call to Proxy. It is not applied to an external HttpClient (see UseHttpClient).
+        /// </summary>
+        /// <returns></returns>
+        public RestBuilder SystemProxy()
+            => With(r =>
+            {
+                r.useProxy = true;
+                r.proxy = null;
+            });
 
         #endregion
 

@@ -44,6 +44,9 @@ namespace Mafesoft.RestClient.Tests
 
             app.MapGet("/protocol", (HttpContext context) => context.Request.Protocol);
 
+            // the server acts as an HTTP proxy: the requests sent through it have the absolute URI of the target
+            app.MapGet("/proxied", (HttpContext context) => context.Request.Host.Value);
+
             app.MapGet("/gzip", async (HttpContext context) =>
             {
                 if (!context.Request.Headers.AcceptEncoding.ToString().Contains("gzip"))
@@ -191,6 +194,21 @@ namespace Mafesoft.RestClient.Tests
 
             Assert.Equal("HTTP/1.1", result.Content);
             Assert.Equal(HttpVersion.Version11, result.Version);
+        }
+
+        [Fact]
+        public async Task Requests_are_sent_through_the_proxy()
+        {
+            var proxy = new WebProxy(httpUrl);
+            RestBuilder rest = Rest.Build().Url("http://restclient-proxy-test.invalid").Command("proxied").Timeout(TimeSpan.FromSeconds(10));
+
+            RestResult<string> proxied = await rest.Proxy(proxy).GetAsync();
+            RestResult<string> direct = await rest.Proxy(proxy).Proxy(null).GetAsync();
+
+            Assert.Null(proxied.Exception);
+            Assert.Equal(HttpStatusCode.OK, proxied.StatusCode);
+            Assert.Equal("restclient-proxy-test.invalid", proxied.Content);
+            Assert.IsType<HttpRequestException>(direct.Exception);
         }
 
         private static int GetFreePort()

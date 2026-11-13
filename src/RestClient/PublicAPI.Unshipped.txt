@@ -1,2 +1,4 @@
 #nullable enable
 Mafesoft.RestClient.RestBuilder.HttpVersion(System.Version? version) -> Mafesoft.RestClient.RestBuilder!
+Mafesoft.RestClient.RestBuilder.Proxy(System.Net.IWebProxy? proxy) -> Mafesoft.RestClient.RestBuilder!
+Mafesoft.RestClient.RestBuilder.SystemProxy() -> Mafesoft.RestClient.RestBuilder!

@@ -448,6 +448,88 @@ namespace Mafesoft.RestClient.Tests
 #endif
 
         /// <summary>
+        /// A proxy that records the requests and points to a closed port (the requests fail)
+        /// </summary>
+        private sealed class RecordingProxy : IWebProxy
+        {
+            private readonly Uri address = new Uri($"http://127.0.0.1:{GetClosedPort()}");
+
+            public List<Uri> Requests { get; } = new List<Uri>();
+
+            public ICredentials Credentials { get; set; }
+
+            public Uri GetProxy(Uri destination)
+            {
+                lock (Requests) { Requests.Add(destination); }
+                return address;
+            }
+
+            public bool IsBypassed(Uri host) => false;
+
+            private static int GetClosedPort()
+            {
+                var listener = new System.Net.Sockets.TcpListener(IPAddress.Loopback, 0);
+                listener.Start();
+                int port = ((IPEndPoint)listener.LocalEndpoint).Port;
+                listener.Stop();
+                return port;
+            }
+        }
+
+        private static RestBuilder Unreachable()
+            => Rest.Build().Url("http://restclient-proxy-test.invalid/").Command("users").Timeout(TimeSpan.FromSeconds(10));
+
+        [Fact]
+        public async Task Proxy_is_used_by_the_pooled_handler()
+        {
+            var proxy = new RecordingProxy();
+
+            RestResult<string> result = await Unreachable().Proxy(proxy).GetAsync();
+
+            Assert.NotNull(result.Exception);
+            Assert.Contains(new Uri("http://restclient-proxy-test.invalid/users"), proxy.Requests);
+        }
+
+        [Fact]
+        public async Task Builders_with_different_proxies_use_different_handlers()
+        {
+            var first = new RecordingProxy();
+            var second = new RecordingProxy();
+
+            await Unreachable().Proxy(first).GetAsync();
+            await Unreachable().Proxy(second).GetAsync();
+            await Unreachable().Proxy(first).GetAsync();
+
+            Assert.Equal(2, first.Requests.Count);
+            Assert.Single(second.Requests);
+        }
+
+        [Fact]
+        public async Task Proxy_null_and_SystemProxy_replace_the_proxy()
+        {
+            var proxy = new RecordingProxy();
+            RestBuilder withProxy = Unreachable().Proxy(proxy);
+
+            await withProxy.Proxy(null).GetAsync();
+            await withProxy.SystemProxy().GetAsync();
+
+            Assert.Empty(proxy.Requests);
+        }
+
+        [Fact]
+        public async Task Proxy_is_not_applied_to_an_external_HttpClient()
+        {
+            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
+            var proxy = new RecordingProxy();
+
+            RestResult<string> result = await Root(handler).Proxy(proxy).GetAsync();
+
+            Assert.Equal(HttpStatusCode.OK, result.StatusCode);
+            Assert.Single(handler.Requests);
+            Assert.Empty(proxy.Requests);
+        }
+
+        /// <summary>
         /// Returns the first chunk, then waits for the release before returning the second one
         /// </summary>
         private sealed class SlowStream : Stream

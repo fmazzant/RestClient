@@ -81,7 +81,7 @@ error handling, progress bars, logging. Mafesoft.RestClient puts that code in on
 | URL templates / path parameters (`users/{id}`) | ⚠️ path segments with `Command`; templates planned ([#31](https://github.com/fmazzant/RestClient/issues/31)) | ❌ | ✅ `AddUrlSegment` | ✅ route attributes | ⚠️ `AppendPathSegment`, no templates |
 | OAuth1 / OAuth2 flows | ❌ bearer/basic header and refresh token only | ❌ | ✅ authenticators | ❌ | ❌ |
 | Cookies | ⚠️ only with your own `HttpClient` (`UseHttpClient`); planned ([#59](https://github.com/fmazzant/RestClient/issues/59)) | ✅ `CookieContainer` | ✅ `CookieContainer` | ⚠️ via the handler | ✅ `CookieJar` |
-| Proxy | ⚠️ only with your own `HttpClient` (`UseHttpClient`); planned ([#58](https://github.com/fmazzant/RestClient/issues/58)) | ✅ handler `Proxy` | ✅ `RestClientOptions.Proxy` | ⚠️ via the handler | ⚠️ via the handler |
+| Proxy | ✅ `Proxy` / `SystemProxy` | ✅ handler `Proxy` | ✅ `RestClientOptions.Proxy` | ⚠️ via the handler | ⚠️ via the handler |
 | Newtonsoft.Json ready to use | ⚠️ write a custom serializer | ⚠️ extra package | ✅ `RestSharp.Serializers.NewtonsoftJson` | ✅ `Refit.Newtonsoft.Json` | ✅ `Flurl.Http.Newtonsoft` |
 | Streaming a JSON array as `IAsyncEnumerable<T>` | ❌ planned ([#30](https://github.com/fmazzant/RestClient/issues/30)) | ✅ `GetFromJsonAsAsyncEnumerable` | ❔ | ❔ | ❔ |
 | Community, documentation, Q&A | ❌ small | ✅ part of .NET | ✅ large | ✅ large | ✅ large |
@@ -113,6 +113,7 @@ comparison is not one-sided.
 - Retry with backoff and `Retry-After`, timeout per attempt, cancellation
 - Pooled handlers, or your own `HttpClient` / `IHttpClientFactory`
 - HTTP/2 and HTTP/3 (`HttpVersion`, with `HttpVersionPolicy` on .NET 8+)
+- Proxy (`WebProxy`, system proxy or no proxy)
 - `ILogger` logging and OpenTelemetry tracing
 - Events: `OnStart`, `OnPreCompleted`, `OnCompleted`, `OnException`, request/response preview
 
@@ -270,8 +271,8 @@ bool canceled = result.IsCancellationRequested;     // OperationCanceledExceptio
 
 ### Connections and HttpClient
 
-RestClient keeps a pool of HTTP handlers, one for each combination of compression, credentials, certificate option and
-certificate validation callback. The TCP/TLS connections are reused by all the requests and, on .NET 8+, recycled
+RestClient keeps a pool of HTTP handlers, one for each combination of compression, credentials, certificate option,
+certificate validation callback and proxy. The TCP/TLS connections are reused by all the requests and, on .NET 8+, recycled
 every 2 minutes so that DNS changes are honored. Cookies are not stored.
 
 You can send the requests with your own `HttpClient`, for example one created by `IHttpClientFactory`
@@ -287,7 +288,7 @@ RestResult<List<User>> users = await Rest.Build(httpClient)   // or Rest.Build()
 ```
 
 The external `HttpClient` is never disposed by RestClient. `NetworkCredential`, `CertificateValidation`,
-`CertificateOption`, `EnableGZipCompression` and `OnConfigureHttpClient` configure the `HttpClient` managed by
+`CertificateOption`, `EnableGZipCompression`, `Proxy`, `SystemProxy` and `OnConfigureHttpClient` configure the `HttpClient` managed by
 RestClient, so they are not applied to an external one: configure them on your handler. Headers, authentication,
 HTTP version, timeout, retry, serialization, progress and all the events work in both cases.
 
@@ -320,6 +321,34 @@ RestBuilder h2c = Rest.Build()
   when the app runs on .NET Core 3.0+, while .NET Framework supports only HTTP/1.0 and HTTP/1.1.
 - HTTP/3 needs .NET 8+ and QUIC support in the operating system (msquic on Windows 11 / Windows Server 2022+, libmsquic
   on Linux).
+
+### Proxy
+
+By default the requests use the system proxy settings (`HttpClient.DefaultProxy` on .NET, the environment variables
+`HTTP_PROXY`/`HTTPS_PROXY`/`NO_PROXY` or the operating system settings). `Proxy` sends them through a proxy of your
+choice, `Proxy(null)` sends them directly to the server and `SystemProxy` goes back to the default.
+
+```c#
+// create the proxy once (e.g. a static field) and reuse it: the same instance shares the pooled handler
+IWebProxy corporateProxy = new WebProxy("http://proxy:8080")
+{
+    Credentials = CredentialCache.DefaultCredentials,
+    BypassProxyOnLocal = true,
+};
+
+RestBuilder viaProxy = api.Proxy(corporateProxy);
+
+// no proxy, ignoring the system settings
+RestBuilder direct = api.Proxy(null);
+
+// back to the system proxy (the default)
+RestBuilder system = viaProxy.SystemProxy();
+```
+
+- The proxy is part of the pooled handler configuration (see [Connections and HttpClient](#connections-and-httpclient)):
+  the same `IWebProxy` instance shares the handler and its connections, a new instance gets a new handler, so create
+  the proxy once instead of for every request.
+- The proxy is not applied to your own `HttpClient` (`UseHttpClient`): set `Proxy` on its handler.
 
 ## Content
 
