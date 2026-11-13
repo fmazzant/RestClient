@@ -148,6 +148,8 @@ namespace Mafesoft.RestClient
                         bool next;
                         try
                         {
+                            // the reader may return items already buffered without looking at the token
+                            cancellationToken.ThrowIfCancellationRequested();
                             next = await items.MoveNextAsync().ConfigureAwait(false);
                         }
                         catch (Exception ex)
