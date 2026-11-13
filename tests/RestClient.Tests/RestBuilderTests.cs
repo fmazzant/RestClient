@@ -560,6 +560,21 @@ namespace Mafesoft.RestClient.Tests
         }
 
         [Fact]
+        public async Task Url_without_route_values_is_sent_unchanged()
+        {
+            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
+            var api = Rest.Build(handler.CreateClient()).Url("https://api.example.com/items/{id}");
+
+            RestResult<string> plain = await api.Command("{{x}}").Command("{y").GetAsync();
+            RestResult<string> removed = await api.Route("id", 1).Route("id", null).GetAsync();
+
+            Assert.Null(plain.Exception);
+            Assert.Null(removed.Exception);
+            Assert.Equal("https://api.example.com/items/{id}/{{x}}/{y", handler.Requests[0].RequestUri.OriginalString);
+            Assert.Equal("https://api.example.com/items/{id}", handler.Requests[1].RequestUri.OriginalString);
+        }
+
+        [Fact]
         public async Task Route_values_belong_to_the_derived_builders()
         {
             var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);

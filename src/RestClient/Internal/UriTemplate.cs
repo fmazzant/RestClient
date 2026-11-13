@@ -35,6 +35,7 @@ namespace Mafesoft.RestClient.Internal
 
     /// <summary>
     /// Expands the {name} placeholders of the url with the route values set by RestBuilder.Route
+    /// (used only when the builder has at least one route value)
     /// </summary>
     internal static class UriTemplate
     {

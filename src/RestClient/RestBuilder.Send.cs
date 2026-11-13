@@ -704,9 +704,14 @@ namespace Mafesoft.RestClient
                 }
             }
 
-            // the {name} placeholders of the endpoint and of the commands (not of the query string parameters)
-            string expanded = UriTemplate.Expand(urlBuilder.ToString(), routeValues);
-            urlBuilder.Clear().Append(expanded);
+            // the {name} placeholders of the endpoint and of the commands (not of the query string parameters),
+            // only when Route was used: without route values the url is sent untouched, as before templates existed
+            string expanded = urlBuilder.ToString();
+            if (routeValues.Count > 0)
+            {
+                expanded = UriTemplate.Expand(expanded, routeValues);
+                urlBuilder.Clear().Append(expanded);
+            }
 
             if (parameters.Count > 0)
             {

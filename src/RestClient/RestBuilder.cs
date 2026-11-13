@@ -474,6 +474,8 @@ namespace Mafesoft.RestClient
         /// Use {{ and }} for literal braces. A value without a placeholder is ignored, so a base builder can set values
         /// used only by some requests. When a placeholder has no value the request is not sent: the result reports an
         /// InvalidOperationException. Placeholders are not supported in the scheme, host and port of the url.
+        /// The url is treated as a template only when the builder has at least one route value: without Route
+        /// (or after removing the last value) Url and Command are used untouched, braces included.
         /// </summary>
         /// <param name="name">The placeholder name, without braces (case-sensitive)</param>
         /// <param name="value">The value, null to remove a value set before</param>

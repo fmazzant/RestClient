@@ -29,7 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `Command(...)` segment, e.g. `Url("https://api/users/{id}").Route("id", 42)`. Values are formatted with the invariant
   culture and url-encoded as a single segment; a repeated placeholder gets the same value; a missing value is reported
   as `InvalidOperationException` without sending the request; values without a placeholder are ignored; `{{` and `}}`
-  are literal braces. Note: an unencoded `{` in the url now always starts a placeholder.
+  are literal braces. The url is a template only when at least one `Route` value is set: without `Route` it is sent
+  unchanged, as before.
   ([#31](https://github.com/fmazzant/RestClient/issues/31))
 
 ## [3.0.0] - 2026-11-11

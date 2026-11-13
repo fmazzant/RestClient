@@ -245,6 +245,8 @@ RestResult<Order> order = await orders
 - A value without a placeholder is ignored, so a shared root can set a value (for example `{tenant}`) used only by
   some requests. Setting a value again replaces it; like every builder method it only affects the derived builders.
 - `{{` and `}}` are literal braces; any other `{` must open a `{name}` placeholder.
+- The url is a template only when the builder has at least one `Route` value: without `Route` (or after removing the
+  last value) `Url` and `Command` are sent untouched, braces included, as in 3.0.
 
 ### Query string
 
