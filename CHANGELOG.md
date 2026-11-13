@@ -21,6 +21,7 @@ dotnet add package Mafesoft.RestClient.Extensions.DependencyInjection --version 
 - Tests: XML and custom serializers, upload/download progress, cancellation and timeouts, certificate validation,
   form and multipart edge cases. ([#25](https://github.com/fmazzant/RestClient/issues/25))
 - NuGet workflow: when the GitHub release is created by hand, the packages are attached to it instead of failing.
+- README: Support section with a PayPal donation link.
 
 ## [3.1.0] - 2026-11-13
 
