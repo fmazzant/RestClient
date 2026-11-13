@@ -171,12 +171,19 @@ jobs:
     - name: Publish on NuGet
       run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
 
+    # A release created by hand on GitHub (which also creates the tag) is kept as it is, title and notes
+    # included: only the packages are attached, replacing those of a previous run.
     - name: Create the GitHub Release
       if: github.ref_type == 'tag'
       env:
         GH_TOKEN: ${{ github.token }}
       run: |
-        gh release create "$GITHUB_REF_NAME" ./artifacts/*.nupkg ./artifacts/*.snupkg \
-          --title "$GITHUB_REF_NAME" \
-          --notes-file "$RUNNER_TEMP/release-notes.md" \
-          --verify-tag
+        if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+          echo "The release $GITHUB_REF_NAME already exists: attaching the packages"
+          gh release upload "$GITHUB_REF_NAME" ./artifacts/*.nupkg ./artifacts/*.snupkg --clobber
+        else
+          gh release create "$GITHUB_REF_NAME" ./artifacts/*.nupkg ./artifacts/*.snupkg \
+            --title "$GITHUB_REF_NAME" \
+            --notes-file "$RUNNER_TEMP/release-notes.md" \
+            --verify-tag
+        fi
