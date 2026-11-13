@@ -9,6 +9,10 @@ Thanks for helping to improve Mafesoft.RestClient! Bug reports, ideas and pull r
 ## Build and test
 
 Requirements: the .NET 10 SDK and the .NET 8 runtime (the tests also run on .NET Framework 4.8 on Windows).
+`global.json` pins the SDK to .NET 10 (any 10.0.x feature band).
+
+The package versions are managed centrally in `Directory.Packages.props` (Central Package Management): add or update
+a version there, and leave the `Version` attribute out of the `PackageReference` items in the projects.
 
 ```
 dotnet build -c Release src/RestClient.sln
