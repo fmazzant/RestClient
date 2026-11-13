@@ -7,15 +7,14 @@
     <PackageId>Mafesoft.RestClient.Extensions.DependencyInjection</PackageId>
     <Product>RestClient</Product>
     <Title>Mafesoft.RestClient.Extensions.DependencyInjection</Title>
-    <Version>3.1.0</Version>
+    <Version>3.1.1</Version>
     <Description>Registers Mafesoft.RestClient builders in the dependency injection container, on top of IHttpClientFactory (pooled handlers, delegating handlers, resilience).</Description>
     <PackageTags>rest-client, restclient, mafesoft, dependency-injection, httpclientfactory, fluent</PackageTags>
     <!-- Only the current version: the full history is in CHANGELOG.md -->
     <PackageReleaseNotes>
-      3.1.0 (no breaking changes)
-      - The builders created by IRestClientFactory carry the client name (ClientName), used as the
-        restclient.client.name tag of the metrics
-      - Requires Mafesoft.RestClient 3.1.0
+      3.1.1 (no breaking changes)
+      - No changes to the library code: same features as 3.1.0 (build and tests only)
+      - Requires Mafesoft.RestClient 3.1.1
 
       Full changelog: https://github.com/fmazzant/RestClient/blob/main/CHANGELOG.md
     </PackageReleaseNotes>
