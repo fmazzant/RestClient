@@ -33,6 +33,7 @@ namespace Mafesoft.RestClient
     using Mafesoft.RestClient.Internal;
     using Mafesoft.RestClient.Serialization;
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
@@ -248,12 +249,19 @@ namespace Mafesoft.RestClient
         #region [ Single attempt ]
 
         /// <summary>
+        /// Maximum number of redirects followed by RestClient when a cookie container is set
+        /// (the same default as HttpClientHandler.MaxAutomaticRedirections)
+        /// </summary>
+        internal const int MaxRedirects = 50;
+
+        /// <summary>
         /// Sends a single HTTP request and returns as soon as the response headers are received
         /// </summary>
         private async Task<ResponseLease> SendOnceAsync(HttpMethod method, string url, CancellationToken cancellationToken)
         {
             HttpClient client;
             IDisposable? owner;
+            CookieContainer? cookieContainer = null;
 
             if (externalHttpClient != null)
             {
@@ -262,8 +270,13 @@ namespace Mafesoft.RestClient
             }
             else
             {
+                // the cookies belong to the builder, not to the pooled handler (UseCookies = false): they are handled
+                // here for every request and, so that the Set-Cookie of the redirects are stored too, the redirects are
+                // followed here instead of by the handler
+                cookieContainer = cookies;
                 client = HttpHandlerPool.CreateClient(new HttpHandlerPool.HandlerKey(
-                    enabledCompression, properties.CertificateOption, credentials, certificateCallback, useProxy, proxy));
+                    enabledCompression, properties.CertificateOption, credentials, certificateCallback, useProxy, proxy,
+                    allowAutoRedirect: cookieContainer == null));
                 // the timeout is managed by RestClient (see CreateAttemptTokenSource)
                 client.Timeout = System.Threading.Timeout.InfiniteTimeSpan;
                 owner = client;
@@ -272,17 +285,43 @@ namespace Mafesoft.RestClient
 
             try
             {
-                using (HttpRequestMessage request = CreateRequestMessage(method, url, cancellationToken))
+                HttpMethod requestMethod = method;
+                Uri requestUri = new Uri(url, UriKind.RelativeOrAbsolute);
+                bool redirected = false;
+                bool withContent = true;
+                int redirects = 0;
+
+                while (true)
                 {
-                    HttpResponseMessage response = await client
-                        .SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
-                        .ConfigureAwait(false);
+                    HttpResponseMessage response;
+                    using (HttpRequestMessage request = CreateRequestMessage(requestMethod, requestUri, redirected, withContent, cancellationToken))
+                    {
+                        AddCookieHeader(cookieContainer, request);
+                        response = await client
+                            .SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
+                            .ConfigureAwait(false);
+                    }
 #if !NET
                     if (response.Content == null)
                     {
                         response.Content = new ByteArrayContent(Array.Empty<byte>());
                     }
 #endif
+                    StoreCookies(cookieContainer, requestUri, response);
+
+                    if (cookieContainer != null
+                        && redirects < MaxRedirects
+                        && TryGetRedirect(requestMethod, requestUri, response, out HttpMethod redirectMethod, out Uri? location))
+                    {
+                        response.Dispose();
+                        redirects++;
+                        redirected = true;
+                        withContent = withContent && redirectMethod == requestMethod;
+                        requestMethod = redirectMethod;
+                        requestUri = location!;
+                        continue;
+                    }
+
                     return new ResponseLease(response, owner);
                 }
             }
@@ -294,11 +333,107 @@ namespace Mafesoft.RestClient
         }
 
         /// <summary>
-        /// Creates the request message with headers, authentication and content
+        /// Adds the cookies of the container for the request URI (Cookie header)
         /// </summary>
-        private HttpRequestMessage CreateRequestMessage(HttpMethod method, string url, CancellationToken cancellationToken)
+        private static void AddCookieHeader(CookieContainer? container, HttpRequestMessage request)
         {
-            HttpRequestMessage request = new HttpRequestMessage(method, url);
+            Uri? uri = request.RequestUri;
+            if (container == null || uri == null || !uri.IsAbsoluteUri)
+            {
+                return;
+            }
+
+            string header = container.GetCookieHeader(uri);
+            if (!string.IsNullOrEmpty(header))
+            {
+                request.Headers.TryAddWithoutValidation("Cookie", header);
+            }
+        }
+
+        /// <summary>
+        /// Stores the cookies of the response (Set-Cookie headers) in the container
+        /// </summary>
+        private static void StoreCookies(CookieContainer? container, Uri requestUri, HttpResponseMessage response)
+        {
+            if (container == null
+                || !requestUri.IsAbsoluteUri
+                || !response.Headers.TryGetValues("Set-Cookie", out IEnumerable<string>? values))
+            {
+                return;
+            }
+
+            foreach (string value in values)
+            {
+                try
+                {
+                    container.SetCookies(requestUri, value);
+                }
+                catch (CookieException)
+                {
+                    // an invalid cookie is ignored, as HttpClientHandler does
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the next request of a redirect, with the rules of HttpClientHandler: 300, 301, 302, 303, 307 and 308
+        /// with a Location header; POST becomes GET for 300-302, every method except GET and HEAD becomes GET for 303;
+        /// a redirect from HTTPS to HTTP or to a scheme other than HTTP(S) is not followed.
+        /// </summary>
+        private static bool TryGetRedirect(HttpMethod method, Uri requestUri, HttpResponseMessage response, out HttpMethod redirectMethod, out Uri? location)
+        {
+            redirectMethod = method;
+            location = null;
+
+            int status = (int)response.StatusCode;
+            switch (status)
+            {
+                case 300:
+                case 301:
+                case 302:
+                case 303:
+                case 307:
+                case 308:
+                    break;
+                default:
+                    return false;
+            }
+
+            Uri? header = response.Headers.Location;
+            if (header == null || !requestUri.IsAbsoluteUri)
+            {
+                return false;
+            }
+
+            // a path like /next can be parsed as an absolute file URI on Unix: resolve it against the request URI
+            Uri target = header.IsAbsoluteUri && !header.IsFile ? header : new Uri(requestUri, header.OriginalString);
+            if (target.Scheme != Uri.UriSchemeHttp && target.Scheme != Uri.UriSchemeHttps)
+            {
+                return false;
+            }
+            if (requestUri.Scheme == Uri.UriSchemeHttps && target.Scheme == Uri.UriSchemeHttp)
+            {
+                return false;
+            }
+
+            if ((status <= 302 && method == HttpMethod.Post)
+                || (status == 303 && method != HttpMethod.Get && method != HttpMethod.Head))
+            {
+                redirectMethod = HttpMethod.Get;
+            }
+
+            location = target;
+            return true;
+        }
+
+        /// <summary>
+        /// Creates the request message with headers, authentication and content.
+        /// A redirected request has no Authorization header (as with HttpClientHandler), no content when the method
+        /// has become GET, and it does not raise OnPreviewContentRequestAsString again.
+        /// </summary>
+        private HttpRequestMessage CreateRequestMessage(HttpMethod method, Uri requestUri, bool redirected, bool withContent, CancellationToken cancellationToken)
+        {
+            HttpRequestMessage request = new HttpRequestMessage(method, requestUri);
             try
             {
                 if (httpVersion != null)
@@ -312,14 +447,19 @@ namespace Mafesoft.RestClient
                 }
 #endif
 
-                if (onAuthentication != null)
+                if (onAuthentication != null && !redirected)
                 {
                     request.Headers.Authorization = onAuthentication();
                 }
 
                 onRequestHeaders?.Invoke(request.Headers);
 
-                HttpContent? content = MakeHttpContent();
+                if (redirected)
+                {
+                    request.Headers.Authorization = null;
+                }
+
+                HttpContent? content = withContent ? MakeHttpContent(preview: !redirected) : null;
                 if (content != null && onUploadProgressAction != null)
                 {
                     var onProgress = onUploadProgressAction;
@@ -343,11 +483,13 @@ namespace Mafesoft.RestClient
         /// <summary>
         /// Creates the request content
         /// </summary>
-        private HttpContent? MakeHttpContent()
+        private HttpContent? MakeHttpContent(bool preview)
         {
+            Action<PreviewContentAsStringEventArgs>? onPreview = preview ? onPreviewContentRequestAsStringAction : null;
+
             if (multipartFormData != null)
             {
-                onPreviewContentRequestAsStringAction?.Invoke(new PreviewContentAsStringEventArgs
+                onPreview?.Invoke(new PreviewContentAsStringEventArgs
                 {
                     ContentAsString = multipartFormData.Describe(),
                     ContentType = typeof(MultipartFormData)
@@ -362,7 +504,7 @@ namespace Mafesoft.RestClient
                     return null;
                 }
 
-                onPreviewContentRequestAsStringAction?.Invoke(new PreviewContentAsStringEventArgs
+                onPreview?.Invoke(new PreviewContentAsStringEventArgs
                 {
                     ContentAsString = string.Join("&", formUrlEncodedKeyValues.Select(q => $"{Uri.EscapeDataString(q.Key)}={Uri.EscapeDataString(q.Value ?? string.Empty)}")),
                     ContentType = formUrlEncodedKeyValues.GetType()
@@ -379,7 +521,7 @@ namespace Mafesoft.RestClient
             {
                 Type payloadType = payloadContent.GetType();
                 string serializedObject = serializer.SerializeObject(payloadContent, payloadType, serializeOptions);
-                onPreviewContentRequestAsStringAction?.Invoke(new PreviewContentAsStringEventArgs
+                onPreview?.Invoke(new PreviewContentAsStringEventArgs
                 {
                     ContentAsString = serializedObject,
                     ContentType = payloadType

@@ -80,7 +80,7 @@ error handling, progress bars, logging. Mafesoft.RestClient puts that code in on
 | `netstandard2.0` (.NET Framework 4.6.2+, Xamarin, Unity) | ✅ | ✅ | ✅ | ⚠️ `net462`+ and `net8.0`+ only | ✅ |
 | URL templates / path parameters (`users/{id}`) | ⚠️ path segments with `Command`; templates planned ([#31](https://github.com/fmazzant/RestClient/issues/31)) | ❌ | ✅ `AddUrlSegment` | ✅ route attributes | ⚠️ `AppendPathSegment`, no templates |
 | OAuth1 / OAuth2 flows | ❌ bearer/basic header and refresh token only | ❌ | ✅ authenticators | ❌ | ❌ |
-| Cookies | ⚠️ only with your own `HttpClient` (`UseHttpClient`); planned ([#59](https://github.com/fmazzant/RestClient/issues/59)) | ✅ `CookieContainer` | ✅ `CookieContainer` | ⚠️ via the handler | ✅ `CookieJar` |
+| Cookies | ✅ `Cookies(CookieContainer)` | ✅ `CookieContainer` | ✅ `CookieContainer` | ⚠️ via the handler | ✅ `CookieJar` |
 | Proxy | ✅ `Proxy` / `SystemProxy` | ✅ handler `Proxy` | ✅ `RestClientOptions.Proxy` | ⚠️ via the handler | ⚠️ via the handler |
 | Newtonsoft.Json ready to use | ⚠️ write a custom serializer | ⚠️ extra package | ✅ `RestSharp.Serializers.NewtonsoftJson` | ✅ `Refit.Newtonsoft.Json` | ✅ `Flurl.Http.Newtonsoft` |
 | Streaming a JSON array as `IAsyncEnumerable<T>` | ❌ planned ([#30](https://github.com/fmazzant/RestClient/issues/30)) | ✅ `GetFromJsonAsAsyncEnumerable` | ❔ | ❔ | ❔ |
@@ -114,6 +114,7 @@ comparison is not one-sided.
 - Pooled handlers, or your own `HttpClient` / `IHttpClientFactory`
 - HTTP/2 and HTTP/3 (`HttpVersion`, with `HttpVersionPolicy` on .NET 8+)
 - Proxy (`WebProxy`, system proxy or no proxy)
+- Cookies (`CookieContainer` per builder, e.g. a cookie-based session)
 - `ILogger` logging and OpenTelemetry tracing
 - Events: `OnStart`, `OnPreCompleted`, `OnCompleted`, `OnException`, request/response preview
 
@@ -273,7 +274,8 @@ bool canceled = result.IsCancellationRequested;     // OperationCanceledExceptio
 
 RestClient keeps a pool of HTTP handlers, one for each combination of compression, credentials, certificate option,
 certificate validation callback and proxy. The TCP/TLS connections are reused by all the requests and, on .NET 8+, recycled
-every 2 minutes so that DNS changes are honored. Cookies are not stored.
+every 2 minutes so that DNS changes are honored. The pooled handlers never store cookies: use `Cookies` (see
+[Cookies](#cookies)) to keep them in a container of the builder.
 
 You can send the requests with your own `HttpClient`, for example one created by `IHttpClientFactory`
 (see also [Dependency Injection](#dependency-injection)):
@@ -288,7 +290,7 @@ RestResult<List<User>> users = await Rest.Build(httpClient)   // or Rest.Build()
 ```
 
 The external `HttpClient` is never disposed by RestClient. `NetworkCredential`, `CertificateValidation`,
-`CertificateOption`, `EnableGZipCompression`, `Proxy`, `SystemProxy` and `OnConfigureHttpClient` configure the `HttpClient` managed by
+`CertificateOption`, `EnableGZipCompression`, `Proxy`, `SystemProxy`, `Cookies` and `OnConfigureHttpClient` configure the `HttpClient` managed by
 RestClient, so they are not applied to an external one: configure them on your handler. Headers, authentication,
 HTTP version, timeout, retry, serialization, progress and all the events work in both cases.
 
@@ -349,6 +351,35 @@ RestBuilder system = viaProxy.SystemProxy();
   the same `IWebProxy` instance shares the handler and its connections, a new instance gets a new handler, so create
   the proxy once instead of for every request.
 - The proxy is not applied to your own `HttpClient` (`UseHttpClient`): set `Proxy` on its handler.
+
+### Cookies
+
+By default cookies are neither stored nor sent. `Cookies` gives the builder a `CookieContainer`: the cookies of the
+responses (`Set-Cookie`) are stored in it and sent back (`Cookie`) with the next requests, for example for an API with
+a cookie-based session.
+
+```c#
+var cookies = new CookieContainer();
+RestBuilder api = Rest.Build().Url("https://example.com").Cookies(cookies);
+
+await api.Command("login").Payload(credentials).PostAsync();     // stores the Set-Cookie
+RestResult<Order[]> orders = await api.Command("orders").GetAsync<Order[]>(); // sends the cookies
+
+// stop storing and sending cookies
+RestBuilder anonymous = api.Cookies(null);
+```
+
+- The container belongs to the builder, not to the pooled handler, so the handlers and their connections are still
+  shared: builders with different containers never see each other's cookies, and two users of the same application
+  get two separate sessions if each has its own container.
+- The builder is immutable, but the container is an object: the builders derived from the one with `Cookies(container)`
+  share the same container, which is the session. `CookieContainer` is thread-safe; create a new container (or call
+  `Cookies` again) for a new session.
+- The cookies set by the redirects are stored too: when a container is set, RestClient follows the redirects itself
+  (with the same rules as `HttpClientHandler`: up to 50 redirects, `POST` becomes `GET` after 300/301/302 and every
+  method except `HEAD` becomes `GET` after 303, method and content are kept for 307/308, the `Authorization` header
+  is not sent to the new location, never from HTTPS to HTTP).
+- The cookies are not applied to your own `HttpClient` (`UseHttpClient`): set `CookieContainer` on its handler.
 
 ## Content
 
@@ -788,7 +819,7 @@ Version 2.0.0 modernized the library and fixed several long-standing issues. It 
 #### Behavior changes
 
 * **Connections**: the HTTP handlers are pooled and the connections are reused (in 1.x a new handler, and a new TCP/TLS connection,
-  was created for every request). Cookies are not stored, as in 1.x.
+  was created for every request). Cookies are not stored by default, as in 1.x (see [Cookies](#cookies)).
 * **TLS certificate validation**: 1.x set `ServicePointManager.ServerCertificateValidationCallback` to *accept every certificate*
   for the whole process on .NET Framework/.NET Standard, as soon as a `RestBuilder` was created. This has been removed:
   certificates are validated by default and `CertificateValidation(...)` only affects the requests of that builder.

@@ -20,6 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   it is not applied to an external `HttpClient`. ([#58](https://github.com/fmazzant/RestClient/issues/58))
 - `SystemProxy()` builder method: goes back to the system proxy settings, the default.
   ([#58](https://github.com/fmazzant/RestClient/issues/58))
+- `Cookies(CookieContainer?)` builder method: stores the `Set-Cookie` of the responses (redirects included) in the
+  container and sends the cookies back with the next requests, e.g. for a cookie-based session. The container belongs
+  to the builder (the derived builders share it), the pooled handlers keep `UseCookies = false`; when a container is set
+  RestClient follows the redirects itself. It is not applied to an external `HttpClient`.
+  ([#59](https://github.com/fmazzant/RestClient/issues/59))
 
 ## [3.0.0] - 2026-11-11
 

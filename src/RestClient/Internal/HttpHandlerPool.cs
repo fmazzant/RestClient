@@ -99,6 +99,7 @@ namespace Mafesoft.RestClient.Internal
                         ? DecompressionMethods.GZip | DecompressionMethods.Deflate | DecompressionMethods.Brotli
                         : DecompressionMethods.None,
                     UseProxy = key.UseProxy,
+                    AllowAutoRedirect = key.AllowAutoRedirect,
                 };
 
                 if (key.Proxy != null)
@@ -126,6 +127,7 @@ namespace Mafesoft.RestClient.Internal
                 ClientCertificateOptions = key.CertificateOption,
                 UseCookies = false,
                 UseProxy = key.UseProxy,
+                AllowAutoRedirect = key.AllowAutoRedirect,
             };
 
             if (key.Proxy != null)
@@ -168,7 +170,8 @@ namespace Mafesoft.RestClient.Internal
                 ICredentials? credentials,
                 Func<object, X509Certificate?, X509Chain?, SslPolicyErrors, bool>? certificateCallback,
                 bool useProxy,
-                IWebProxy? proxy)
+                IWebProxy? proxy,
+                bool allowAutoRedirect = true)
             {
                 Compression = compression;
                 CertificateOption = certificateOption;
@@ -176,6 +179,7 @@ namespace Mafesoft.RestClient.Internal
                 CertificateCallback = certificateCallback;
                 UseProxy = useProxy;
                 Proxy = proxy;
+                AllowAutoRedirect = allowAutoRedirect;
             }
 
             public bool Compression { get; }
@@ -196,10 +200,16 @@ namespace Mafesoft.RestClient.Internal
             /// </summary>
             public IWebProxy? Proxy { get; }
 
+            /// <summary>
+            /// False when RestClient follows the redirects itself, to store the cookies of every response (see RestBuilder.Cookies)
+            /// </summary>
+            public bool AllowAutoRedirect { get; }
+
             public bool Equals(HandlerKey other)
                 => Compression == other.Compression
                 && CertificateOption == other.CertificateOption
                 && UseProxy == other.UseProxy
+                && AllowAutoRedirect == other.AllowAutoRedirect
                 && ReferenceEquals(Proxy, other.Proxy)
                 && Equals(CertificateCallback, other.CertificateCallback)
                 && CredentialsEquals(Credentials, other.Credentials);
@@ -215,6 +225,7 @@ namespace Mafesoft.RestClient.Internal
                     hash = (hash * 397) ^ (CertificateCallback?.GetHashCode() ?? 0);
                     hash = (hash * 397) ^ CredentialsHashCode(Credentials);
                     hash = (hash * 397) ^ (UseProxy ? 1 : 0);
+                    hash = (hash * 397) ^ (AllowAutoRedirect ? 1 : 0);
                     hash = (hash * 397) ^ (Proxy == null ? 0 : System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(Proxy));
                     return hash;
                 }

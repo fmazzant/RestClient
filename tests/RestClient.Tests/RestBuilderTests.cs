@@ -529,6 +529,26 @@ namespace Mafesoft.RestClient.Tests
             Assert.Empty(proxy.Requests);
         }
 
+        [Fact]
+        public async Task Cookies_are_not_applied_to_an_external_HttpClient()
+        {
+            var handler = new FakeHttpMessageHandler((r, i) =>
+            {
+                var response = new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(string.Empty) };
+                response.Headers.Add("Set-Cookie", "session=server; Path=/");
+                return response;
+            });
+            var cookies = new CookieContainer();
+            cookies.Add(new Uri("https://api.example.com/"), new Cookie("session", "client", "/"));
+
+            RestResult<string> result = await Root(handler).Cookies(cookies).GetAsync();
+
+            Assert.Equal(HttpStatusCode.OK, result.StatusCode);
+            Assert.False(handler.Requests[0].Headers.Contains("Cookie"));
+            Assert.Equal("client", cookies.GetCookies(new Uri("https://api.example.com/"))["session"].Value);
+            Assert.Equal(1, cookies.Count);
+        }
+
         /// <summary>
         /// Returns the first chunk, then waits for the release before returning the second one
         /// </summary>

@@ -47,6 +47,34 @@ namespace Mafesoft.RestClient.Tests
             // the server acts as an HTTP proxy: the requests sent through it have the absolute URI of the target
             app.MapGet("/proxied", (HttpContext context) => context.Request.Host.Value);
 
+            // cookies: login sets the session cookie, echo returns the Cookie header received by the server
+            app.MapPost("/cookies/login", (HttpContext context) =>
+            {
+                context.Response.Cookies.Append("session", context.Request.Query["user"].ToString(), new CookieOptions { Path = "/" });
+                return "logged";
+            });
+            app.MapGet("/cookies/echo", (HttpContext context) => context.Request.Headers.Cookie.ToString());
+            app.MapGet("/cookies/redirect", (HttpContext context) =>
+            {
+                context.Response.Cookies.Append("hop", "1", new CookieOptions { Path = "/" });
+                return Results.Redirect("/cookies/echo");
+            });
+            app.MapPost("/cookies/login-redirect", (HttpContext context) =>
+            {
+                context.Response.Cookies.Append("session", "redirected", new CookieOptions { Path = "/" });
+                return Results.Redirect("/cookies/echo");
+            });
+            app.MapPost("/cookies/temporary-redirect", (HttpContext context) =>
+            {
+                context.Response.Cookies.Append("hop", "307", new CookieOptions { Path = "/" });
+                return Results.Redirect("/cookies/body", permanent: false, preserveMethod: true);
+            });
+            app.MapPost("/cookies/body", async (HttpContext context) =>
+            {
+                using var reader = new StreamReader(context.Request.Body);
+                return $"{context.Request.Headers.Cookie} {context.Request.Headers.Authorization} {await reader.ReadToEndAsync()}".Trim();
+            });
+
             app.MapGet("/gzip", async (HttpContext context) =>
             {
                 if (!context.Request.Headers.AcceptEncoding.ToString().Contains("gzip"))
@@ -209,6 +237,93 @@ namespace Mafesoft.RestClient.Tests
             Assert.Equal(HttpStatusCode.OK, proxied.StatusCode);
             Assert.Equal("restclient-proxy-test.invalid", proxied.Content);
             Assert.IsType<HttpRequestException>(direct.Exception);
+        }
+
+        [Fact]
+        public async Task Cookies_are_sent_back_on_the_next_requests_of_the_derived_builders()
+        {
+            var cookies = new CookieContainer();
+            RestBuilder api = Rest.Build().Url(httpUrl).Cookies(cookies);
+
+            RestResult<string> login = await api.Command("cookies/login").Parameter("user", "mario").PostAsync();
+            RestResult<string> echo = await api.Command("cookies").Command("echo").GetAsync();
+
+            Assert.Equal("logged", login.Content);
+            Assert.Equal("session=mario", echo.Content);
+            Assert.Equal("mario", cookies.GetCookies(new Uri(httpUrl))["session"]?.Value);
+        }
+
+        [Fact]
+        public async Task Builders_with_different_containers_do_not_see_each_others_cookies()
+        {
+            RestBuilder first = Rest.Build().Url(httpUrl).Cookies(new CookieContainer());
+            RestBuilder second = Rest.Build().Url(httpUrl).Cookies(new CookieContainer());
+
+            await first.Command("cookies/login").Parameter("user", "mario").PostAsync();
+            await second.Command("cookies/login").Parameter("user", "luigi").PostAsync();
+
+            Assert.Equal("session=mario", (await first.Command("cookies/echo").GetAsync()).Content);
+            Assert.Equal("session=luigi", (await second.Command("cookies/echo").GetAsync()).Content);
+        }
+
+        [Fact]
+        public async Task Builders_with_different_containers_share_the_pooled_connections()
+        {
+            RestResult<string> first = await Rest.Build().Url(httpUrl).Command("connection").Cookies(new CookieContainer()).GetAsync();
+            RestResult<string> second = await Rest.Build().Url(httpUrl).Command("connection").Cookies(new CookieContainer()).GetAsync();
+
+            Assert.Equal(HttpStatusCode.OK, first.StatusCode);
+            Assert.Equal(first.Content, second.Content);
+        }
+
+        [Fact]
+        public async Task No_cookie_is_stored_without_a_container()
+        {
+            var cookies = new CookieContainer();
+            RestBuilder api = Rest.Build().Url(httpUrl);
+
+            await api.Command("cookies/login").Parameter("user", "mario").PostAsync();
+            RestResult<string> echo = await api.Command("cookies/echo").GetAsync();
+            await api.Cookies(cookies).Cookies(null).Command("cookies/login").Parameter("user", "luigi").PostAsync();
+
+            Assert.Equal(string.Empty, echo.Content);
+            Assert.Equal(0, cookies.Count);
+        }
+
+        [Fact]
+        public async Task Cookies_of_the_redirects_are_stored_and_sent()
+        {
+            var cookies = new CookieContainer();
+            RestBuilder api = Rest.Build().Url(httpUrl).Cookies(cookies);
+
+            RestResult<string> redirected = await api.Command("cookies/redirect").GetAsync();
+            RestResult<string> withoutCookies = await Rest.Build().Url(httpUrl).Command("cookies/redirect").GetAsync();
+
+            Assert.Equal(HttpStatusCode.OK, redirected.StatusCode);
+            Assert.Equal("hop=1", redirected.Content);
+            Assert.Equal("1", cookies.GetCookies(new Uri(httpUrl))["hop"]?.Value);
+            // without a container the redirects are still followed (by the handler)
+            Assert.Equal(HttpStatusCode.OK, withoutCookies.StatusCode);
+            Assert.Equal(string.Empty, withoutCookies.Content);
+        }
+
+        [Fact]
+        public async Task Redirects_follow_the_rules_of_HttpClientHandler()
+        {
+            RestBuilder api = Rest.Build().Url(httpUrl).Cookies(new CookieContainer()).Authentication("Bearer", "token");
+
+            // 302 after POST: GET without content
+            RestResult<string> found = await api.Command("cookies/login-redirect").Payload(new User { Id = 1 }).PostAsync();
+            // 307: same method and content, the Authorization header is not sent to the new location
+            RestResult<string> temporary = await api.Command("cookies/temporary-redirect").Payload(new User { Id = 2 }).PostAsync();
+
+            Assert.Equal(HttpStatusCode.OK, found.StatusCode);
+            Assert.Equal("session=redirected", found.Content);
+            Assert.Equal(HttpStatusCode.OK, temporary.StatusCode);
+            Assert.Contains("session=redirected", temporary.Content);
+            Assert.Contains("hop=307", temporary.Content);
+            Assert.Contains("\"id\":2", temporary.Content);
+            Assert.DoesNotContain("Bearer", temporary.Content);
         }
 
         private static int GetFreePort()

@@ -75,6 +75,7 @@ namespace Mafesoft.RestClient
         private ICredentials? credentials;
         private bool useProxy = true;
         private IWebProxy? proxy;
+        private CookieContainer? cookies;
         private Func<AuthenticationHeaderValue>? onAuthentication;
         private Action<HttpRequestHeaders>? onRequestHeaders;
         private bool enabledCompression;
@@ -141,7 +142,7 @@ namespace Mafesoft.RestClient
 
         /// <summary>
         /// Sends the requests using an existing HttpClient (for example created by IHttpClientFactory).
-        /// The HttpClient is never disposed by RestClient. Credentials, CertificateValidation, CertificateOption, Proxy,
+        /// The HttpClient is never disposed by RestClient. Credentials, CertificateValidation, CertificateOption, Proxy, Cookies,
         /// compression and OnConfigureHttpClient are not applied: configure them on your HttpClient/handler.
         /// </summary>
         /// <param name="httpClient">The HttpClient, null to go back to the HttpClient managed by RestClient.</param>
@@ -225,6 +226,24 @@ namespace Mafesoft.RestClient
                 r.useProxy = true;
                 r.proxy = null;
             });
+
+        #endregion
+
+        #region [ Cookies ]
+
+        /// <summary>
+        /// Stores the cookies of the responses (Set-Cookie) in the container and sends them back with the requests (Cookie),
+        /// for example for an API with a cookie-based session: Cookies(new CookieContainer()).
+        /// The container belongs to the builder, not to the pooled handler: the builders derived from this one share
+        /// the same container (it is the session), builders with different containers never see each other's cookies,
+        /// and without Cookies no cookie is stored. The cookies set by the redirects are stored too: RestClient follows
+        /// the redirects itself when a container is set. CookieContainer is thread-safe.
+        /// It is not applied to an external HttpClient (see UseHttpClient): configure CookieContainer on your handler.
+        /// </summary>
+        /// <param name="container">The cookie container, null to stop storing and sending cookies</param>
+        /// <returns></returns>
+        public RestBuilder Cookies(CookieContainer? container)
+            => With(r => r.cookies = container);
 
         #endregion
 
