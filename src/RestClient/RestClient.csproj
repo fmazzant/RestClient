@@ -6,11 +6,11 @@
     <RootNamespace>Mafesoft.RestClient</RootNamespace>
 
     <!-- NuGet package metadata. The publish workflow checks that the git tag (v3.0.0)
-         matches Version, here and in Mafesoft.RestClient.Extensions.DependencyInjection. -->
+         matches Version, here, in Mafesoft.RestClient.Extensions.DependencyInjection and in Mafesoft.RestClient.Testing. -->
     <PackageId>Mafesoft.RestClient</PackageId>
     <Product>RestClient</Product>
     <Title>Mafesoft.RestClient</Title>
-    <Version>3.1.1</Version>
+    <Version>3.2.0</Version>
     <Description>RestClient is a fluent library for .NET that helps you to consume REST services.</Description>
     <PackageTags>rest-client, c-sharp, dotnet-standard, dotnet-core, dotnet-framework, http-client, restclient, mafesoft, xml, json, rest, fluent</PackageTags>
     <!-- Only the current version: the full history is in CHANGELOG.md -->
@@ -24,6 +24,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+  </ItemGroup>
+
+  <!-- Mafesoft.RestClient.Testing intercepts the requests of the current async flow (Internal/TestInterception.cs) -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="Mafesoft.RestClient.Testing" />
   </ItemGroup>
 
   <!-- Public API available only on .NET (net8.0+), e.g. HttpVersionPolicy -->

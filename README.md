@@ -37,6 +37,7 @@ If RestClient is useful to you, consider [supporting the project](#support). ☕
 - [Diagnostics](#diagnostics)
 - [Events](#events)
 - [Dependency Injection](#dependency-injection)
+- [Testing](#testing)
 - [Samples](#samples)
 - [Migrating to 3.0](#migrating-to-30)
 - [Build and test](#build-and-test)
@@ -78,10 +79,10 @@ error handling, progress bars, logging. Mafesoft.RestClient puts that code in on
 | `ILogger` / OpenTelemetry of its own | ✅ | ✅ built-in spans and metrics | ❌ | ❌ | ❌ |
 | Problem Details (RFC 9457) | ✅ `result.Problem`, `ErrorAs<T>()` | ⚠️ manual | ❌ | ✅ `ValidationApiException` | ❌ |
 | Typed client from an interface | ❌ | ❌ | ❌ | ✅ | ❌ |
-| Test helpers | ⚠️ write a fake `HttpMessageHandler` | ❌ | ❌ | ✅ `Refit.Testing` | ✅ `HttpTest` |
+| Test helpers | ✅ `Mafesoft.RestClient.Testing` (`RestTest`) | ❌ | ❌ | ✅ `Refit.Testing` | ✅ `HttpTest` |
 | `netstandard2.0` (.NET Framework 4.6.2+, Xamarin, Unity) | ✅ | ✅ | ✅ | ⚠️ `net462`+ and `net8.0`+ only | ✅ |
 | URL templates / path parameters (`users/{id}`) | ✅ `Route` (url-encoded, invariant culture) | ❌ | ✅ `AddUrlSegment` | ✅ route attributes | ⚠️ `AppendPathSegment`, no templates |
-| OAuth1 / OAuth2 flows | ❌ bearer/basic header, async token provider and refresh token only | ❌ | ✅ authenticators | ❌ | ❌ |
+| OAuth1 / OAuth2 flows | ⚠️ OAuth2 client credentials and refresh token grant (`OAuth2ClientCredentials`), no OAuth1 | ❌ | ✅ authenticators | ❌ | ❌ |
 | Cookies | ✅ `Cookies(CookieContainer)` | ✅ `CookieContainer` | ✅ `CookieContainer` | ⚠️ via the handler | ✅ `CookieJar` |
 | Proxy | ✅ `Proxy` / `SystemProxy` | ✅ handler `Proxy` | ✅ `RestClientOptions.Proxy` | ⚠️ via the handler | ⚠️ via the handler |
 | Newtonsoft.Json ready to use | ⚠️ write a custom serializer | ⚠️ extra package | ✅ `RestSharp.Serializers.NewtonsoftJson` | ✅ `Refit.Newtonsoft.Json` | ✅ `Flurl.Http.Newtonsoft` |
@@ -100,8 +101,8 @@ comparison is not one-sided.
 - **Plain `HttpClient`** for one or two calls, or when you already have the `IHttpClientFactory` + resilience
   pipeline you want: no extra dependency.
 - **Refit** if you prefer to describe the API as a C# interface and let a source generator write the client.
-- **Flurl** if you mostly build URLs fluently and want its `HttpTest` to fake the HTTP calls in the tests.
-- **RestSharp** if you already use it, or need its OAuth1/OAuth2 authenticators.
+- **Flurl** if you mostly build URLs fluently.
+- **RestSharp** if you already use it, or need OAuth1 or the other OAuth2 flows of its authenticators.
 
 ## Features
 
@@ -114,7 +115,7 @@ comparison is not one-sided.
 - `multipart/form-data`, form-url-encoded, upload and download progress
 - URL templates (`users/{id}`) with url-encoded, culture invariant route values
 - Query string with url-encoding, invariant culture and repeated keys
-- Bearer/basic authentication, asynchronous token provider (`BearerToken(async ct => ...)`), refresh token, `NetworkCredential`, per-builder certificate validation
+- Bearer/basic authentication, asynchronous token provider (`BearerToken(async ct => ...)`), refresh token, OAuth2 client credentials with token caching (`OAuth2ClientCredentials`), `NetworkCredential`, per-builder certificate validation
 - Retry with backoff and `Retry-After`, timeout per attempt, cancellation
 - Problem Details (RFC 9457) and typed error bodies (`result.Problem`, `result.ErrorAs<T>()`)
 - Pooled handlers, or your own `HttpClient` / `IHttpClientFactory`
@@ -123,6 +124,7 @@ comparison is not one-sided.
 - Cookies (`CookieContainer` per builder, e.g. a cookie-based session)
 - `ILogger` logging, OpenTelemetry tracing and metrics
 - Events: `OnStart`, `OnPreCompleted`, `OnCompleted`, `OnException`, request/response preview
+- Test helpers: `RestTest` fake server and call assertions (Mafesoft.RestClient.Testing)
 
 ## Packages
 
@@ -131,6 +133,7 @@ comparison is not one-sided.
 |---|---|---|---|---|
 | [Mafesoft.RestClient](src/RestClient/README.md) | `net10.0`, `net8.0`, `netstandard2.1`, `netstandard2.0` | [![NuGet](https://img.shields.io/nuget/v/Mafesoft.RestClient?style=flat-square&label=nuget)](https://www.nuget.org/packages/Mafesoft.RestClient) | [![Downloads](https://img.shields.io/nuget/dt/Mafesoft.RestClient?style=flat-square&label=downloads)](https://www.nuget.org/packages/Mafesoft.RestClient) | [![Mafe.RestClient downloads](https://img.shields.io/nuget/dt/Mafe.RestClient?style=flat-square&label=Mafe.RestClient)](https://www.nuget.org/packages/Mafe.RestClient) |
 | [Mafesoft.RestClient.Extensions.DependencyInjection](src/RestClient.Extensions.DependencyInjection/README.md) | `net10.0`, `net8.0`, `netstandard2.0` | [![NuGet](https://img.shields.io/nuget/v/Mafesoft.RestClient.Extensions.DependencyInjection?style=flat-square&label=nuget)](https://www.nuget.org/packages/Mafesoft.RestClient.Extensions.DependencyInjection) | [![Downloads](https://img.shields.io/nuget/dt/Mafesoft.RestClient.Extensions.DependencyInjection?style=flat-square&label=downloads)](https://www.nuget.org/packages/Mafesoft.RestClient.Extensions.DependencyInjection) | [![Mafe.RestClient.Extensions.DependencyInjection downloads](https://img.shields.io/nuget/dt/Mafe.RestClient.Extensions.DependencyInjection?style=flat-square&label=Mafe.RestClient.Extensions.DependencyInjection)](https://www.nuget.org/packages/Mafe.RestClient.Extensions.DependencyInjection) |
+| [Mafesoft.RestClient.Testing](src/RestClient.Testing/README.md) | `net10.0`, `net8.0`, `netstandard2.0` | [![NuGet](https://img.shields.io/nuget/v/Mafesoft.RestClient.Testing?style=flat-square&label=nuget)](https://www.nuget.org/packages/Mafesoft.RestClient.Testing) | [![Downloads](https://img.shields.io/nuget/dt/Mafesoft.RestClient.Testing?style=flat-square&label=downloads)](https://www.nuget.org/packages/Mafesoft.RestClient.Testing) | — |
 <!-- markdownlint-enable MD013 -->
 
 ## Installation
@@ -250,7 +253,7 @@ await foreach (Order order in api.Command("orders").GetAsyncEnumerable<Order>(ca
   `JsonException`. Use `GetAsync<T>()` when you need the error body (`result.Problem`, `result.ErrorAs<T>()`).
 - The response is released when the enumeration ends, also with `break` or an exception.
 - The items are deserialized with the JSON configuration of the builder; with `Json(MyJsonContext.Default)` the
-  metadata comes from the source generated context (Native AOT safe). `Xml()` and `CustomSerializer(...)` are not
+  metadata comes from the source generated context (Native AOT safe). `Xml()` and custom serializers are not
   supported (`NotSupportedException`): read a `Stream` result instead.
 - A JSON `null` item is returned as `null` (the default value of `T`). Newline delimited JSON (NDJSON) is not supported.
 - `OnStart`, `OnDownloadProgress` and `OnException` are raised; `OnPreviewContentResponseAsString`, `OnPreCompleted`
@@ -303,7 +306,7 @@ await foreach (SseItem<string> evt in api.Command("notifications").GetEventsAsyn
 - The `Last-Event-ID` reconnection is not automatic: when the stream ends or fails, read the `EventId` of the last
   event and send a new request with `Header("Last-Event-ID", id)` if the server supports it.
 - The data is deserialized with the JSON configuration of the builder (`Json(MyJsonContext.Default)` for Native AOT);
-  `Xml()` and `CustomSerializer(...)` are not supported by the typed methods (`NotSupportedException`), the `string`
+  `Xml()` and custom serializers are not supported by the typed methods (`NotSupportedException`), the `string`
   methods work with any serializer.
 - On `net8.0`, `netstandard2.1` and `netstandard2.0` this uses the `System.Net.ServerSentEvents` package (a dependency
   of Mafesoft.RestClient); on .NET 9+ it is part of the framework.
@@ -499,6 +502,22 @@ RestBuilder anonymous = api.Cookies(null);
 
 ## Content
 
+### Serializers
+
+The serializer is set with `WithSerializer(IRestSerializer)`; the serializer owns its options. `Json(...)` and `Xml(...)`
+are shortcuts:
+
+```c#
+api.WithSerializer(new SystemTextJsonSerializer(options));                   // = Json(options)
+api.WithSerializer(new SystemTextJsonSerializer(AppJsonContext.Default));    // = Json(AppJsonContext.Default), Native AOT
+api.WithSerializer(new XmlRestSerializer(readerSettings, writerSettings));   // = Xml(readerSettings, writerSettings)
+api.WithSerializer(new CsvSerializer());                                      // a custom serializer
+```
+
+`SystemTextJsonSerializer` and `XmlRestSerializer` are in the `Mafesoft.RestClient.Serialization.Json` and
+`Mafesoft.RestClient.Serialization.Xml` namespaces. The default serializer is `SystemTextJsonSerializer` with
+`SystemTextJsonSerializer.DefaultOptions` (web defaults).
+
 ### JSON
 
 JSON is the default serializer, based on System.Text.Json. Without options it uses `JsonSerializerDefaults.Web`:
@@ -539,8 +558,9 @@ The library is annotated for trimming and verified by a Native AOT smoke test in
 
 ### XML
 
-`Xml()` uses `XmlSerializer`. The reader settings are used to read the response, the writer settings to write the
-payload. `XmlSerializer` is not compatible with trimming: the method is annotated, so the compiler warns you.
+`Xml()` (a shortcut for `WithSerializer(new XmlRestSerializer(...))`) uses `XmlSerializer`. The reader settings are
+used to read the response, the writer settings to write the payload. `XmlSerializer` is not compatible with trimming:
+the method and the `XmlRestSerializer` constructor are annotated, so the compiler warns you.
 
 ```c#
 RestResult<User> user = await api
@@ -551,25 +571,29 @@ RestResult<User> user = await api
 
 ### Custom serialization
 
-Implement `ISerializerContent` (and optionally `IAsyncSerializerContent`, that adds `DeserializeObjectAsync(Stream, ...)`
-to deserialize directly from the response stream):
+Implement `IRestSerializer` (and optionally `IAsyncRestSerializer`, that adds `DeserializeAsync(Stream, ...)` to
+deserialize directly from the response stream). The serializer owns its configuration: pass it in the constructor.
 
 ```c#
-public class CsvSerializer : ISerializerContent
+public class CsvSerializer : IRestSerializer
 {
-    public string MediaTypeAsString => "text/csv";
+    public string MediaType => "text/csv";
 
-    public object? DeserializeObject(string value, Type typeOf, object? options = null)
+    public string Serialize(object? value, Type type)
         => throw new NotImplementedException();
 
-    public string SerializeObject(object? value, Type typeOf, object? options = null)
+    public object? Deserialize(string value, Type type)
         => throw new NotImplementedException();
 }
 ```
 
 ```c#
-RestBuilder csv = api.CustomSerializer(new CsvSerializer(), options: null);
+RestBuilder csv = api.WithSerializer(new CsvSerializer());
 ```
+
+`ISerializerContent`, `IAsyncSerializerContent`, `CustomSerializer(...)`, `JSON` and `XML` are obsolete but keep
+working (`CustomSerializer(serializer, options)` passes the same options to every call, as before); they will be removed
+in a future major version.
 
 ### Payload
 
@@ -696,6 +720,47 @@ RestBuilder secured = api
 When many concurrent requests of the same builder receive 401, the refresh func is invoked **only once** and the other
 requests wait for it. The requests sent from inside the refresh func never trigger another refresh.
 `RefreshToken(null)` disables the refresh token on a derived builder.
+
+### OAuth2 client credentials
+
+`OAuth2ClientCredentials` gets the token from the token endpoint with the client credentials grant (RFC 6749,
+section 4.4) and sends it as `Authorization: Bearer <token>`:
+
+```c#
+RestBuilder api = Rest.Build()
+    .Url("https://api.example.com")
+    .OAuth2ClientCredentials(o =>
+    {
+        o.TokenEndpoint = new Uri("https://login.example.com/oauth2/token");
+        o.ClientId = "...";
+        o.ClientSecret = "...";
+        o.Scopes = new[] { "api.read" };
+        // o.Parameters["audience"] = "https://api.example.com";               // optional extra parameters
+        // o.ClientAuthentication = OAuth2ClientAuthentication.BasicHeader;   // default: RequestBody
+    });
+```
+
+- The token is requested before the first request and cached until shortly before it expires (`expires_in` minus
+  `RefreshBeforeExpiration`, 30 seconds by default); a token response without `expires_in` is used until a `401`.
+- When it has to be renewed, it is requested **once** for all the concurrent requests (the others wait for it).
+- When the token response contains a `refresh_token`, the refresh token grant is used to renew it; if the refresh is
+  rejected, the client credentials grant is used again.
+- On `401 Unauthorized` the cached token is discarded and the request is sent again **once** with a new token.
+- The token request uses the HttpClient (or the pooled handlers), the timeout, the retry policy and the logger of the
+  builder; it does not use its headers, cookies and events. The client secret and the tokens are never logged.
+- A failed token request is reported by the result (`result.Exception`, an `InvalidOperationException` with the HTTP
+  status and the OAuth2 `error`), like the other errors of the request.
+- `Authentication(...)` and `BearerToken(...)` replace it, and it replaces them.
+- The cache belongs to the `OAuth2ClientCredentials` call and is shared by the builders derived from it. When the
+  builder is configured again for every client (as with `IRestClientFactory`), share an `OAuth2TokenCache`:
+
+```c#
+var cache = new OAuth2TokenCache(); // e.g. a singleton
+services.AddRestClient("orders", b => b.OAuth2ClientCredentials(o => { /* ... */ o.Cache = cache; }));
+```
+
+The token response is read with a source generated `JsonSerializerContext`, so the flow is Native AOT compatible.
+OAuth1 is not supported (it is rare in new APIs).
 
 ### Network credentials
 
@@ -932,6 +997,37 @@ one, it owns the token cache), not scoped services.
 `Microsoft.Extensions.DependencyInjection`. The builders log with the category `Mafesoft.RestClient.{name}` (the full
 type name for a typed client) and their [metrics](#tracing-and-metrics-opentelemetry) have the tag
 `restclient.client.name` = `{name}`.
+
+## Testing
+
+The `Mafesoft.RestClient.Testing` package contains `RestTest`, a fake server for the tests (like Flurl's `HttpTest`).
+While it is active, every request sent by Mafesoft.RestClient in the async flow of the test is answered by it: with
+`Rest.Build()`, with `Rest.Build(httpClient)` and with the builders of `IRestClientFactory`. It works with any test
+framework: a failed assertion throws `RestCallAssertionException`.
+
+```
+dotnet add package Mafesoft.RestClient.Testing
+```
+
+```c#
+using var http = new RestTest();
+http.RespondWithJson(new User { Name = "fede" }).For(HttpMethod.Get, "*/users/*");
+
+var result = await sut.GetUserAsync("fede");
+
+http.ShouldHaveCalled("*/users/fede").WithVerb(HttpMethod.Get).Times(1);
+```
+
+- Responses: `RespondWith(body, status, mediaType)`, `RespondWith(status)`, `RespondWithJson(value)`,
+  `RespondWithJson(value, MyJsonContext.Default.User)` (Native AOT safe), `RespondWith(request => response)`,
+  `SimulateException(exception)`, `SimulateTimeout()`; `.For(pattern)`, `.For(method, pattern)` and `.When(predicate)`
+  restrict them (`*` matches any text, case-insensitive). They are used in order; the last matching one is reused;
+  a request without a matching response gets `200 OK` with an empty body.
+- Assertions: `ShouldHaveCalled(pattern)` with `WithVerb`, `WithHeader`, `WithoutHeader`, `WithQueryParam`,
+  `WithRequestBody`, `WithContentType`, `WithOAuthBearerToken`, `With(predicate)`, `Times(n)`;
+  `ShouldNotHaveCalled`, `ShouldHaveMadeACall`, `ShouldNotHaveMadeACall`; `CallLog` lists every request.
+- The fake server is bound to the async flow (`AsyncLocal`): parallel tests do not see each other's. For code that runs
+  outside the flow of the test, pass `http.CreateClient()` to `Rest.Build(...)`.
 
 ## Samples
 

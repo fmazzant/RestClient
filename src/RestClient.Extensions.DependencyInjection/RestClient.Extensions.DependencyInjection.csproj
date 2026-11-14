@@ -7,7 +7,7 @@
     <PackageId>Mafesoft.RestClient.Extensions.DependencyInjection</PackageId>
     <Product>RestClient</Product>
     <Title>Mafesoft.RestClient.Extensions.DependencyInjection</Title>
-    <Version>3.1.1</Version>
+    <Version>3.2.0</Version>
     <Description>Registers Mafesoft.RestClient builders in the dependency injection container, on top of IHttpClientFactory (pooled handlers, delegating handlers, resilience).</Description>
     <PackageTags>rest-client, restclient, mafesoft, dependency-injection, httpclientfactory, fluent</PackageTags>
     <!-- Only the current version: the full history is in CHANGELOG.md -->

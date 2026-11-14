@@ -30,33 +30,23 @@
 namespace Mafesoft.RestClient.Serialization.Xml
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Diagnostics.CodeAnalysis;
-    using System.IO;
-    using System.Text;
     using System.Xml;
-    using Serializer = System.Xml.Serialization;
 
     /// <summary>
     /// Implements a Mafesoft.RestClient.Serialization.ISerializerContent for XML object serialization.
     /// XmlSerializer uses reflection and it is not compatible with trimming and Native AOT.
+    /// Obsolete: use XmlRestSerializer with RestBuilder.WithSerializer (or RestBuilder.Xml).
     /// </summary>
+    [Obsolete("Use XmlRestSerializer with RestBuilder.WithSerializer, or RestBuilder.Xml. XML will be removed in a future major version.")]
     public sealed class XML : ISerializerContent
     {
-        internal const string ReflectionMessage = "XmlSerializer uses reflection and runtime code generation: it is not compatible with trimming and Native AOT.";
-
-        /// <summary>
-        /// XmlSerializer instances are expensive to create: they are cached per type.
-        /// </summary>
-        private static readonly ConcurrentDictionary<Type, Serializer.XmlSerializer> serializers
-            = new ConcurrentDictionary<Type, Serializer.XmlSerializer>();
-
         /// <summary>
         /// Initializes a new instance of the Mafesoft.RestClient.Serialization.Xml.XML class.
         /// </summary>
 #if NET
-        [RequiresUnreferencedCode(ReflectionMessage)]
-        [RequiresDynamicCode(ReflectionMessage)]
+        [RequiresUnreferencedCode(XmlRestSerializer.ReflectionMessage)]
+        [RequiresDynamicCode(XmlRestSerializer.ReflectionMessage)]
 #endif
         public XML() : base() { }
 
@@ -73,18 +63,7 @@ namespace Mafesoft.RestClient.Serialization.Xml
         /// <param name="options">The System.Xml.XmlReaderSettings</param>
         /// <returns>The deserialized object from the XML string.</returns>
         public object? DeserializeObject(string value, Type typeOf, object? options = null)
-        {
-            if (string.IsNullOrEmpty(value))
-            {
-                return null;
-            }
-
-            XmlReaderSettings xmlOptions = options as XmlReaderSettings ?? new XmlReaderSettings();
-            using (var reader = XmlReader.Create(new StringReader(value), xmlOptions))
-            {
-                return Deserialize(typeOf, reader);
-            }
-        }
+            => XmlRestSerializer.Deserialize(value, typeOf, options as XmlReaderSettings);
 
         /// <summary>
         /// Serializes the specified object to a XML string
@@ -94,33 +73,6 @@ namespace Mafesoft.RestClient.Serialization.Xml
         /// <param name="options">The System.Xml.XmlWriterSettings</param>
         /// <returns>A XML string representation of the object.</returns>
         public string SerializeObject(object? value, Type typeOf, object? options = null)
-        {
-            if (value == null)
-            {
-                return string.Empty;
-            }
-
-            XmlWriterSettings xmlOptions = options as XmlWriterSettings ?? new XmlWriterSettings();
-            var builder = new StringBuilder();
-            using (var writer = XmlWriter.Create(builder, xmlOptions))
-            {
-                Serialize(typeOf ?? value.GetType(), writer, value);
-            }
-            return builder.ToString();
-        }
-
-#if NET
-        [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "The constructor of XML is annotated: an instance exists only if the caller accepted the warning.")]
-        [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "The constructor of XML is annotated: an instance exists only if the caller accepted the warning.")]
-#endif
-        private static object? Deserialize(Type type, XmlReader reader)
-            => serializers.GetOrAdd(type, t => new Serializer.XmlSerializer(t)).Deserialize(reader);
-
-#if NET
-        [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "The constructor of XML is annotated: an instance exists only if the caller accepted the warning.")]
-        [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "The constructor of XML is annotated: an instance exists only if the caller accepted the warning.")]
-#endif
-        private static void Serialize(Type type, XmlWriter writer, object value)
-            => serializers.GetOrAdd(type, t => new Serializer.XmlSerializer(t)).Serialize(writer, value);
+            => XmlRestSerializer.Serialize(value, typeOf, options as XmlWriterSettings);
     }
 }

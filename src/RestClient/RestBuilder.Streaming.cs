@@ -98,18 +98,18 @@ namespace Mafesoft.RestClient
         /// <param name="cancellationToken">Cancellation token, also combined with the token passed to WithCancellation</param>
         /// <returns>The items of the array; the request is sent when the enumeration starts</returns>
         /// <exception cref="ArgumentNullException">method is null</exception>
-        /// <exception cref="NotSupportedException">The configured serializer is not JSON (Xml or CustomSerializer), or the configured JsonSerializerContext does not contain T</exception>
+        /// <exception cref="NotSupportedException">The configured serializer is not SystemTextJsonSerializer (e.g. Xml or a custom serializer), or the configured JsonSerializerContext does not contain T</exception>
         public IAsyncEnumerable<T> SendAsyncEnumerable<T>(HttpMethod method, CancellationToken cancellationToken = default)
         {
             if (method == null) { throw new ArgumentNullException(nameof(method)); }
-            if (!(serializer is JSON))
+            if (!(serializer is SystemTextJsonSerializer jsonSerializer))
             {
                 throw new NotSupportedException(
-                    $"Streaming a JSON array requires the JSON serializer, but the builder uses {serializer.GetType().FullName}: call Json(...) before SendAsyncEnumerable, or use SendAsync<Stream> to read the response yourself.");
+                    $"Streaming a JSON array requires the JSON serializer (SystemTextJsonSerializer), but the builder uses {serializer.GetType().FullName}: call Json(...) or WithSerializer(new SystemTextJsonSerializer(...)) before SendAsyncEnumerable, or use SendAsync<Stream> to read the response yourself.");
             }
 
             // resolved here, so that a type missing from the JsonSerializerContext is reported before sending the request
-            JsonTypeInfo<T> typeInfo = JSON.GetTypeInfo<T>(deserializeOptions);
+            JsonTypeInfo<T> typeInfo = jsonSerializer.GetTypeInfo<T>();
             return StreamAsync(method, (stream, token) => (IAsyncEnumerable<T>)JsonSerializer.DeserializeAsyncEnumerable(stream, typeInfo, token), cancellationToken);
         }
 

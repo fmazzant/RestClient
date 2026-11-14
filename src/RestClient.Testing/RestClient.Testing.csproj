@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net10.0;net8.0;netstandard2.0</TargetFrameworks>
+    <AssemblyName>Mafesoft.$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>Mafesoft.RestClient.Testing</RootNamespace>
+    <PackageId>Mafesoft.RestClient.Testing</PackageId>
+    <Product>RestClient</Product>
+    <Title>Mafesoft.RestClient.Testing</Title>
+    <Version>3.2.0</Version>
+    <Description>Test helpers for Mafesoft.RestClient: a fake server (RestTest) that intercepts the requests of Rest.Build() and of IRestClientFactory, with configurable responses and call assertions. Test framework agnostic.</Description>
+    <PackageTags>rest-client, restclient, mafesoft, testing, fake, mock, http, fluent</PackageTags>
+    <!-- Only the current version: the full history is in CHANGELOG.md -->
+    <PackageReleaseNotes>
+      First version of the package: RestTest fake server and call assertions
+
+      Full changelog: https://github.com/fmazzant/RestClient/blob/main/CHANGELOG.md
+    </PackageReleaseNotes>
+    <!-- New package: there is no released version to compare with yet.
+         After the first release set PackageValidationBaselineVersion to it (or remove this line). -->
+    <PackageValidationBaselineVersion></PackageValidationBaselineVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RestClient\RestClient.csproj" />
+  </ItemGroup>
+
+</Project>
