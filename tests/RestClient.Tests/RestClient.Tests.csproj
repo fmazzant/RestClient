@@ -24,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="../../src/RestClient/RestClient.csproj" />
     <ProjectReference Include="../../src/RestClient.Extensions.DependencyInjection/RestClient.Extensions.DependencyInjection.csproj" />
+    <ProjectReference Include="../../src/RestClient.Testing/RestClient.Testing.csproj" />
     <Reference Include="System.Net.Http" Condition="'$(TargetFramework)' == 'net48'" />
   </ItemGroup>
 

@@ -288,8 +288,17 @@ namespace Mafesoft.RestClient
             HttpClient client;
             IDisposable? owner;
             CookieContainer? cookieContainer = null;
+            HttpMessageHandler? testHandler = TestInterception.Handler;
 
-            if (externalHttpClient != null)
+            if (testHandler != null)
+            {
+                // Mafesoft.RestClient.Testing (RestTest): every request of the current async flow goes to the fake
+                // server, also with Rest.Build() and with the HttpClient of IHttpClientFactory
+                cookieContainer = cookies;
+                client = new HttpClient(testHandler, disposeHandler: false) { Timeout = System.Threading.Timeout.InfiniteTimeSpan };
+                owner = client;
+            }
+            else if (externalHttpClient != null)
             {
                 client = externalHttpClient;
                 owner = null;
