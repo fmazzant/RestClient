@@ -1,3 +1,6 @@
+// The obsolete serializer API (ISerializerContent, CustomSerializer) must keep working until it is removed
+#pragma warning disable CS0618
+
 namespace Mafesoft.RestClient.Tests
 {
     using Mafesoft.RestClient.Serialization;
@@ -130,6 +133,56 @@ namespace Mafesoft.RestClient.Tests
         public void Custom_serializer_cannot_be_null()
         {
             Assert.Throws<ArgumentNullException>(() => Rest.Build().CustomSerializer(null));
+        }
+
+        [Fact]
+        public async Task Custom_serializer_with_the_obsolete_JSON_keeps_its_options_and_streaming()
+        {
+            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK, "[{\"Id\":1,\"Name\":\"a\"}]");
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            RestBuilder api = Root(handler).CustomSerializer(new Mafesoft.RestClient.Serialization.Json.JSON(), options);
+            var names = new List<string>();
+            await foreach (User user in api.GetAsyncEnumerable<User>())
+            {
+                names.Add(user.Name);
+            }
+            RestResult<List<User>> list = await api.GetAsync<List<User>>();
+
+            Assert.Equal(new[] { "a" }, names);
+            Assert.Equal("a", list.Content[0].Name);
+        }
+
+        [Fact]
+        public async Task Custom_serializer_with_the_obsolete_JSON_and_a_context()
+        {
+            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK, "{\"id\":2,\"name\":\"b\"}");
+
+            RestResult<User> result = await Root(handler)
+                .CustomSerializer(new Mafesoft.RestClient.Serialization.Json.JSON(), TestJsonContext.Default)
+                .GetAsync<User>();
+
+            Assert.Equal(2, result.Content.Id);
+        }
+
+        [Fact]
+        public void Obsolete_JSON_default_options_are_the_SystemTextJsonSerializer_ones()
+        {
+            Assert.Same(Mafesoft.RestClient.Serialization.Json.SystemTextJsonSerializer.DefaultOptions,
+                Mafesoft.RestClient.Serialization.Json.JSON.DefaultOptions);
+        }
+
+        [Fact]
+        public async Task Custom_serializer_is_used_by_ErrorAs()
+        {
+            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.BadRequest, "id=5;name=Bad", "text/x-key-value");
+            var serializer = new KeyValueSerializer();
+            var options = new object();
+
+            RestResult<string> result = await Root(handler).CustomSerializer(serializer, options).GetAsync();
+
+            Assert.Equal(5, result.ErrorAs<User>().Id);
+            Assert.Same(options, serializer.ReceivedOptions.Single());
         }
 
         /// <summary>

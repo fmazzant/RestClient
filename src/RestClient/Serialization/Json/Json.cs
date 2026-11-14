@@ -41,16 +41,17 @@ namespace Mafesoft.RestClient.Serialization.Json
     /// Implements a Mafesoft.RestClient.Serialization.ISerializerContent for JSON object serialization based on System.Text.Json.
     /// The type metadata is always resolved with JsonSerializerOptions.GetTypeInfo: pass the options of a
     /// JsonSerializerContext (source generator) to be Native AOT and trimming safe.
+    /// Obsolete: use SystemTextJsonSerializer with RestBuilder.WithSerializer (or RestBuilder.Json).
     /// </summary>
+    [Obsolete("Use SystemTextJsonSerializer with RestBuilder.WithSerializer, or RestBuilder.Json. JSON will be removed in a future major version.")]
     public sealed class JSON : IAsyncSerializerContent
     {
         /// <summary>
         /// Default options used when no options are provided: web defaults (camelCase names, case-insensitive properties, numbers allowed as strings).
         /// They use reflection: in Native AOT applications pass the options of a JsonSerializerContext.
+        /// Same instance as SystemTextJsonSerializer.DefaultOptions.
         /// </summary>
-        public static JsonSerializerOptions DefaultOptions { get; } = new JsonSerializerOptions(JsonSerializerDefaults.Web);
-
-        private static readonly object resolverLock = new object();
+        public static JsonSerializerOptions DefaultOptions => SystemTextJsonSerializer.DefaultOptions;
 
         /// <summary>
         /// Initializes a new instance of the Mafesoft.RestClient.Serialization.Json.JSON class.
@@ -108,37 +109,18 @@ namespace Mafesoft.RestClient.Serialization.Json
             return JsonSerializer.Serialize(value, GetTypeInfo(typeOf ?? value.GetType(), options));
         }
 
-        /// <summary>
-        /// Gets the metadata of T from the options (or the JsonSerializerContext), as the other methods do
-        /// </summary>
-        internal static JsonTypeInfo<T> GetTypeInfo<T>(object? options)
-            => (JsonTypeInfo<T>)GetTypeInfo(typeof(T), options);
-
         private static JsonTypeInfo GetTypeInfo(Type type, object? options)
+            => SystemTextJsonSerializer.GetTypeInfo(type, ToJsonSerializerOptions(options));
+
+        /// <summary>
+        /// Converts the untyped options of the obsolete API: the options of a JsonSerializerContext,
+        /// JsonSerializerOptions, or DefaultOptions for anything else (as in the previous versions)
+        /// </summary>
+        internal static JsonSerializerOptions ToJsonSerializerOptions(object? options) => options switch
         {
-            if (type == null) { throw new ArgumentNullException(nameof(type)); }
-
-            JsonSerializerOptions jsonOptions = options switch
-            {
-                JsonSerializerContext context => context.Options,
-                JsonSerializerOptions o => o,
-                _ => DefaultOptions
-            };
-
-            if (!jsonOptions.IsReadOnly && jsonOptions.TypeInfoResolver == null && JsonSerializer.IsReflectionEnabledByDefault)
-            {
-                lock (resolverLock)
-                {
-                    if (!jsonOptions.IsReadOnly && jsonOptions.TypeInfoResolver == null)
-                    {
-#pragma warning disable IL2026, IL3050 // guarded by JsonSerializer.IsReflectionEnabledByDefault, false in Native AOT/trimmed apps
-                        jsonOptions.TypeInfoResolver = new DefaultJsonTypeInfoResolver();
-#pragma warning restore IL2026, IL3050
-                    }
-                }
-            }
-
-            return jsonOptions.GetTypeInfo(type);
-        }
+            JsonSerializerContext context => context.Options,
+            JsonSerializerOptions o => o,
+            _ => DefaultOptions
+        };
     }
 }

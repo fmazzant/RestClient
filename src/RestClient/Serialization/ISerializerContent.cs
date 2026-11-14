@@ -36,7 +36,9 @@ namespace Mafesoft.RestClient.Serialization
 
     /// <summary>
     /// Provides custom formatting for generic serialization and deserialization.
+    /// Obsolete: implement IRestSerializer and set it with RestBuilder.WithSerializer.
     /// </summary>
+    [Obsolete("Implement IRestSerializer (or IAsyncRestSerializer) and set it with RestBuilder.WithSerializer: the serializer owns its options. ISerializerContent will be removed in a future major version.")]
     public interface ISerializerContent
     {
         /// <summary>
@@ -66,7 +68,9 @@ namespace Mafesoft.RestClient.Serialization
     /// <summary>
     /// A serializer that can deserialize directly from the response stream, without buffering it as a string.
     /// RestClient uses it for successful responses when no OnPreviewContentResponseAsString handler is set.
+    /// Obsolete: implement IAsyncRestSerializer and set it with RestBuilder.WithSerializer.
     /// </summary>
+    [Obsolete("Implement IAsyncRestSerializer and set it with RestBuilder.WithSerializer: the serializer owns its options. IAsyncSerializerContent will be removed in a future major version.")]
     public interface IAsyncSerializerContent : ISerializerContent
     {
         /// <summary>

@@ -1,1 +1,22 @@
 #nullable enable
+Mafesoft.RestClient.RestBuilder.WithSerializer(Mafesoft.RestClient.Serialization.IRestSerializer! serializer) -> Mafesoft.RestClient.RestBuilder!
+Mafesoft.RestClient.Serialization.IAsyncRestSerializer
+Mafesoft.RestClient.Serialization.IAsyncRestSerializer.DeserializeAsync(System.IO.Stream! stream, System.Type! type, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<object?>!
+Mafesoft.RestClient.Serialization.IRestSerializer
+Mafesoft.RestClient.Serialization.IRestSerializer.Deserialize(string! value, System.Type! type) -> object?
+Mafesoft.RestClient.Serialization.IRestSerializer.MediaType.get -> string!
+Mafesoft.RestClient.Serialization.IRestSerializer.Serialize(object? value, System.Type! type) -> string!
+Mafesoft.RestClient.Serialization.Json.SystemTextJsonSerializer
+Mafesoft.RestClient.Serialization.Json.SystemTextJsonSerializer.Deserialize(string! value, System.Type! type) -> object?
+Mafesoft.RestClient.Serialization.Json.SystemTextJsonSerializer.DeserializeAsync(System.IO.Stream! stream, System.Type! type, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<object?>!
+Mafesoft.RestClient.Serialization.Json.SystemTextJsonSerializer.MediaType.get -> string!
+Mafesoft.RestClient.Serialization.Json.SystemTextJsonSerializer.Options.get -> System.Text.Json.JsonSerializerOptions!
+Mafesoft.RestClient.Serialization.Json.SystemTextJsonSerializer.Serialize(object? value, System.Type! type) -> string!
+Mafesoft.RestClient.Serialization.Json.SystemTextJsonSerializer.SystemTextJsonSerializer(System.Text.Json.JsonSerializerOptions? options = null) -> void
+Mafesoft.RestClient.Serialization.Json.SystemTextJsonSerializer.SystemTextJsonSerializer(System.Text.Json.Serialization.JsonSerializerContext! context) -> void
+Mafesoft.RestClient.Serialization.Xml.XmlRestSerializer
+Mafesoft.RestClient.Serialization.Xml.XmlRestSerializer.Deserialize(string! value, System.Type! type) -> object?
+Mafesoft.RestClient.Serialization.Xml.XmlRestSerializer.MediaType.get -> string!
+Mafesoft.RestClient.Serialization.Xml.XmlRestSerializer.Serialize(object? value, System.Type! type) -> string!
+Mafesoft.RestClient.Serialization.Xml.XmlRestSerializer.XmlRestSerializer(System.Xml.XmlReaderSettings? readerSettings = null, System.Xml.XmlWriterSettings? writerSettings = null) -> void
+static Mafesoft.RestClient.Serialization.Json.SystemTextJsonSerializer.DefaultOptions.get -> System.Text.Json.JsonSerializerOptions!
