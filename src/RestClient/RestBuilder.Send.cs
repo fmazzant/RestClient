@@ -543,13 +543,13 @@ namespace Mafesoft.RestClient
             if (payloadContent != null)
             {
                 Type payloadType = payloadContent.GetType();
-                string serializedObject = serializer.SerializeObject(payloadContent, payloadType, serializeOptions);
+                string serializedObject = serializer.Serialize(payloadContent, payloadType);
                 onPreview?.Invoke(new PreviewContentAsStringEventArgs
                 {
                     ContentAsString = serializedObject,
                     ContentType = payloadType
                 });
-                return new StringContent(serializedObject, Encoding.UTF8, serializer.MediaTypeAsString);
+                return new StringContent(serializedObject, Encoding.UTF8, serializer.MediaType);
             }
 
             return null;
@@ -583,7 +583,7 @@ namespace Mafesoft.RestClient
                     if (!response.IsSuccessStatusCode)
                     {
                         // the error body is read only if Problem or ErrorAs are used
-                        result.SetError(serializer, deserializeOptions, body: null);
+                        result.SetError(serializer, body: null);
                     }
                     return result;
                 }
@@ -591,7 +591,7 @@ namespace Mafesoft.RestClient
                 // successful response of a serializer that supports streams: deserialize while downloading
                 if (type != typeof(string)
                     && type != typeof(byte[])
-                    && serializer is IAsyncSerializerContent asyncSerializer
+                    && serializer is IAsyncRestSerializer asyncSerializer
                     && response.IsSuccessStatusCode
                     && onPreviewContentResponseAsStringAction == null)
                 {
@@ -599,7 +599,7 @@ namespace Mafesoft.RestClient
                     {
                         try
                         {
-                            object? value = await asyncSerializer.DeserializeObjectAsync(stream, type, deserializeOptions, cancellationToken).ConfigureAwait(false);
+                            object? value = await asyncSerializer.DeserializeAsync(stream, type, cancellationToken).ConfigureAwait(false);
                             result.Content = value is null ? default : (T)value;
                         }
                         catch (Exception ex) when (!(ex is OperationCanceledException))
@@ -620,7 +620,7 @@ namespace Mafesoft.RestClient
                 if (!response.IsSuccessStatusCode)
                 {
                     // the buffered body, read by Problem and ErrorAs without reading the content again
-                    result.SetError(serializer, deserializeOptions, body);
+                    result.SetError(serializer, body);
                 }
 
                 HttpContent content = response.Content;
@@ -646,7 +646,7 @@ namespace Mafesoft.RestClient
                     else
                     {
                         string serializedObject = await content.ReadAsStringAsync().ConfigureAwait(false);
-                        object? value = serializer.DeserializeObject(serializedObject, type, deserializeOptions);
+                        object? value = serializer.Deserialize(serializedObject, type);
                         result.Content = value is null ? default : (T)value;
                     }
                 }

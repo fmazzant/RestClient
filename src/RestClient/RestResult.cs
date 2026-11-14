@@ -187,8 +187,7 @@ namespace Mafesoft.RestClient
         private object? errorLock;
         private byte[]? errorBody;
         private bool errorBodyRead;
-        private ISerializerContent? errorSerializer;
-        private object? errorDeserializeOptions;
+        private IRestSerializer? errorSerializer;
         private RestProblemDetails? problem;
         private bool problemRead;
 
@@ -207,10 +206,9 @@ namespace Mafesoft.RestClient
         /// <summary>
         /// Sets the serializer used by ErrorAs and, for a buffered response, the error body (only for error responses)
         /// </summary>
-        internal void SetError(ISerializerContent serializer, object? deserializeOptions, byte[]? body)
+        internal void SetError(IRestSerializer serializer, byte[]? body)
         {
             errorSerializer = serializer;
-            errorDeserializeOptions = deserializeOptions;
             if (body != null)
             {
                 errorBody = body;
@@ -290,7 +288,7 @@ namespace Mafesoft.RestClient
                     return default;
                 }
 
-                object? value = errorSerializer.DeserializeObject(text, type, errorDeserializeOptions);
+                object? value = errorSerializer.Deserialize(text, type);
                 return value is null ? default : (TError)value;
             }
             catch (Exception)
