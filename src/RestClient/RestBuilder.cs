@@ -59,9 +59,7 @@ namespace Mafesoft.RestClient
         private List<string> commands = new List<string>();
         private List<KeyValuePair<string, string>> parameters = new List<KeyValuePair<string, string>>();
         private Dictionary<string, string> routeValues = new Dictionary<string, string>(StringComparer.Ordinal);
-        private ISerializerContent serializer = new JSON();
-        private object? serializeOptions;
-        private object? deserializeOptions;
+        private IRestSerializer serializer = new SystemTextJsonSerializer();
         private HttpClient? externalHttpClient;
         private Func<object, X509Certificate?, X509Chain?, SslPolicyErrors, bool>? certificateCallback;
         private ICredentials? credentials;
@@ -73,6 +71,7 @@ namespace Mafesoft.RestClient
         private Action<HttpRequestHeaders>? onRequestHeaders;
         private bool enabledCompression;
         private RefreshTokenCoordinator? refreshTokenCoordinator;
+        private OAuth2TokenProvider? oauth2TokenProvider;
         private RetrySettings? retrySettings;
         private ILogger? logger;
         private string? clientName;

@@ -141,6 +141,7 @@ namespace Mafesoft.RestClient
         {
             int retries = 0;
             bool refreshAttempted = false;
+            bool oauth2TokenRenewed = false;
 
             while (true)
             {
@@ -155,6 +156,19 @@ namespace Mafesoft.RestClient
                         int generation = refreshTokenCoordinator?.Generation ?? 0;
                         lease = await SendOnceAsync(method, url, attemptSource.Token).ConfigureAwait(false);
                         HttpResponseMessage response = lease.Response;
+
+                        // OAuth2: the token has been rejected, discard it and send the request again (once) with a new one
+                        if (response.StatusCode == HttpStatusCode.Unauthorized
+                            && !oauth2TokenRenewed
+                            && oauth2TokenProvider != null
+                            && lease.OAuth2Token != null)
+                        {
+                            oauth2TokenRenewed = true;
+                            RestClientDiagnostics.RefreshingToken(logger, method, logUrl);
+                            oauth2TokenProvider.Cache.Invalidate(lease.OAuth2Token);
+                            lease.Dispose();
+                            continue;
+                        }
 
                         if (response.StatusCode == HttpStatusCode.Unauthorized
                             && !refreshAttempted
@@ -298,9 +312,19 @@ namespace Mafesoft.RestClient
             try
             {
                 // the authorization is computed once per attempt: the redirected requests have no Authorization header
-                AuthenticationHeaderValue? authorization = onAuthenticationAsync != null
-                    ? await GetAuthorizationAsync(onAuthenticationAsync, cancellationToken).ConfigureAwait(false)
-                    : onAuthentication?.Invoke();
+                OAuth2Token? oauth2Token = null;
+                AuthenticationHeaderValue? authorization;
+                if (oauth2TokenProvider != null)
+                {
+                    oauth2Token = await oauth2TokenProvider.GetTokenAsync(this, cancellationToken).ConfigureAwait(false);
+                    authorization = oauth2Token.ToHeader();
+                }
+                else
+                {
+                    authorization = onAuthenticationAsync != null
+                        ? await GetAuthorizationAsync(onAuthenticationAsync, cancellationToken).ConfigureAwait(false)
+                        : onAuthentication?.Invoke();
+                }
 
                 HttpMethod requestMethod = method;
                 Uri requestUri = new Uri(url, UriKind.RelativeOrAbsolute);
@@ -339,7 +363,7 @@ namespace Mafesoft.RestClient
                         continue;
                     }
 
-                    return new ResponseLease(response, owner);
+                    return new ResponseLease(response, owner) { OAuth2Token = oauth2Token };
                 }
             }
             catch
@@ -543,13 +567,13 @@ namespace Mafesoft.RestClient
             if (payloadContent != null)
             {
                 Type payloadType = payloadContent.GetType();
-                string serializedObject = serializer.SerializeObject(payloadContent, payloadType, serializeOptions);
+                string serializedObject = serializer.Serialize(payloadContent, payloadType);
                 onPreview?.Invoke(new PreviewContentAsStringEventArgs
                 {
                     ContentAsString = serializedObject,
                     ContentType = payloadType
                 });
-                return new StringContent(serializedObject, Encoding.UTF8, serializer.MediaTypeAsString);
+                return new StringContent(serializedObject, Encoding.UTF8, serializer.MediaType);
             }
 
             return null;
@@ -583,7 +607,7 @@ namespace Mafesoft.RestClient
                     if (!response.IsSuccessStatusCode)
                     {
                         // the error body is read only if Problem or ErrorAs are used
-                        result.SetError(serializer, deserializeOptions, body: null);
+                        result.SetError(serializer, body: null);
                     }
                     return result;
                 }
@@ -591,7 +615,7 @@ namespace Mafesoft.RestClient
                 // successful response of a serializer that supports streams: deserialize while downloading
                 if (type != typeof(string)
                     && type != typeof(byte[])
-                    && serializer is IAsyncSerializerContent asyncSerializer
+                    && serializer is IAsyncRestSerializer asyncSerializer
                     && response.IsSuccessStatusCode
                     && onPreviewContentResponseAsStringAction == null)
                 {
@@ -599,7 +623,7 @@ namespace Mafesoft.RestClient
                     {
                         try
                         {
-                            object? value = await asyncSerializer.DeserializeObjectAsync(stream, type, deserializeOptions, cancellationToken).ConfigureAwait(false);
+                            object? value = await asyncSerializer.DeserializeAsync(stream, type, cancellationToken).ConfigureAwait(false);
                             result.Content = value is null ? default : (T)value;
                         }
                         catch (Exception ex) when (!(ex is OperationCanceledException))
@@ -620,7 +644,7 @@ namespace Mafesoft.RestClient
                 if (!response.IsSuccessStatusCode)
                 {
                     // the buffered body, read by Problem and ErrorAs without reading the content again
-                    result.SetError(serializer, deserializeOptions, body);
+                    result.SetError(serializer, body);
                 }
 
                 HttpContent content = response.Content;
@@ -646,7 +670,7 @@ namespace Mafesoft.RestClient
                     else
                     {
                         string serializedObject = await content.ReadAsStringAsync().ConfigureAwait(false);
-                        object? value = serializer.DeserializeObject(serializedObject, type, deserializeOptions);
+                        object? value = serializer.Deserialize(serializedObject, type);
                         result.Content = value is null ? default : (T)value;
                     }
                 }
@@ -773,6 +797,11 @@ namespace Mafesoft.RestClient
             public HttpResponseMessage Response { get; }
 
             public IDisposable? Owner { get; }
+
+            /// <summary>
+            /// The OAuth2 token sent with the request (null without OAuth2ClientCredentials)
+            /// </summary>
+            public OAuth2Token? OAuth2Token { get; set; }
 
             public void Dispose()
             {

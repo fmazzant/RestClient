@@ -1,1 +1,46 @@
 #nullable enable
+Mafesoft.RestClient.RestBuilder.WithSerializer(Mafesoft.RestClient.Serialization.IRestSerializer! serializer) -> Mafesoft.RestClient.RestBuilder!
+Mafesoft.RestClient.Serialization.IAsyncRestSerializer
+Mafesoft.RestClient.Serialization.IAsyncRestSerializer.DeserializeAsync(System.IO.Stream! stream, System.Type! type, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<object?>!
+Mafesoft.RestClient.Serialization.IRestSerializer
+Mafesoft.RestClient.Serialization.IRestSerializer.Deserialize(string! value, System.Type! type) -> object?
+Mafesoft.RestClient.Serialization.IRestSerializer.MediaType.get -> string!
+Mafesoft.RestClient.Serialization.IRestSerializer.Serialize(object? value, System.Type! type) -> string!
+Mafesoft.RestClient.Serialization.Json.SystemTextJsonSerializer
+Mafesoft.RestClient.Serialization.Json.SystemTextJsonSerializer.Deserialize(string! value, System.Type! type) -> object?
+Mafesoft.RestClient.Serialization.Json.SystemTextJsonSerializer.DeserializeAsync(System.IO.Stream! stream, System.Type! type, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<object?>!
+Mafesoft.RestClient.Serialization.Json.SystemTextJsonSerializer.MediaType.get -> string!
+Mafesoft.RestClient.Serialization.Json.SystemTextJsonSerializer.Options.get -> System.Text.Json.JsonSerializerOptions!
+Mafesoft.RestClient.Serialization.Json.SystemTextJsonSerializer.Serialize(object? value, System.Type! type) -> string!
+Mafesoft.RestClient.Serialization.Json.SystemTextJsonSerializer.SystemTextJsonSerializer(System.Text.Json.JsonSerializerOptions? options = null) -> void
+Mafesoft.RestClient.Serialization.Json.SystemTextJsonSerializer.SystemTextJsonSerializer(System.Text.Json.Serialization.JsonSerializerContext! context) -> void
+Mafesoft.RestClient.Serialization.Xml.XmlRestSerializer
+Mafesoft.RestClient.Serialization.Xml.XmlRestSerializer.Deserialize(string! value, System.Type! type) -> object?
+Mafesoft.RestClient.Serialization.Xml.XmlRestSerializer.MediaType.get -> string!
+Mafesoft.RestClient.Serialization.Xml.XmlRestSerializer.Serialize(object? value, System.Type! type) -> string!
+Mafesoft.RestClient.Serialization.Xml.XmlRestSerializer.XmlRestSerializer(System.Xml.XmlReaderSettings? readerSettings = null, System.Xml.XmlWriterSettings? writerSettings = null) -> void
+static Mafesoft.RestClient.Serialization.Json.SystemTextJsonSerializer.DefaultOptions.get -> System.Text.Json.JsonSerializerOptions!
+Mafesoft.RestClient.OAuth2ClientAuthentication
+Mafesoft.RestClient.OAuth2ClientAuthentication.BasicHeader = 1 -> Mafesoft.RestClient.OAuth2ClientAuthentication
+Mafesoft.RestClient.OAuth2ClientAuthentication.RequestBody = 0 -> Mafesoft.RestClient.OAuth2ClientAuthentication
+Mafesoft.RestClient.OAuth2ClientCredentialsOptions
+Mafesoft.RestClient.OAuth2ClientCredentialsOptions.Cache.get -> Mafesoft.RestClient.OAuth2TokenCache?
+Mafesoft.RestClient.OAuth2ClientCredentialsOptions.Cache.set -> void
+Mafesoft.RestClient.OAuth2ClientCredentialsOptions.ClientAuthentication.get -> Mafesoft.RestClient.OAuth2ClientAuthentication
+Mafesoft.RestClient.OAuth2ClientCredentialsOptions.ClientAuthentication.set -> void
+Mafesoft.RestClient.OAuth2ClientCredentialsOptions.ClientId.get -> string?
+Mafesoft.RestClient.OAuth2ClientCredentialsOptions.ClientId.set -> void
+Mafesoft.RestClient.OAuth2ClientCredentialsOptions.ClientSecret.get -> string?
+Mafesoft.RestClient.OAuth2ClientCredentialsOptions.ClientSecret.set -> void
+Mafesoft.RestClient.OAuth2ClientCredentialsOptions.OAuth2ClientCredentialsOptions() -> void
+Mafesoft.RestClient.OAuth2ClientCredentialsOptions.Parameters.get -> System.Collections.Generic.IDictionary<string!, string!>!
+Mafesoft.RestClient.OAuth2ClientCredentialsOptions.RefreshBeforeExpiration.get -> System.TimeSpan
+Mafesoft.RestClient.OAuth2ClientCredentialsOptions.RefreshBeforeExpiration.set -> void
+Mafesoft.RestClient.OAuth2ClientCredentialsOptions.Scopes.get -> System.Collections.Generic.IEnumerable<string!>?
+Mafesoft.RestClient.OAuth2ClientCredentialsOptions.Scopes.set -> void
+Mafesoft.RestClient.OAuth2ClientCredentialsOptions.TokenEndpoint.get -> System.Uri?
+Mafesoft.RestClient.OAuth2ClientCredentialsOptions.TokenEndpoint.set -> void
+Mafesoft.RestClient.OAuth2TokenCache
+Mafesoft.RestClient.OAuth2TokenCache.Clear() -> void
+Mafesoft.RestClient.OAuth2TokenCache.OAuth2TokenCache() -> void
+Mafesoft.RestClient.RestBuilder.OAuth2ClientCredentials(System.Action<Mafesoft.RestClient.OAuth2ClientCredentialsOptions!>! configure) -> Mafesoft.RestClient.RestBuilder!
