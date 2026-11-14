@@ -81,7 +81,7 @@ error handling, progress bars, logging. Mafesoft.RestClient puts that code in on
 | Test helpers | ⚠️ write a fake `HttpMessageHandler` | ❌ | ❌ | ✅ `Refit.Testing` | ✅ `HttpTest` |
 | `netstandard2.0` (.NET Framework 4.6.2+, Xamarin, Unity) | ✅ | ✅ | ✅ | ⚠️ `net462`+ and `net8.0`+ only | ✅ |
 | URL templates / path parameters (`users/{id}`) | ✅ `Route` (url-encoded, invariant culture) | ❌ | ✅ `AddUrlSegment` | ✅ route attributes | ⚠️ `AppendPathSegment`, no templates |
-| OAuth1 / OAuth2 flows | ❌ bearer/basic header, async token provider and refresh token only | ❌ | ✅ authenticators | ❌ | ❌ |
+| OAuth1 / OAuth2 flows | ⚠️ OAuth2 client credentials and refresh token grant (`OAuth2ClientCredentials`), no OAuth1 | ❌ | ✅ authenticators | ❌ | ❌ |
 | Cookies | ✅ `Cookies(CookieContainer)` | ✅ `CookieContainer` | ✅ `CookieContainer` | ⚠️ via the handler | ✅ `CookieJar` |
 | Proxy | ✅ `Proxy` / `SystemProxy` | ✅ handler `Proxy` | ✅ `RestClientOptions.Proxy` | ⚠️ via the handler | ⚠️ via the handler |
 | Newtonsoft.Json ready to use | ⚠️ write a custom serializer | ⚠️ extra package | ✅ `RestSharp.Serializers.NewtonsoftJson` | ✅ `Refit.Newtonsoft.Json` | ✅ `Flurl.Http.Newtonsoft` |
@@ -101,7 +101,7 @@ comparison is not one-sided.
   pipeline you want: no extra dependency.
 - **Refit** if you prefer to describe the API as a C# interface and let a source generator write the client.
 - **Flurl** if you mostly build URLs fluently and want its `HttpTest` to fake the HTTP calls in the tests.
-- **RestSharp** if you already use it, or need its OAuth1/OAuth2 authenticators.
+- **RestSharp** if you already use it, or need OAuth1 or the other OAuth2 flows of its authenticators.
 
 ## Features
 
@@ -114,7 +114,7 @@ comparison is not one-sided.
 - `multipart/form-data`, form-url-encoded, upload and download progress
 - URL templates (`users/{id}`) with url-encoded, culture invariant route values
 - Query string with url-encoding, invariant culture and repeated keys
-- Bearer/basic authentication, asynchronous token provider (`BearerToken(async ct => ...)`), refresh token, `NetworkCredential`, per-builder certificate validation
+- Bearer/basic authentication, asynchronous token provider (`BearerToken(async ct => ...)`), refresh token, OAuth2 client credentials with token caching (`OAuth2ClientCredentials`), `NetworkCredential`, per-builder certificate validation
 - Retry with backoff and `Retry-After`, timeout per attempt, cancellation
 - Problem Details (RFC 9457) and typed error bodies (`result.Problem`, `result.ErrorAs<T>()`)
 - Pooled handlers, or your own `HttpClient` / `IHttpClientFactory`
@@ -717,6 +717,47 @@ RestBuilder secured = api
 When many concurrent requests of the same builder receive 401, the refresh func is invoked **only once** and the other
 requests wait for it. The requests sent from inside the refresh func never trigger another refresh.
 `RefreshToken(null)` disables the refresh token on a derived builder.
+
+### OAuth2 client credentials
+
+`OAuth2ClientCredentials` gets the token from the token endpoint with the client credentials grant (RFC 6749,
+section 4.4) and sends it as `Authorization: Bearer <token>`:
+
+```c#
+RestBuilder api = Rest.Build()
+    .Url("https://api.example.com")
+    .OAuth2ClientCredentials(o =>
+    {
+        o.TokenEndpoint = new Uri("https://login.example.com/oauth2/token");
+        o.ClientId = "...";
+        o.ClientSecret = "...";
+        o.Scopes = new[] { "api.read" };
+        // o.Parameters["audience"] = "https://api.example.com";               // optional extra parameters
+        // o.ClientAuthentication = OAuth2ClientAuthentication.BasicHeader;   // default: RequestBody
+    });
+```
+
+- The token is requested before the first request and cached until shortly before it expires (`expires_in` minus
+  `RefreshBeforeExpiration`, 30 seconds by default); a token response without `expires_in` is used until a `401`.
+- When it has to be renewed, it is requested **once** for all the concurrent requests (the others wait for it).
+- When the token response contains a `refresh_token`, the refresh token grant is used to renew it; if the refresh is
+  rejected, the client credentials grant is used again.
+- On `401 Unauthorized` the cached token is discarded and the request is sent again **once** with a new token.
+- The token request uses the HttpClient (or the pooled handlers), the timeout, the retry policy and the logger of the
+  builder; it does not use its headers, cookies and events. The client secret and the tokens are never logged.
+- A failed token request is reported by the result (`result.Exception`, an `InvalidOperationException` with the HTTP
+  status and the OAuth2 `error`), like the other errors of the request.
+- `Authentication(...)` and `BearerToken(...)` replace it, and it replaces them.
+- The cache belongs to the `OAuth2ClientCredentials` call and is shared by the builders derived from it. When the
+  builder is configured again for every client (as with `IRestClientFactory`), share an `OAuth2TokenCache`:
+
+```c#
+var cache = new OAuth2TokenCache(); // e.g. a singleton
+services.AddRestClient("orders", b => b.OAuth2ClientCredentials(o => { /* ... */ o.Cache = cache; }));
+```
+
+The token response is read with a source generated `JsonSerializerContext`, so the flow is Native AOT compatible.
+OAuth1 is not supported (it is rare in new APIs).
 
 ### Network credentials
 

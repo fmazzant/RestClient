@@ -71,6 +71,7 @@ namespace Mafesoft.RestClient
         private Action<HttpRequestHeaders>? onRequestHeaders;
         private bool enabledCompression;
         private RefreshTokenCoordinator? refreshTokenCoordinator;
+        private OAuth2TokenProvider? oauth2TokenProvider;
         private RetrySettings? retrySettings;
         private ILogger? logger;
         private string? clientName;

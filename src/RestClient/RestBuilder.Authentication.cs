@@ -42,7 +42,7 @@ namespace Mafesoft.RestClient
         /// <summary>
         /// The Authorization header for an HTTP request. The func is invoked for every request,
         /// so after a refresh token the new value is used.
-        /// It replaces any authentication set before (also an asynchronous one); null removes the authentication.
+        /// It replaces any authentication set before (also an asynchronous one or OAuth2ClientCredentials); null removes the authentication.
         /// </summary>
         /// <param name="authentication"></param>
         /// <returns></returns>
@@ -51,6 +51,7 @@ namespace Mafesoft.RestClient
             {
                 r.onAuthentication = authentication;
                 r.onAuthenticationAsync = null;
+                r.oauth2TokenProvider = null;
             });
 
         /// <summary>
@@ -58,7 +59,7 @@ namespace Mafesoft.RestClient
         /// a cache or a secret store). The func is invoked for every attempt: the first request, every retry
         /// and the request sent again after a refresh token. A null header sends the request without authorization.
         /// An exception thrown by the func is reported by the result, like the other errors of the request.
-        /// It replaces any authentication set before; null removes the authentication.
+        /// It replaces any authentication set before (also OAuth2ClientCredentials); null removes the authentication.
         /// </summary>
         /// <param name="authenticationProvider">
         /// The func that provides the header; it receives the cancellation token of the attempt
@@ -70,6 +71,7 @@ namespace Mafesoft.RestClient
             {
                 r.onAuthentication = null;
                 r.onAuthenticationAsync = authenticationProvider;
+                r.oauth2TokenProvider = null;
             });
 
         /// <summary>
@@ -94,7 +96,7 @@ namespace Mafesoft.RestClient
         /// (e.g. a token from MSAL, a cache or a secret store). The func is invoked for every attempt: the first request,
         /// every retry and the request sent again after a refresh token. A null or empty token sends the request without
         /// authorization. An exception thrown by the func is reported by the result, like the other errors of the request.
-        /// It replaces any authentication set before; null removes the authentication.
+        /// It replaces any authentication set before (also OAuth2ClientCredentials); null removes the authentication.
         /// </summary>
         /// <param name="tokenProvider">
         /// The func that provides the token; it receives the cancellation token of the attempt

@@ -141,6 +141,7 @@ namespace Mafesoft.RestClient
         {
             int retries = 0;
             bool refreshAttempted = false;
+            bool oauth2TokenRenewed = false;
 
             while (true)
             {
@@ -155,6 +156,19 @@ namespace Mafesoft.RestClient
                         int generation = refreshTokenCoordinator?.Generation ?? 0;
                         lease = await SendOnceAsync(method, url, attemptSource.Token).ConfigureAwait(false);
                         HttpResponseMessage response = lease.Response;
+
+                        // OAuth2: the token has been rejected, discard it and send the request again (once) with a new one
+                        if (response.StatusCode == HttpStatusCode.Unauthorized
+                            && !oauth2TokenRenewed
+                            && oauth2TokenProvider != null
+                            && lease.OAuth2Token != null)
+                        {
+                            oauth2TokenRenewed = true;
+                            RestClientDiagnostics.RefreshingToken(logger, method, logUrl);
+                            oauth2TokenProvider.Cache.Invalidate(lease.OAuth2Token);
+                            lease.Dispose();
+                            continue;
+                        }
 
                         if (response.StatusCode == HttpStatusCode.Unauthorized
                             && !refreshAttempted
@@ -298,9 +312,19 @@ namespace Mafesoft.RestClient
             try
             {
                 // the authorization is computed once per attempt: the redirected requests have no Authorization header
-                AuthenticationHeaderValue? authorization = onAuthenticationAsync != null
-                    ? await GetAuthorizationAsync(onAuthenticationAsync, cancellationToken).ConfigureAwait(false)
-                    : onAuthentication?.Invoke();
+                OAuth2Token? oauth2Token = null;
+                AuthenticationHeaderValue? authorization;
+                if (oauth2TokenProvider != null)
+                {
+                    oauth2Token = await oauth2TokenProvider.GetTokenAsync(this, cancellationToken).ConfigureAwait(false);
+                    authorization = oauth2Token.ToHeader();
+                }
+                else
+                {
+                    authorization = onAuthenticationAsync != null
+                        ? await GetAuthorizationAsync(onAuthenticationAsync, cancellationToken).ConfigureAwait(false)
+                        : onAuthentication?.Invoke();
+                }
 
                 HttpMethod requestMethod = method;
                 Uri requestUri = new Uri(url, UriKind.RelativeOrAbsolute);
@@ -339,7 +363,7 @@ namespace Mafesoft.RestClient
                         continue;
                     }
 
-                    return new ResponseLease(response, owner);
+                    return new ResponseLease(response, owner) { OAuth2Token = oauth2Token };
                 }
             }
             catch
@@ -773,6 +797,11 @@ namespace Mafesoft.RestClient
             public HttpResponseMessage Response { get; }
 
             public IDisposable? Owner { get; }
+
+            /// <summary>
+            /// The OAuth2 token sent with the request (null without OAuth2ClientCredentials)
+            /// </summary>
+            public OAuth2Token? OAuth2Token { get; set; }
 
             public void Dispose()
             {

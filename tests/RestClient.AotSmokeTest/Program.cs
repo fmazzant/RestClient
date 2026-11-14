@@ -40,6 +40,19 @@ RestResult<User> withSerializer = await root
     .Command("users").Payload(new User { Id = 2, Name = "Luigi" }).PostAsync<User>();
 Check(withSerializer.IsSuccessStatusCode && withSerializer.Content?.Name == "Luigi" && withSerializer.Content.Id == 2, "WithSerializer round trip");
 
+// OAuth2 client credentials: the token response is read with a source generated context
+RestResult<User> oauth2 = await Rest.Build(httpClient)
+    .Url("https://aot.example.com/api")
+    .Json(AppJsonContext.Default)
+    .OAuth2ClientCredentials(o =>
+    {
+        o.TokenEndpoint = new Uri("https://aot.example.com/oauth/token");
+        o.ClientId = "client";
+        o.ClientSecret = "secret";
+    })
+    .Command("users").Payload(new User { Id = 3, Name = "Peach" }).PostAsync<User>();
+Check(oauth2.IsSuccessStatusCode && oauth2.Content?.Name == "Peach", "OAuth2 client credentials");
+
 // collections, query string and retry of a transient error
 RestResult<List<User>> users = await root.Command("flaky").Parameter("id", new[] { 1, 2 }).GetAsync<List<User>>();
 Check(users.IsSuccessStatusCode && users.Content?.Count == 2 && users.RetryCount == 1, "retry and collections");
@@ -156,6 +169,13 @@ internal sealed class EchoHandler : HttpMessageHandler
         LastQuery = request.RequestUri.Query;
         LastAccept = request.Headers.Accept.ToString();
         string body = request.Content is null ? string.Empty : await request.Content.ReadAsStringAsync(cancellationToken);
+
+        if (path == "/oauth/token")
+        {
+            return body.Contains("grant_type=client_credentials")
+                ? Json("{\"access_token\":\"token\",\"token_type\":\"Bearer\",\"expires_in\":3600}")
+                : new HttpResponseMessage(HttpStatusCode.BadRequest);
+        }
 
         if (request.Headers.Authorization?.Parameter != "token")
         {
