@@ -1,0 +1,43 @@
+#nullable enable
+Mafesoft.RestClient.Testing.RestCallAssertion
+Mafesoft.RestClient.Testing.RestCallAssertion.Calls.get -> System.Collections.Generic.IReadOnlyList<Mafesoft.RestClient.Testing.RestTestCall!>!
+Mafesoft.RestClient.Testing.RestCallAssertion.Times(int expected) -> Mafesoft.RestClient.Testing.RestCallAssertion!
+Mafesoft.RestClient.Testing.RestCallAssertion.With(System.Func<Mafesoft.RestClient.Testing.RestTestCall!, bool>! predicate, string? description = null) -> Mafesoft.RestClient.Testing.RestCallAssertion!
+Mafesoft.RestClient.Testing.RestCallAssertion.WithContentType(string! mediaType) -> Mafesoft.RestClient.Testing.RestCallAssertion!
+Mafesoft.RestClient.Testing.RestCallAssertion.WithHeader(string! name, string? valuePattern = null) -> Mafesoft.RestClient.Testing.RestCallAssertion!
+Mafesoft.RestClient.Testing.RestCallAssertion.WithOAuthBearerToken(string? token = null) -> Mafesoft.RestClient.Testing.RestCallAssertion!
+Mafesoft.RestClient.Testing.RestCallAssertion.WithQueryParam(string! name, string? value = null) -> Mafesoft.RestClient.Testing.RestCallAssertion!
+Mafesoft.RestClient.Testing.RestCallAssertion.WithRequestBody(string! bodyPattern) -> Mafesoft.RestClient.Testing.RestCallAssertion!
+Mafesoft.RestClient.Testing.RestCallAssertion.WithVerb(System.Net.Http.HttpMethod! method) -> Mafesoft.RestClient.Testing.RestCallAssertion!
+Mafesoft.RestClient.Testing.RestCallAssertion.WithoutHeader(string! name) -> Mafesoft.RestClient.Testing.RestCallAssertion!
+Mafesoft.RestClient.Testing.RestCallAssertionException
+Mafesoft.RestClient.Testing.RestCallAssertionException.RestCallAssertionException(string! message) -> void
+Mafesoft.RestClient.Testing.RestTest
+Mafesoft.RestClient.Testing.RestTest.CallLog.get -> System.Collections.Generic.IReadOnlyList<Mafesoft.RestClient.Testing.RestTestCall!>!
+Mafesoft.RestClient.Testing.RestTest.CreateClient() -> System.Net.Http.HttpClient!
+Mafesoft.RestClient.Testing.RestTest.Dispose() -> void
+Mafesoft.RestClient.Testing.RestTest.Handler.get -> System.Net.Http.HttpMessageHandler!
+Mafesoft.RestClient.Testing.RestTest.RespondWith(System.Func<System.Net.Http.HttpRequestMessage!, System.Net.Http.HttpResponseMessage!>! responder) -> Mafesoft.RestClient.Testing.RestTestResponse!
+Mafesoft.RestClient.Testing.RestTest.RespondWith(System.Net.HttpStatusCode status) -> Mafesoft.RestClient.Testing.RestTestResponse!
+Mafesoft.RestClient.Testing.RestTest.RespondWith(string! body = "", System.Net.HttpStatusCode status = System.Net.HttpStatusCode.OK, string! mediaType = "text/plain") -> Mafesoft.RestClient.Testing.RestTestResponse!
+Mafesoft.RestClient.Testing.RestTest.RespondWithJson(object? body, System.Net.HttpStatusCode status = System.Net.HttpStatusCode.OK, System.Text.Json.JsonSerializerOptions? options = null) -> Mafesoft.RestClient.Testing.RestTestResponse!
+Mafesoft.RestClient.Testing.RestTest.RespondWithJson<T>(T body, System.Text.Json.Serialization.Metadata.JsonTypeInfo<T>! typeInfo, System.Net.HttpStatusCode status = System.Net.HttpStatusCode.OK) -> Mafesoft.RestClient.Testing.RestTestResponse!
+Mafesoft.RestClient.Testing.RestTest.RestTest() -> void
+Mafesoft.RestClient.Testing.RestTest.ShouldHaveCalled(string! urlPattern) -> Mafesoft.RestClient.Testing.RestCallAssertion!
+Mafesoft.RestClient.Testing.RestTest.ShouldHaveMadeACall() -> Mafesoft.RestClient.Testing.RestCallAssertion!
+Mafesoft.RestClient.Testing.RestTest.ShouldNotHaveCalled(string! urlPattern) -> void
+Mafesoft.RestClient.Testing.RestTest.ShouldNotHaveMadeACall() -> void
+Mafesoft.RestClient.Testing.RestTest.SimulateException(System.Exception! exception) -> Mafesoft.RestClient.Testing.RestTestResponse!
+Mafesoft.RestClient.Testing.RestTest.SimulateTimeout() -> Mafesoft.RestClient.Testing.RestTestResponse!
+Mafesoft.RestClient.Testing.RestTestCall
+Mafesoft.RestClient.Testing.RestTestCall.ContentType.get -> string?
+Mafesoft.RestClient.Testing.RestTestCall.Method.get -> System.Net.Http.HttpMethod!
+Mafesoft.RestClient.Testing.RestTestCall.Request.get -> System.Net.Http.HttpRequestMessage!
+Mafesoft.RestClient.Testing.RestTestCall.RequestBody.get -> string?
+Mafesoft.RestClient.Testing.RestTestCall.StatusCode.get -> System.Net.HttpStatusCode?
+Mafesoft.RestClient.Testing.RestTestCall.Url.get -> System.Uri!
+Mafesoft.RestClient.Testing.RestTestResponse
+Mafesoft.RestClient.Testing.RestTestResponse.For(System.Net.Http.HttpMethod! method, string! urlPattern) -> Mafesoft.RestClient.Testing.RestTestResponse!
+Mafesoft.RestClient.Testing.RestTestResponse.For(string! urlPattern) -> Mafesoft.RestClient.Testing.RestTestResponse!
+Mafesoft.RestClient.Testing.RestTestResponse.When(System.Func<System.Net.Http.HttpRequestMessage!, bool>! predicate) -> Mafesoft.RestClient.Testing.RestTestResponse!
+override Mafesoft.RestClient.Testing.RestTestCall.ToString() -> string!

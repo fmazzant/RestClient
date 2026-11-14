@@ -37,6 +37,7 @@ If RestClient is useful to you, consider [supporting the project](#support). ☕
 - [Diagnostics](#diagnostics)
 - [Events](#events)
 - [Dependency Injection](#dependency-injection)
+- [Testing](#testing)
 - [Samples](#samples)
 - [Migrating to 3.0](#migrating-to-30)
 - [Build and test](#build-and-test)
@@ -78,7 +79,7 @@ error handling, progress bars, logging. Mafesoft.RestClient puts that code in on
 | `ILogger` / OpenTelemetry of its own | ✅ | ✅ built-in spans and metrics | ❌ | ❌ | ❌ |
 | Problem Details (RFC 9457) | ✅ `result.Problem`, `ErrorAs<T>()` | ⚠️ manual | ❌ | ✅ `ValidationApiException` | ❌ |
 | Typed client from an interface | ❌ | ❌ | ❌ | ✅ | ❌ |
-| Test helpers | ⚠️ write a fake `HttpMessageHandler` | ❌ | ❌ | ✅ `Refit.Testing` | ✅ `HttpTest` |
+| Test helpers | ✅ `Mafesoft.RestClient.Testing` (`RestTest`) | ❌ | ❌ | ✅ `Refit.Testing` | ✅ `HttpTest` |
 | `netstandard2.0` (.NET Framework 4.6.2+, Xamarin, Unity) | ✅ | ✅ | ✅ | ⚠️ `net462`+ and `net8.0`+ only | ✅ |
 | URL templates / path parameters (`users/{id}`) | ✅ `Route` (url-encoded, invariant culture) | ❌ | ✅ `AddUrlSegment` | ✅ route attributes | ⚠️ `AppendPathSegment`, no templates |
 | OAuth1 / OAuth2 flows | ⚠️ OAuth2 client credentials and refresh token grant (`OAuth2ClientCredentials`), no OAuth1 | ❌ | ✅ authenticators | ❌ | ❌ |
@@ -100,7 +101,7 @@ comparison is not one-sided.
 - **Plain `HttpClient`** for one or two calls, or when you already have the `IHttpClientFactory` + resilience
   pipeline you want: no extra dependency.
 - **Refit** if you prefer to describe the API as a C# interface and let a source generator write the client.
-- **Flurl** if you mostly build URLs fluently and want its `HttpTest` to fake the HTTP calls in the tests.
+- **Flurl** if you mostly build URLs fluently.
 - **RestSharp** if you already use it, or need OAuth1 or the other OAuth2 flows of its authenticators.
 
 ## Features
@@ -123,6 +124,7 @@ comparison is not one-sided.
 - Cookies (`CookieContainer` per builder, e.g. a cookie-based session)
 - `ILogger` logging, OpenTelemetry tracing and metrics
 - Events: `OnStart`, `OnPreCompleted`, `OnCompleted`, `OnException`, request/response preview
+- Test helpers: `RestTest` fake server and call assertions (Mafesoft.RestClient.Testing)
 
 ## Packages
 
@@ -131,6 +133,7 @@ comparison is not one-sided.
 |---|---|---|---|---|
 | [Mafesoft.RestClient](src/RestClient/README.md) | `net10.0`, `net8.0`, `netstandard2.1`, `netstandard2.0` | [![NuGet](https://img.shields.io/nuget/v/Mafesoft.RestClient?style=flat-square&label=nuget)](https://www.nuget.org/packages/Mafesoft.RestClient) | [![Downloads](https://img.shields.io/nuget/dt/Mafesoft.RestClient?style=flat-square&label=downloads)](https://www.nuget.org/packages/Mafesoft.RestClient) | [![Mafe.RestClient downloads](https://img.shields.io/nuget/dt/Mafe.RestClient?style=flat-square&label=Mafe.RestClient)](https://www.nuget.org/packages/Mafe.RestClient) |
 | [Mafesoft.RestClient.Extensions.DependencyInjection](src/RestClient.Extensions.DependencyInjection/README.md) | `net10.0`, `net8.0`, `netstandard2.0` | [![NuGet](https://img.shields.io/nuget/v/Mafesoft.RestClient.Extensions.DependencyInjection?style=flat-square&label=nuget)](https://www.nuget.org/packages/Mafesoft.RestClient.Extensions.DependencyInjection) | [![Downloads](https://img.shields.io/nuget/dt/Mafesoft.RestClient.Extensions.DependencyInjection?style=flat-square&label=downloads)](https://www.nuget.org/packages/Mafesoft.RestClient.Extensions.DependencyInjection) | [![Mafe.RestClient.Extensions.DependencyInjection downloads](https://img.shields.io/nuget/dt/Mafe.RestClient.Extensions.DependencyInjection?style=flat-square&label=Mafe.RestClient.Extensions.DependencyInjection)](https://www.nuget.org/packages/Mafe.RestClient.Extensions.DependencyInjection) |
+| [Mafesoft.RestClient.Testing](src/RestClient.Testing/README.md) | `net10.0`, `net8.0`, `netstandard2.0` | [![NuGet](https://img.shields.io/nuget/v/Mafesoft.RestClient.Testing?style=flat-square&label=nuget)](https://www.nuget.org/packages/Mafesoft.RestClient.Testing) | [![Downloads](https://img.shields.io/nuget/dt/Mafesoft.RestClient.Testing?style=flat-square&label=downloads)](https://www.nuget.org/packages/Mafesoft.RestClient.Testing) | — |
 <!-- markdownlint-enable MD013 -->
 
 ## Installation
@@ -994,6 +997,37 @@ one, it owns the token cache), not scoped services.
 `Microsoft.Extensions.DependencyInjection`. The builders log with the category `Mafesoft.RestClient.{name}` (the full
 type name for a typed client) and their [metrics](#tracing-and-metrics-opentelemetry) have the tag
 `restclient.client.name` = `{name}`.
+
+## Testing
+
+The `Mafesoft.RestClient.Testing` package contains `RestTest`, a fake server for the tests (like Flurl's `HttpTest`).
+While it is active, every request sent by Mafesoft.RestClient in the async flow of the test is answered by it: with
+`Rest.Build()`, with `Rest.Build(httpClient)` and with the builders of `IRestClientFactory`. It works with any test
+framework: a failed assertion throws `RestCallAssertionException`.
+
+```
+dotnet add package Mafesoft.RestClient.Testing
+```
+
+```c#
+using var http = new RestTest();
+http.RespondWithJson(new User { Name = "fede" }).For(HttpMethod.Get, "*/users/*");
+
+var result = await sut.GetUserAsync("fede");
+
+http.ShouldHaveCalled("*/users/fede").WithVerb(HttpMethod.Get).Times(1);
+```
+
+- Responses: `RespondWith(body, status, mediaType)`, `RespondWith(status)`, `RespondWithJson(value)`,
+  `RespondWithJson(value, MyJsonContext.Default.User)` (Native AOT safe), `RespondWith(request => response)`,
+  `SimulateException(exception)`, `SimulateTimeout()`; `.For(pattern)`, `.For(method, pattern)` and `.When(predicate)`
+  restrict them (`*` matches any text, case-insensitive). They are used in order; the last matching one is reused;
+  a request without a matching response gets `200 OK` with an empty body.
+- Assertions: `ShouldHaveCalled(pattern)` with `WithVerb`, `WithHeader`, `WithoutHeader`, `WithQueryParam`,
+  `WithRequestBody`, `WithContentType`, `WithOAuthBearerToken`, `With(predicate)`, `Times(n)`;
+  `ShouldNotHaveCalled`, `ShouldHaveMadeACall`, `ShouldNotHaveMadeACall`; `CallLog` lists every request.
+- The fake server is bound to the async flow (`AsyncLocal`): parallel tests do not see each other's. For code that runs
+  outside the flow of the test, pass `http.CreateClient()` to `Rest.Build(...)`.
 
 ## Samples
 

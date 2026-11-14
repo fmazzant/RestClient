@@ -1,20 +1,22 @@
 namespace Mafesoft.RestClient.Tests
 {
+    using Mafesoft.RestClient.Testing;
     using System.Net;
     using System.Net.Http;
     using System.Net.Http.Headers;
 
     public class AuthenticationProviderTests
     {
-        private static RestBuilder Root(FakeHttpMessageHandler handler)
-            => Rest.Build(handler.CreateClient()).Url("https://api.example.com");
+        // Rest.Build() without an HttpClient: RestTest (Mafesoft.RestClient.Testing) intercepts the requests
+        private static RestBuilder Root()
+            => Rest.Build().Url("https://api.example.com");
 
         [Fact]
         public async Task Async_authentication_sets_the_authorization_header()
         {
-            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
+            using var http = new RestTest();
 
-            await Root(handler)
+            await Root()
                 .Authentication(async ct =>
                 {
                     await Task.Yield();
@@ -22,59 +24,61 @@ namespace Mafesoft.RestClient.Tests
                 })
                 .GetAsync();
 
-            Assert.Equal("Basic dXNlcjpwd2Q=", handler.Requests[0].Headers.Authorization.ToString());
+            Assert.Equal("Basic dXNlcjpwd2Q=", http.CallLog[0].Request.Headers.Authorization.ToString());
         }
 
         [Fact]
         public async Task Bearer_token_sets_the_authorization_header()
         {
-            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
+            using var http = new RestTest();
 
-            await Root(handler).BearerToken(async ct => { await Task.Yield(); return "abc"; }).GetAsync();
+            await Root().BearerToken(async ct => { await Task.Yield(); return "abc"; }).GetAsync();
 
-            Assert.Equal("Bearer abc", handler.Requests[0].Headers.Authorization.ToString());
+            Assert.Equal("Bearer abc", http.CallLog[0].Request.Headers.Authorization.ToString());
         }
 
         [Fact]
         public async Task Null_or_empty_token_sends_the_request_without_authorization()
         {
-            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
+            using var http = new RestTest();
 
-            await Root(handler).BearerToken(ct => Task.FromResult<string>(null)).GetAsync();
-            await Root(handler).BearerToken(ct => Task.FromResult(string.Empty)).GetAsync();
-            await Root(handler).Authentication(ct => Task.FromResult<AuthenticationHeaderValue>(null)).GetAsync();
+            await Root().BearerToken(ct => Task.FromResult<string>(null)).GetAsync();
+            await Root().BearerToken(ct => Task.FromResult(string.Empty)).GetAsync();
+            await Root().Authentication(ct => Task.FromResult<AuthenticationHeaderValue>(null)).GetAsync();
 
-            Assert.Equal(3, handler.Requests.Count);
-            Assert.All(handler.Requests, r => Assert.Null(r.Headers.Authorization));
+            http.ShouldHaveMadeACall().WithoutHeader("Authorization").Times(3);
         }
 
         [Fact]
         public async Task Provider_is_called_on_every_attempt_of_the_retry()
         {
-            var handler = new FakeHttpMessageHandler((r, i) =>
-                new HttpResponseMessage(i < 2 ? HttpStatusCode.ServiceUnavailable : HttpStatusCode.OK));
+            using var http = new RestTest();
+            http.RespondWith(HttpStatusCode.ServiceUnavailable);
+            http.RespondWith(HttpStatusCode.ServiceUnavailable);
+            http.RespondWith(HttpStatusCode.OK);
             int calls = 0;
 
-            RestResult<string> result = await Root(handler)
+            RestResult<string> result = await Root()
                 .Retry(3, TimeSpan.Zero)
                 .BearerToken(ct => Task.FromResult("token-" + Interlocked.Increment(ref calls)))
                 .GetAsync();
 
             Assert.Equal(HttpStatusCode.OK, result.StatusCode);
             Assert.Equal(3, calls);
-            Assert.Equal(new[] { "token-1", "token-2", "token-3" }, handler.Requests.Select(r => r.Headers.Authorization.Parameter));
+            Assert.Equal(new[] { "token-1", "token-2", "token-3" }, http.CallLog.Select(c => c.Request.Headers.Authorization.Parameter));
         }
 
         [Fact]
         public async Task Provider_is_called_again_after_a_refresh_token()
         {
             string token = "expired";
-            var handler = new FakeHttpMessageHandler((r, i) =>
-                new HttpResponseMessage(r.Headers.Authorization?.Parameter == "valid" ? HttpStatusCode.OK : HttpStatusCode.Unauthorized));
-            var refreshHandler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
+            using var http = new RestTest();
+            http.RespondWith(HttpStatusCode.OK).For(HttpMethod.Post, "*/refresh");
+            http.RespondWith(r => new HttpResponseMessage(r.Headers.Authorization?.Parameter == "valid" ? HttpStatusCode.OK : HttpStatusCode.Unauthorized))
+                .For(HttpMethod.Get, "*");
             int calls = 0;
 
-            RestResult<string> result = await Root(handler)
+            RestResult<string> result = await Root()
                 .BearerToken(async ct =>
                 {
                     Interlocked.Increment(ref calls);
@@ -84,24 +88,27 @@ namespace Mafesoft.RestClient.Tests
                 .RefreshToken(async ct =>
                 {
                     token = "valid";
-                    return await Root(refreshHandler).PostAsync(ct);
+                    return await Root().Command("refresh").PostAsync(ct);
                 })
                 .GetAsync();
 
             Assert.Equal(HttpStatusCode.OK, result.StatusCode);
             Assert.Equal(2, calls);
-            Assert.Equal(new[] { "expired", "valid" }, handler.Requests.Select(r => r.Headers.Authorization.Parameter));
+            http.ShouldHaveCalled("*/refresh").WithVerb(HttpMethod.Post).Times(1);
+            Assert.Equal(new[] { "expired", "valid" }, http.CallLog
+                .Where(c => c.Method == HttpMethod.Get)
+                .Select(c => c.Request.Headers.Authorization.Parameter));
         }
 
         [Fact]
         public async Task Provider_receives_the_cancellation_token_of_the_request()
         {
-            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
+            using var http = new RestTest();
             using var cts = new CancellationTokenSource();
             bool canBeCanceled = false;
             bool canceled = false;
 
-            RestResult<string> result = await Root(handler)
+            RestResult<string> result = await Root()
                 .BearerToken(ct =>
                 {
                     canBeCanceled = ct.CanBeCanceled;
@@ -119,10 +126,10 @@ namespace Mafesoft.RestClient.Tests
         [Fact]
         public async Task Canceling_the_request_cancels_the_provider()
         {
-            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
+            using var http = new RestTest();
             using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
 
-            RestResult<string> result = await Root(handler)
+            RestResult<string> result = await Root()
                 .Retry(3, TimeSpan.Zero)
                 .BearerToken(async ct =>
                 {
@@ -133,16 +140,16 @@ namespace Mafesoft.RestClient.Tests
 
             Assert.True(result.IsCancellationRequested);
             Assert.Equal(0, result.RetryCount);
-            Assert.Empty(handler.Requests);
+            http.ShouldNotHaveMadeACall();
         }
 
         [Fact]
         public async Task Timeout_cancels_the_provider_and_the_attempt_is_retried()
         {
-            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
+            using var http = new RestTest();
             int calls = 0;
 
-            RestResult<string> result = await Root(handler)
+            RestResult<string> result = await Root()
                 .Timeout(TimeSpan.FromMilliseconds(100))
                 .Retry(1, TimeSpan.Zero)
                 .BearerToken(async ct =>
@@ -158,17 +165,17 @@ namespace Mafesoft.RestClient.Tests
             Assert.Equal(HttpStatusCode.OK, result.StatusCode);
             Assert.Equal(1, result.RetryCount);
             Assert.Equal(2, calls);
-            Assert.Single(handler.Requests);
+            http.ShouldHaveMadeACall().Times(1);
         }
 
         [Fact]
         public async Task Provider_exception_is_reported_by_the_result()
         {
-            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
+            using var http = new RestTest();
             var error = new InvalidOperationException("no token");
             Exception raised = null;
 
-            RestResult<string> result = await Root(handler)
+            RestResult<string> result = await Root()
                 .Retry(3, TimeSpan.Zero)
                 .BearerToken(async ct =>
                 {
@@ -181,40 +188,40 @@ namespace Mafesoft.RestClient.Tests
             Assert.False(result.IsSuccessStatusCode);
             Assert.Same(error, result.Exception);
             Assert.Same(error, raised);
-            Assert.Empty(handler.Requests);
+            http.ShouldNotHaveMadeACall();
         }
 
         [Fact]
         public async Task Provider_returning_a_null_task_is_reported_by_the_result()
         {
-            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
+            using var http = new RestTest();
 
-            RestResult<string> result = await Root(handler).Authentication(ct => null).GetAsync();
-            RestResult<string> bearer = await Root(handler).BearerToken(ct => null).GetAsync();
+            RestResult<string> result = await Root().Authentication(ct => null).GetAsync();
+            RestResult<string> bearer = await Root().BearerToken(ct => null).GetAsync();
 
             Assert.IsType<InvalidOperationException>(result.Exception);
             Assert.IsType<InvalidOperationException>(bearer.Exception);
-            Assert.Empty(handler.Requests);
+            http.ShouldNotHaveMadeACall();
         }
 
         [Fact]
         public void Provider_works_with_synchronous_requests()
         {
-            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
+            using var http = new RestTest();
 
-            RestResult<string> result = Root(handler)
+            RestResult<string> result = Root()
                 .BearerToken(async ct => { await Task.Delay(10, ct); return "abc"; })
                 .Get();
 
             Assert.Equal(HttpStatusCode.OK, result.StatusCode);
-            Assert.Equal("Bearer abc", handler.Requests[0].Headers.Authorization.ToString());
+            Assert.Equal("Bearer abc", http.CallLog[0].Request.Headers.Authorization.ToString());
         }
 
         [Fact]
         public async Task Last_authentication_wins_and_null_removes_it()
         {
-            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
-            RestBuilder bearer = Root(handler).BearerToken(ct => Task.FromResult("async"));
+            using var http = new RestTest();
+            RestBuilder bearer = Root().BearerToken(ct => Task.FromResult("async"));
 
             await bearer.Authentication("Basic", "sync").GetAsync();
             await bearer.Authentication("Basic", "sync").BearerToken(ct => Task.FromResult("async-again")).GetAsync();
@@ -223,30 +230,30 @@ namespace Mafesoft.RestClient.Tests
             await bearer.Authentication(authenticationProvider: null).GetAsync();
             await bearer.GetAsync();
 
-            Assert.Equal("Basic sync", handler.Requests[0].Headers.Authorization.ToString());
-            Assert.Equal("Bearer async-again", handler.Requests[1].Headers.Authorization.ToString());
-            Assert.Null(handler.Requests[2].Headers.Authorization);
-            Assert.Null(handler.Requests[3].Headers.Authorization);
-            Assert.Null(handler.Requests[4].Headers.Authorization);
+            Assert.Equal("Basic sync", http.CallLog[0].Request.Headers.Authorization.ToString());
+            Assert.Equal("Bearer async-again", http.CallLog[1].Request.Headers.Authorization.ToString());
+            Assert.Null(http.CallLog[2].Request.Headers.Authorization);
+            Assert.Null(http.CallLog[3].Request.Headers.Authorization);
+            Assert.Null(http.CallLog[4].Request.Headers.Authorization);
             // the builder is immutable: the base builder keeps its provider
-            Assert.Equal("Bearer async", handler.Requests[5].Headers.Authorization.ToString());
+            Assert.Equal("Bearer async", http.CallLog[5].Request.Headers.Authorization.ToString());
         }
 
         [Fact]
         public async Task Existing_overloads_keep_binding_as_before()
         {
-            var handler = FakeHttpMessageHandler.Returns(HttpStatusCode.OK);
+            using var http = new RestTest();
             static AuthenticationHeaderValue Header() => new AuthenticationHeaderValue("Bearer", "method-group");
 
-            await Root(handler).Authentication(() => new AuthenticationHeaderValue("Bearer", "lambda")).GetAsync();
-            await Root(handler).Authentication(Header).GetAsync();
-            await Root(handler).Authentication(authentication: null).GetAsync();
-            await Root(handler).Authentication("Bearer").GetAsync();
+            await Root().Authentication(() => new AuthenticationHeaderValue("Bearer", "lambda")).GetAsync();
+            await Root().Authentication(Header).GetAsync();
+            await Root().Authentication(authentication: null).GetAsync();
+            await Root().Authentication("Bearer").GetAsync();
 
-            Assert.Equal("Bearer lambda", handler.Requests[0].Headers.Authorization.ToString());
-            Assert.Equal("Bearer method-group", handler.Requests[1].Headers.Authorization.ToString());
-            Assert.Null(handler.Requests[2].Headers.Authorization);
-            Assert.Equal("Bearer", handler.Requests[3].Headers.Authorization.ToString());
+            Assert.Equal("Bearer lambda", http.CallLog[0].Request.Headers.Authorization.ToString());
+            Assert.Equal("Bearer method-group", http.CallLog[1].Request.Headers.Authorization.ToString());
+            Assert.Null(http.CallLog[2].Request.Headers.Authorization);
+            Assert.Equal("Bearer", http.CallLog[3].Request.Headers.Authorization.ToString());
         }
     }
 }
