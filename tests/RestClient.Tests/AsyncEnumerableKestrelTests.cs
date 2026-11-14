@@ -119,33 +119,28 @@ namespace Mafesoft.RestClient.Tests
         public async Task Memory_does_not_grow_with_the_number_of_items()
         {
             const int count = 200_000;
-            WeakReference first = null;
-            long baseline = 0;
-            long growth = 0;
+            var samples = new List<WeakReference>();
             int received = 0;
 
             await foreach (User user in Root.Command("many").Parameter("count", count).GetAsyncEnumerable<User>())
             {
                 Assert.Equal(received, user.Id);
-                if (received == 0)
+                if (received % 10_000 == 0)
                 {
-                    first = new WeakReference(user);
-                }
-                else if (received == 10_000)
-                {
-                    baseline = GC.GetTotalMemory(forceFullCollection: true);
-                }
-                else if (received == count - 1)
-                {
-                    growth = GC.GetTotalMemory(forceFullCollection: true) - baseline;
+                    samples.Add(new WeakReference(user));
                 }
                 received++;
             }
 
-            // ~25 MB of JSON, ~50 MB of objects if they were kept: the items are not retained
+            // ~25 MB of JSON, ~50 MB of objects if they were kept: no sampled item survives a full collection.
+            // GC.GetTotalMemory is not used because it is process-wide and other test classes run in parallel.
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+
             Assert.Equal(count, received);
-            Assert.False(first.IsAlive);
-            Assert.True(growth < 16 * 1024 * 1024, $"memory grew by {growth} bytes");
+            Assert.Equal(count / 10_000, samples.Count);
+            Assert.All(samples, sample => Assert.False(sample.IsAlive));
         }
 
         [Fact]
