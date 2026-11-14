@@ -10,7 +10,7 @@
     <PackageId>Mafesoft.RestClient</PackageId>
     <Product>RestClient</Product>
     <Title>Mafesoft.RestClient</Title>
-    <Version>3.1.1</Version>
+    <Version>3.2.0</Version>
     <Description>RestClient is a fluent library for .NET that helps you to consume REST services.</Description>
     <PackageTags>rest-client, c-sharp, dotnet-standard, dotnet-core, dotnet-framework, http-client, restclient, mafesoft, xml, json, rest, fluent</PackageTags>
     <!-- Only the current version: the full history is in CHANGELOG.md -->

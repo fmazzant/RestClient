@@ -5,6 +5,40 @@ All notable changes to the `Mafesoft.RestClient*` packages (`Mafe.RestClient*` u
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] - 2026-11-14
+
+### Added
+
+- Pluggable serializers: `IRestSerializer` / `IAsyncRestSerializer` and `RestBuilder.WithSerializer(...)`. The
+  serializer owns its configuration. `SystemTextJsonSerializer` (`JsonSerializerOptions` or `JsonSerializerContext`,
+  Native AOT safe) is the default; `XmlRestSerializer` for XML (not trimming / Native AOT safe). `Json(...)` and
+  `Xml(...)` are now shortcuts for `WithSerializer`, and `RestResult.ErrorAs` uses the configured serializer.
+  ([#52](https://github.com/fmazzant/RestClient/issues/52))
+- OAuth2 client credentials: `OAuth2ClientCredentials(o => ...)` requests the token before the first call, caches it
+  until shortly before `expires_in` (`RefreshBeforeExpiration`, 30 s) and renews it once for all the concurrent
+  requests. It uses the refresh token grant when the token response has a `refresh_token` (falling back to client
+  credentials if it is rejected), and on `401` discards the token and sends the request again once. Client
+  authentication in the body (default) or with a Basic header, extra parameters such as `audience`. The token request
+  uses the same handlers, timeout, retry and logger; the secret and the tokens are never logged. `OAuth2TokenCache`
+  shares the token across the clients of `IRestClientFactory`. ([#60](https://github.com/fmazzant/RestClient/issues/60))
+- New package **Mafesoft.RestClient.Testing**: `RestTest`, a fake server for unit tests that answers every request
+  of Mafesoft.RestClient in the current async flow (`Rest.Build()`, `Rest.Build(httpClient)`, `IRestClientFactory`),
+  with configurable responses (`RespondWith`, `RespondWithJson`, `SimulateException`, `SimulateTimeout`, `For`,
+  `When`) and call assertions (`ShouldHaveCalled(...).WithVerb(...).Times(n)`, `ShouldNotHaveCalled`, ...) that
+  throw `RestCallAssertionException`. It works with any test framework, and parallel tests are isolated. It must be
+  used with the same version of Mafesoft.RestClient. ([#33](https://github.com/fmazzant/RestClient/issues/33))
+
+### Changed
+
+- CI and CodeQL run on the `release/*` and `release-candidate/*` branches too, not only on `main`.
+
+### Deprecated
+
+- `ISerializerContent`, `IAsyncSerializerContent`, `CustomSerializer(...)`, `JSON` and `XML`: they still work
+  (through an internal adapter, and `CustomSerializer(new JSON(), options)` keeps JSON streaming and typed
+  server-sent events), and will be removed in a future major version. Use `IRestSerializer` and `WithSerializer`.
+  ([#52](https://github.com/fmazzant/RestClient/issues/52))
+
 ## [3.1.1] - 2026-11-14
 
 No changes to the library code: same features as 3.1.0.

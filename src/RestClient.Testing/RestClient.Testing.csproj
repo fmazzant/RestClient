@@ -7,7 +7,7 @@
     <PackageId>Mafesoft.RestClient.Testing</PackageId>
     <Product>RestClient</Product>
     <Title>Mafesoft.RestClient.Testing</Title>
-    <Version>3.1.1</Version>
+    <Version>3.2.0</Version>
     <Description>Test helpers for Mafesoft.RestClient: a fake server (RestTest) that intercepts the requests of Rest.Build() and of IRestClientFactory, with configurable responses and call assertions. Test framework agnostic.</Description>
     <PackageTags>rest-client, restclient, mafesoft, testing, fake, mock, http, fluent</PackageTags>
     <!-- Only the current version: the full history is in CHANGELOG.md -->
