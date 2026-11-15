@@ -5,8 +5,6 @@
 [![Build](https://img.shields.io/github/actions/workflow/status/fmazzant/RestClient/ci.yml?branch=main&style=flat-square&label=build)](https://github.com/fmazzant/RestClient/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](https://github.com/fmazzant/RestClient/blob/main/LICENSE)
 
-[![Mafe.RestClient downloads](https://img.shields.io/nuget/dt/Mafe.RestClient?style=flat-square&label=Mafe.RestClient%20downloads)](https://www.nuget.org/packages/Mafe.RestClient)
-
 A fluent and immutable builder over `HttpClient` to consume REST services: pooled connections, retry with backoff,
 refresh token, timeout, JSON (System.Text.Json, Native AOT ready) or XML serialization, multipart and form-url-encoded
 uploads, upload/download progress, `ILogger` logging, OpenTelemetry tracing and metrics. The result is a `RestResult<T>`
