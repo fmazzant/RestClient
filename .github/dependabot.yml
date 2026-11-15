@@ -6,7 +6,15 @@
 version: 2
 updates:
   - package-ecosystem: nuget
-    directory: "/"
+    directory: 
+      - "/src/RestClient"
+  - "/src/RestClient.Extensions.DependencyInjection"
+  - "/src/RestClient.Testing"
+  - "/tests/RestClient.AotSmokeTest"
+  - "/tests/RestClient.Tests"
+  - "/samples/RestClient.Samples.AspNetCore"
+  - "/samples/RestClient.Samples.Console"
+  - "/samples/RestClient.Samples.NativeAot"
     schedule:
       interval: weekly
       day: monday
